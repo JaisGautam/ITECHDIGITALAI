@@ -2444,6 +2444,7 @@
 const express = require("express");
 const path= require("path");
 const mongoose = require("mongoose");
+const fs = require("fs");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
@@ -2462,6 +2463,17 @@ app.use(
 
 app.use(express.json());
 app.use(express.static(__dirname));
+// Serve webinar image explicitly
+app.get("/1000044144.jpg", (req, res) => {
+  const imagePath = path.join(__dirname, "1000044144.jpg");
+
+  if (!fs.existsSync(imagePath)) {
+    console.error("❌ Image not found:", imagePath);
+    return res.status(404).send("Image not found");
+  }
+
+  res.sendFile(imagePath);
+});
 
 /* =========================================================
    CONFIGURATION
@@ -2510,15 +2522,29 @@ if (!EMAIL_USER || !EMAIL_PASS) {
    MONGODB CONNECTION
 ========================================================= */
 
-mongoose
-  .connect(MONGO_URI)
-  .then(() => {
-    console.log("✅ MongoDB connected");
-  })
-  .catch((error) => {
-    console.error("❌ MongoDB connection error:");
-    console.error(error.message);
-  });
+// mongoose
+//   .connect(MONGO_URI)
+//   .then(() => {
+//     console.log("✅ MongoDB connected");
+//   })
+//   .catch((error) => {
+//     console.error("❌ MongoDB connection error:");
+//     console.error(error.message);
+//   });
+
+if (MONGO_URI) {
+  mongoose
+    .connect(MONGO_URI)
+    .then(() => {
+      console.log("✅ MongoDB connected");
+    })
+    .catch((error) => {
+      console.error("❌ MongoDB connection error:");
+      console.error(error.message);
+    });
+} else {
+  console.error("❌ MONGO_URI is missing. MongoDB connection skipped.");
+}
 
 
 /* =========================================================
