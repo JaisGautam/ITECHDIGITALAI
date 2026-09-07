@@ -2442,6 +2442,7 @@
 
 
 const express = require("express");
+const path= require("path");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
@@ -3139,27 +3140,30 @@ Regards,<br>
    HEALTH CHECK
 ========================================================= */
 
+// app.get("/", (req, res) => {
+
+//   res.json({
+
+//     success: true,
+
+//     message:
+//       "I TECH AI Webinar Backend is running 🚀",
+
+//     webinarDates,
+
+//     webinarMeetingLink:
+//       WEBINAR_MEETING_LINK,
+
+//     whatsappCommunityLink:
+//       WHATSAPP_COMMUNITY_LINK,
+
+//   });
+
+// });
+
 app.get("/", (req, res) => {
-
-  res.json({
-
-    success: true,
-
-    message:
-      "I TECH AI Webinar Backend is running 🚀",
-
-    webinarDates,
-
-    webinarMeetingLink:
-      WEBINAR_MEETING_LINK,
-
-    whatsappCommunityLink:
-      WHATSAPP_COMMUNITY_LINK,
-
-  });
-
+  res.sendFile(path.join(__dirname, "index1.html"));
 });
-
 
 /* =========================================================
    CREATE LEAD
