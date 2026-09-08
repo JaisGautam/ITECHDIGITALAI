@@ -4132,7 +4132,7 @@ const Lead = mongoose.model("Lead", leadSchema);
    NODEMAILER
 ========================================================= */
 
-let transporter = null;
+// let transporter = null;
 
 // if (EMAIL_USER && EMAIL_PASS) {
 //   transporter = nodemailer.createTransport({
