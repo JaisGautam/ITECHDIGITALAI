@@ -6461,6 +6461,1240 @@
 
 
 
+// const express = require("express");
+// const path = require("path");
+// const mongoose = require("mongoose");
+// const cors = require("cors");
+// const nodemailer = require("nodemailer");
+// const dns = require("dns");
+
+// require("dotenv").config();
+
+// /* =========================================================
+//    DNS CONFIGURATION
+// ========================================================= */
+
+// try {
+//   dns.setDefaultResultOrder("ipv4first");
+//   console.log("🌐 DNS order: IPv4 first");
+// } catch (error) {
+//   console.log("⚠️ Could not set DNS order:", error.message);
+// }
+
+// /* =========================================================
+//    APP
+// ========================================================= */
+
+// const app = express();
+
+// /* =========================================================
+//    MIDDLEWARE
+// ========================================================= */
+
+// app.use(
+//   cors({
+//     origin: "*",
+//   })
+// );
+
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+
+// /* =========================================================
+//    STATIC FILES
+// ========================================================= */
+
+// app.use(express.static(__dirname));
+
+// /* =========================================================
+//    CONFIGURATION
+// ========================================================= */
+
+// const PORT = process.env.PORT || 5000;
+
+// const MONGO_URI = process.env.MONGO_URI;
+// const EMAIL_USER = process.env.EMAIL_USER;
+// const EMAIL_PASS = process.env.EMAIL_PASS;
+
+// /* =========================================================
+//    WEBINAR CONFIGURATION
+// ========================================================= */
+
+// // const WEBINAR_MEETING_LINK =
+// //   "https://meet.google.com/uca-deoe-vnh?hs=151";
+// // const WEBINAR_MEETING_LINK = process.env.GOOGLE_MEET_LINK;
+
+// const WHATSAPP_COMMUNITY_LINK =
+//   "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
+
+// const webinarDates = [
+//   "2026-09-08T20:00:00+05:30",
+//   "2026-09-09T20:00:00+05:30",
+//   "2026-09-10T20:00:00+05:30",
+// ];
+
+// /* =========================================================
+//    DATABASE
+// ========================================================= */
+
+// if (!MONGO_URI) {
+//   console.error("❌ MONGO_URI is missing");
+// } else {
+//   console.log("🔗 MongoDB URI detected");
+// }
+
+// mongoose
+//   .connect(MONGO_URI)
+//   .then(() => {
+//     console.log("========================================");
+//     console.log("🟢 MongoDB connection established");
+//     console.log("📦 Database:", mongoose.connection.name);
+//     console.log("🖥️ Host:", mongoose.connection.host);
+//     console.log("========================================");
+//   })
+//   .catch((error) => {
+//     console.error("========================================");
+//     console.error("❌ MongoDB CONNECTION ERROR");
+//     console.error("Message:", error.message);
+//     console.error("========================================");
+//   });
+
+// /* =========================================================
+//    LEAD SCHEMA
+// ========================================================= */
+
+// const leadSchema = new mongoose.Schema(
+//   {
+//     name: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//     },
+
+//     phone: {
+//       type: String,
+//       required: true,
+//       unique: true,
+//       trim: true,
+//     },
+
+//     email: {
+//       type: String,
+//       required: true,
+//       lowercase: true,
+//       trim: true,
+//     },
+
+//     state: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//     },
+
+//     communityJoined: {
+//       type: Boolean,
+//       default: false,
+//     },
+
+//     communityJoinDate: {
+//       type: Date,
+//       default: null,
+//     },
+
+//     zoomEmailSent: {
+//       type: Boolean,
+//       default: false,
+//     },
+
+//     zoomReminderSent: {
+//       type: Boolean,
+//       default: false,
+//     },
+
+//     registrationDate: {
+//       type: Date,
+//       default: Date.now,
+//     },
+//   },
+//   {
+//     timestamps: true,
+//   }
+// );
+
+// const Lead = mongoose.model("Lead", leadSchema);
+
+// /* =========================================================
+//    GMAIL SMTP
+// ========================================================= */
+
+// let transporter = null;
+
+// /*
+//   Gmail SMTP ko directly IPv4 address par connect karne ki
+//   koshish ki ja rahi hai.
+
+//   Example:
+//   smtp.gmail.com
+//        ↓
+//   IPv4 address
+//        ↓
+//   Gmail SMTP :587
+// */
+
+// async function createGmailTransporter() {
+//   if (!EMAIL_USER || !EMAIL_PASS) {
+//     console.error("========================================");
+//     console.error("❌ EMAIL CONFIGURATION MISSING");
+//     console.error("EMAIL_USER:", EMAIL_USER ? "SET" : "MISSING");
+//     console.error("EMAIL_PASS:", EMAIL_PASS ? "SET" : "MISSING");
+//     console.error("========================================");
+
+//     return null;
+//   }
+
+//   try {
+//     console.log("========================================");
+//     console.log("🌐 Resolving Gmail IPv4...");
+//     console.log("Host: smtp.gmail.com");
+//     console.log("========================================");
+
+//     const addresses = await new Promise((resolve, reject) => {
+//       dns.resolve4("smtp.gmail.com", (error, result) => {
+//         if (error) {
+//           reject(error);
+//           return;
+//         }
+
+//         resolve(result);
+//       });
+//     });
+
+//     console.log("========================================");
+//     console.log("🌐 GMAIL IPV4 DNS CHECK");
+//     console.log("========================================");
+//     console.log("SMTP Host: smtp.gmail.com");
+//     console.log("IPv4 Addresses:", addresses);
+//     console.log("========================================");
+
+//     if (!addresses || addresses.length === 0) {
+//       console.error("❌ No Gmail IPv4 address found");
+//       return null;
+//     }
+
+//     const smtpIP = addresses[0];
+
+//     console.log("🎯 Using Gmail IPv4:", smtpIP);
+
+//     const smtpTransporter = nodemailer.createTransport({
+//       host: smtpIP,
+//       port: 587,
+//       secure: false,
+//       family: 4,
+
+//       auth: {
+//         user: EMAIL_USER,
+//         pass: EMAIL_PASS,
+//       },
+
+//       connectionTimeout: 30000,
+//       greetingTimeout: 30000,
+//       socketTimeout: 30000,
+
+//       tls: {
+//         servername: "smtp.gmail.com",
+//         rejectUnauthorized: true,
+//       },
+//     });
+
+//     console.log("========================================");
+//     console.log("📧 Gmail transporter created");
+//     console.log("Host:", smtpIP);
+//     console.log("Port: 587");
+//     console.log("Network: IPv4");
+//     console.log("TLS Servername: smtp.gmail.com");
+//     console.log("========================================");
+
+//     return smtpTransporter;
+//   } catch (error) {
+//     console.error("========================================");
+//     console.error("❌ Gmail IPv4 DNS ERROR");
+//     console.error("Code:", error.code);
+//     console.error("Message:", error.message);
+//     console.error("========================================");
+
+//     return null;
+//   }
+// }
+
+// /* =========================================================
+//    EMAIL VERIFICATION
+// ========================================================= */
+
+// async function verifyEmailConfiguration() {
+//   console.log("========================================");
+//   console.log("📧 Verifying Gmail SMTP connection...");
+//   console.log("========================================");
+
+//   transporter = await createGmailTransporter();
+
+//   if (!transporter) {
+//     console.error("❌ Gmail transporter could not be created");
+//     return;
+//   }
+
+//   try {
+//     await transporter.verify();
+
+//     console.log("========================================");
+//     console.log("✅ Gmail SMTP connection successful");
+//     console.log("📧 Email:", EMAIL_USER);
+//     console.log("========================================");
+//   } catch (error) {
+//     console.error("========================================");
+//     console.error("❌ EMAIL SERVICE ERROR");
+//     console.error("Code:", error.code);
+//     console.error("Command:", error.command || "N/A");
+//     console.error("Response:", error.response || "N/A");
+//     console.error("Response Code:", error.responseCode || "N/A");
+//     console.error("Message:", error.message);
+//     console.error("========================================");
+//   }
+// }
+
+// /* =========================================================
+//    EMAIL HTML - REGISTRATION
+// ========================================================= */
+
+// function registrationEmailHTML(name) {
+//   return `
+// <!DOCTYPE html>
+// <html>
+// <head>
+//   <meta charset="UTF-8">
+
+//   <style>
+//     body {
+//       margin: 0;
+//       padding: 0;
+//       background: #f4f7fb;
+//       font-family: Arial, Helvetica, sans-serif;
+//     }
+
+//     .container {
+//       max-width: 650px;
+//       margin: 30px auto;
+//       background: #ffffff;
+//       border-radius: 16px;
+//       overflow: hidden;
+//       box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+//     }
+
+//     .header {
+//       background: #111827;
+//       color: #ffffff;
+//       padding: 35px 25px;
+//       text-align: center;
+//     }
+
+//     .header h1 {
+//       margin: 0;
+//       font-size: 30px;
+//     }
+
+//     .header p {
+//       margin-top: 10px;
+//       color: #d1d5db;
+//     }
+
+//     .content {
+//       padding: 30px;
+//       color: #1f2937;
+//     }
+
+//     .success {
+//       background: #ecfdf5;
+//       border: 1px solid #a7f3d0;
+//       color: #065f46;
+//       padding: 18px;
+//       border-radius: 10px;
+//       margin-bottom: 25px;
+//     }
+
+//     .meeting {
+//       background: #f9fafb;
+//       border: 1px solid #e5e7eb;
+//       padding: 20px;
+//       border-radius: 12px;
+//       margin-top: 20px;
+//     }
+
+//     .button {
+//       display: inline-block;
+//       background: #2563eb;
+//       color: #ffffff !important;
+//       text-decoration: none;
+//       padding: 14px 24px;
+//       border-radius: 8px;
+//       font-weight: bold;
+//       margin-top: 15px;
+//     }
+
+//     .whatsapp {
+//       background: #16a34a;
+//     }
+
+//     .footer {
+//       background: #f9fafb;
+//       padding: 20px;
+//       text-align: center;
+//       color: #6b7280;
+//       font-size: 13px;
+//     }
+//   </style>
+// </head>
+
+// <body>
+
+//   <div class="container">
+
+//     <div class="header">
+//       <h1>🚀 I TECH AI</h1>
+//       <p>Webinar Registration Confirmed</p>
+//     </div>
+
+//     <div class="content">
+
+//       <div class="success">
+//         <strong>Registration Successful!</strong>
+//         <br>
+//         Your webinar registration has been successfully received.
+//       </div>
+
+//       <p>Hi <strong>${name}</strong>,</p>
+
+//       <p>
+//         Thank you for registering for the I TECH AI webinar.
+//         We are excited to have you with us.
+//       </p>
+
+//       <div class="meeting">
+
+//         <h2>🎥 Join Webinar</h2>
+
+//         <p>
+//           Click the button below to join the webinar:
+//         </p>
+
+//         <a
+//           href="${WEBINAR_MEETING_LINK}"
+//           class="button"
+//           target="_blank"
+//         >
+//           Join Google Meet
+//         </a>
+
+//       </div>
+
+//       <div class="meeting">
+
+//         <h2>📱 WhatsApp Channel</h2>
+
+//         <p>
+//           Join our WhatsApp channel for updates and reminders.
+//         </p>
+
+//         <a
+//           href="${WHATSAPP_COMMUNITY_LINK}"
+//           class="button whatsapp"
+//           target="_blank"
+//         >
+//           Join WhatsApp Channel
+//         </a>
+
+//       </div>
+
+//       <p style="margin-top:30px;">
+//         Please save the webinar link and join on time.
+//       </p>
+
+//       <p>
+//         Regards,<br>
+//         <strong>I TECH AI Team</strong>
+//       </p>
+
+//     </div>
+
+//     <div class="footer">
+//       © 2026 I TECH AI. All rights reserved.
+//     </div>
+
+//   </div>
+
+// </body>
+// </html>
+// `;
+// }
+
+// /* =========================================================
+//    EMAIL HTML - REMINDER
+// ========================================================= */
+
+// function reminderEmailHTML(name) {
+//   return `
+// <!DOCTYPE html>
+// <html>
+// <head>
+//   <meta charset="UTF-8">
+
+//   <style>
+//     body {
+//       margin: 0;
+//       padding: 0;
+//       background: #f4f7fb;
+//       font-family: Arial, Helvetica, sans-serif;
+//     }
+
+//     .container {
+//       max-width: 650px;
+//       margin: 30px auto;
+//       background: white;
+//       border-radius: 16px;
+//       overflow: hidden;
+//     }
+
+//     .header {
+//       background: #111827;
+//       color: white;
+//       padding: 30px;
+//       text-align: center;
+//     }
+
+//     .content {
+//       padding: 30px;
+//       color: #1f2937;
+//     }
+
+//     .button {
+//       display: inline-block;
+//       background: #2563eb;
+//       color: white !important;
+//       text-decoration: none;
+//       padding: 14px 24px;
+//       border-radius: 8px;
+//       font-weight: bold;
+//       margin-top: 15px;
+//     }
+//   </style>
+
+// </head>
+
+// <body>
+
+//   <div class="container">
+
+//     <div class="header">
+//       <h1>⏰ Webinar Reminder</h1>
+//     </div>
+
+//     <div class="content">
+
+//       <p>Hi <strong>${name}</strong>,</p>
+
+//       <p>
+//         This is a reminder for your registered I TECH AI webinar.
+//       </p>
+
+//       <p>
+//         Please join the webinar using the link below.
+//       </p>
+
+//       <a
+//         href="${WEBINAR_MEETING_LINK}"
+//         class="button"
+//         target="_blank"
+//       >
+//         Join Google Meet
+//       </a>
+
+//       <p style="margin-top:30px;">
+//         See you there!
+//       </p>
+
+//       <p>
+//         Regards,<br>
+//         <strong>I TECH AI Team</strong>
+//       </p>
+
+//     </div>
+
+//   </div>
+
+// </body>
+// </html>
+// `;
+// }
+
+// /* =========================================================
+//    SEND REGISTRATION EMAIL
+// ========================================================= */
+
+// async function sendRegistrationEmail(lead) {
+//   try {
+//     if (!transporter) {
+//       console.error("❌ Email transporter is not available");
+//       return false;
+//     }
+
+//     const mailOptions = {
+//       from: `"I TECH AI" <${EMAIL_USER}>`,
+//       to: lead.email,
+//       subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
+//       html: registrationEmailHTML(lead.name),
+//     };
+
+//     const info = await transporter.sendMail(mailOptions);
+
+//     console.log("========================================");
+//     console.log("✅ REGISTRATION EMAIL SENT");
+//     console.log("To:", lead.email);
+//     console.log("Message ID:", info.messageId);
+//     console.log("========================================");
+
+//     return true;
+//   } catch (error) {
+//     console.error("========================================");
+//     console.error("❌ REGISTRATION EMAIL ERROR");
+//     console.error("Code:", error.code);
+//     console.error("Command:", error.command || "N/A");
+//     console.error("Message:", error.message);
+//     console.error("========================================");
+
+//     return false;
+//   }
+// }
+
+// /* =========================================================
+//    SEND REMINDER EMAIL
+// ========================================================= */
+
+// async function sendReminderEmail(lead) {
+//   try {
+//     if (!transporter) {
+//       console.error("❌ Email transporter is not available");
+//       return false;
+//     }
+
+//     const mailOptions = {
+//       from: `"I TECH AI" <${EMAIL_USER}>`,
+//       to: lead.email,
+//       subject: "⏰ I TECH AI Webinar Reminder",
+//       html: reminderEmailHTML(lead.name),
+//     };
+
+//     const info = await transporter.sendMail(mailOptions);
+
+//     console.log("========================================");
+//     console.log("✅ REMINDER EMAIL SENT");
+//     console.log("To:", lead.email);
+//     console.log("Message ID:", info.messageId);
+//     console.log("========================================");
+
+//     return true;
+//   } catch (error) {
+//     console.error("========================================");
+//     console.error("❌ REMINDER EMAIL ERROR");
+//     console.error("Code:", error.code);
+//     console.error("Message:", error.message);
+//     console.error("========================================");
+
+//     return false;
+//   }
+// }
+
+// /* =========================================================
+//    HOME ROUTE
+// ========================================================= */
+
+// app.get("/", (req, res) => {
+//   res.sendFile(path.join(__dirname, "index1.html"));
+// });
+
+// /* =========================================================
+//    HEALTH CHECK
+// ========================================================= */
+
+// app.get("/health", (req, res) => {
+//   res.json({
+//     success: true,
+//     message: "I TECH AI Webinar API is running",
+//     serverTime: new Date().toISOString(),
+
+//     mongodb: {
+//       connected: mongoose.connection.readyState === 1,
+//       database: mongoose.connection.name || null,
+//       host: mongoose.connection.host || null,
+//     },
+
+//     email: {
+//       configured: Boolean(EMAIL_USER && EMAIL_PASS),
+//       transporterReady: Boolean(transporter),
+//       provider: "Gmail SMTP",
+//       smtpHost: "smtp.gmail.com",
+//       smtpPort: 587,
+//       network: "IPv4",
+//     },
+
+//     webinar: {
+//       // meetingLink: WEBINAR_MEETING_LINK,
+//       whatsappChannel: WHATSAPP_COMMUNITY_LINK,
+//       dates: webinarDates,
+//     },
+//   });
+// });
+
+// /* =========================================================
+//    REGISTER LEAD
+// ========================================================= */
+
+// app.post("/api/leads", async (req, res) => {
+//   try {
+//     console.log("========================================");
+//     console.log("📥 NEW LEAD REQUEST");
+//     console.log("========================================");
+
+//     const {
+//       name,
+//       phone,
+//       email,
+//       state,
+//       communityJoined,
+//     } = req.body;
+
+//     /* -------------------------------------------------------
+//        BASIC VALIDATION
+//     ------------------------------------------------------- */
+
+//     if (!name || !phone || !email || !state) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Name, phone, email and state are required.",
+//       });
+//     }
+
+//     /* -------------------------------------------------------
+//        COMMUNITY VALIDATION
+//     ------------------------------------------------------- */
+
+//     if (
+//       communityJoined !== true &&
+//       communityJoined !== "true" &&
+//       communityJoined !== 1 &&
+//       communityJoined !== "1"
+//     ) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Please join the WhatsApp channel before registering.",
+//       });
+//     }
+
+//     /* -------------------------------------------------------
+//        MONGODB CHECK
+//     ------------------------------------------------------- */
+
+//     if (mongoose.connection.readyState !== 1) {
+//       return res.status(503).json({
+//         success: false,
+//         message: "Database is currently unavailable. Please try again.",
+//       });
+//     }
+
+//     /* -------------------------------------------------------
+//        PHONE NORMALIZATION
+//     ------------------------------------------------------- */
+
+//     let normalizedPhone = String(phone).replace(/\D/g, "");
+
+//     if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) {
+//       normalizedPhone = normalizedPhone.substring(2);
+//     }
+
+//     if (normalizedPhone.length !== 10) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Please enter a valid 10-digit phone number.",
+//       });
+//     }
+
+//     /* -------------------------------------------------------
+//        EMAIL VALIDATION
+//     ------------------------------------------------------- */
+
+//     const normalizedEmail = String(email)
+//       .trim()
+//       .toLowerCase();
+
+//     const emailRegex =
+//       /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+//     if (!emailRegex.test(normalizedEmail)) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Please enter a valid email address.",
+//       });
+//     }
+
+//     /* -------------------------------------------------------
+//        DUPLICATE PHONE CHECK
+//     ------------------------------------------------------- */
+
+//     const existingLead = await Lead.findOne({
+//       phone: normalizedPhone,
+//     });
+
+//     if (existingLead) {
+//       return res.status(409).json({
+//         success: false,
+//         message: "This phone number is already registered.",
+//       });
+//     }
+
+//     /* -------------------------------------------------------
+//        SAVE LEAD
+//     ------------------------------------------------------- */
+
+//     const lead = await Lead.create({
+//       name: String(name).trim(),
+//       phone: normalizedPhone,
+//       email: normalizedEmail,
+//       state: String(state).trim(),
+
+//       communityJoined: true,
+//       communityJoinDate: new Date(),
+
+//       zoomEmailSent: false,
+//       zoomReminderSent: false,
+
+//       registrationDate: new Date(),
+//     });
+
+//     console.log("========================================");
+//     console.log("✅ LEAD SAVED");
+//     console.log("ID:", lead._id);
+//     console.log("Name:", lead.name);
+//     console.log("Phone:", lead.phone);
+//     console.log("Email:", lead.email);
+//     console.log("State:", lead.state);
+//     console.log("📦 Database:", mongoose.connection.name);
+//     console.log("========================================");
+
+//     /* -------------------------------------------------------
+//        SEND EMAIL IN BACKGROUND
+//     ------------------------------------------------------- */
+
+//     sendRegistrationEmail(lead)
+//       .then(async (sent) => {
+//         if (sent) {
+//           await Lead.findByIdAndUpdate(lead._id, {
+//             zoomEmailSent: true,
+//           });
+
+//           console.log(
+//             "✅ zoomEmailSent updated to true"
+//           );
+//         }
+//       })
+//       .catch((error) => {
+//         console.error(
+//           "❌ Background email error:",
+//           error.message
+//         );
+//       });
+
+//     /* -------------------------------------------------------
+//        RESPONSE
+//     ------------------------------------------------------- */
+
+//     // return res.status(201).json({
+//     //   success: true,
+//     //   message:
+//     //     "Registration successful. Webinar details have been processed.",
+
+//     //   leadId: lead._id,
+
+//     //   webinarMeetingLink: WEBINAR_MEETING_LINK,
+
+//     //   whatsappCommunityLink:
+//     //     WHATSAPP_COMMUNITY_LINK,
+//     // });
+
+// return res.status(201).json({
+//   success: true,
+//   message:
+//     "Registration successful. Webinar details have been processed.",
+
+//   leadId: lead._id,
+
+//   // Frontend success button isi property ko use karega
+//   // zoomLink: WEBINAR_MEETING_LINK,
+
+//   // Existing property bhi rakhi gayi hai
+//   // webinarMeetingLink: WEBINAR_MEETING_LINK,
+
+//   whatsappCommunityLink:
+//     WHATSAPP_COMMUNITY_LINK,
+// });
+
+
+//   } catch (error) {
+//     console.error("========================================");
+//     console.error("❌ LEAD REGISTRATION ERROR");
+//     console.error("Name:", error.name);
+//     console.error("Code:", error.code);
+//     console.error("Message:", error.message);
+//     console.error("========================================");
+
+//     /* -------------------------------------------------------
+//        DUPLICATE KEY ERROR
+//     ------------------------------------------------------- */
+
+//     if (error.code === 11000) {
+//       return res.status(409).json({
+//         success: false,
+//         message: "This phone number is already registered.",
+//       });
+//     }
+
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error. Please try again later.",
+//     });
+//   }
+// });
+
+// /* =========================================================
+//    GET ALL LEADS
+// ========================================================= */
+
+// app.get("/api/leads", async (req, res) => {
+//   try {
+//     if (mongoose.connection.readyState !== 1) {
+//       return res.status(503).json({
+//         success: false,
+//         message: "Database is unavailable.",
+//       });
+//     }
+
+//     const leads = await Lead.find()
+//       .sort({
+//         registrationDate: -1,
+//       })
+//       .lean();
+
+//     return res.json({
+//       success: true,
+//       count: leads.length,
+//       leads,
+//     });
+//   } catch (error) {
+//     console.error(
+//       "❌ GET LEADS ERROR:",
+//       error.message
+//     );
+
+//     return res.status(500).json({
+//       success: false,
+//       message: "Unable to fetch leads.",
+//     });
+//   }
+// });
+
+// /* =========================================================
+//    GET LEAD BY PHONE
+// ========================================================= */
+
+// app.get("/api/leads/:phone", async (req, res) => {
+//   try {
+//     let phone = String(req.params.phone).replace(
+//       /\D/g,
+//       ""
+//     );
+
+//     if (phone.startsWith("91") && phone.length === 12) {
+//       phone = phone.substring(2);
+//     }
+
+//     const lead = await Lead.findOne({
+//       phone,
+//     }).lean();
+
+//     if (!lead) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Lead not found.",
+//       });
+//     }
+
+//     return res.json({
+//       success: true,
+//       lead,
+//     });
+//   } catch (error) {
+//     console.error(
+//       "❌ GET LEAD ERROR:",
+//       error.message
+//     );
+
+//     return res.status(500).json({
+//       success: false,
+//       message: "Unable to fetch lead.",
+//     });
+//   }
+// });
+
+// /* =========================================================
+//    TEST EMAIL API
+// ========================================================= */
+
+// app.post("/api/test-email", async (req, res) => {
+//   try {
+//     const { email } = req.body;
+
+//     if (!email) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Email is required.",
+//       });
+//     }
+
+//     if (!transporter) {
+//       return res.status(503).json({
+//         success: false,
+//         message: "Gmail SMTP transporter is not ready.",
+//       });
+//     }
+
+//     const info = await transporter.sendMail({
+//       from: `"I TECH AI" <${EMAIL_USER}>`,
+//       to: email,
+//       subject: "I TECH AI - Test Email",
+//       html: `
+//         <div style="font-family:Arial,sans-serif;padding:30px;">
+//           <h1>✅ Email Test Successful</h1>
+
+//           <p>
+//             This is a test email from the I TECH AI webinar server.
+//           </p>
+
+//           <p>
+//             Gmail SMTP connection is working.
+//           </p>
+//         </div>
+//       `,
+//     });
+
+//     console.log("========================================");
+//     console.log("✅ TEST EMAIL SENT");
+//     console.log("To:", email);
+//     console.log("Message ID:", info.messageId);
+//     console.log("========================================");
+
+//     return res.json({
+//       success: true,
+//       message: "Test email sent successfully.",
+//       messageId: info.messageId,
+//     });
+//   } catch (error) {
+//     console.error("========================================");
+//     console.error("❌ TEST EMAIL ERROR");
+//     console.error("Code:", error.code);
+//     console.error("Command:", error.command || "N/A");
+//     console.error("Message:", error.message);
+//     console.error("========================================");
+
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//       code: error.code || null,
+//     });
+//   }
+// });
+
+// /* =========================================================
+//    MANUAL REMINDER API
+// ========================================================= */
+
+// app.post("/api/send-reminders", async (req, res) => {
+//   try {
+//     const leads = await Lead.find({
+//       zoomReminderSent: false,
+//     });
+
+//     console.log(
+//       `📨 Reminder candidates: ${leads.length}`
+//     );
+
+//     let sentCount = 0;
+
+//     for (const lead of leads) {
+//       const sent = await sendReminderEmail(lead);
+
+//       if (sent) {
+//         await Lead.findByIdAndUpdate(lead._id, {
+//           zoomReminderSent: true,
+//         });
+
+//         sentCount++;
+//       }
+//     }
+
+//     return res.json({
+//       success: true,
+//       message: "Reminder process completed.",
+//       totalCandidates: leads.length,
+//       sentCount,
+//     });
+//   } catch (error) {
+//     console.error(
+//       "❌ REMINDER API ERROR:",
+//       error.message
+//     );
+
+//     return res.status(500).json({
+//       success: false,
+//       message: "Unable to send reminders.",
+//     });
+//   }
+// });
+
+// /* =========================================================
+//    API 404
+// ========================================================= */
+
+// app.use("/api", (req, res) => {
+//   res.status(404).json({
+//     success: false,
+//     message: "API endpoint not found.",
+//     path: req.originalUrl,
+//   });
+// });
+
+// /* =========================================================
+//    GLOBAL ERROR HANDLER
+// ========================================================= */
+
+// app.use((error, req, res, next) => {
+//   console.error("========================================");
+//   console.error("❌ GLOBAL SERVER ERROR");
+//   console.error("Message:", error.message);
+//   console.error("========================================");
+
+//   res.status(500).json({
+//     success: false,
+//     message: "Internal server error.",
+//   });
+// });
+
+// /* =========================================================
+//    START SERVER
+// ========================================================= */
+
+// app.listen(PORT, () => {
+//   console.log("");
+//   console.log("========================================");
+//   console.log("🚀 I TECH AI WEBINAR SERVER");
+//   console.log("========================================");
+//   console.log("🟢 Server running on port:", PORT);
+//   console.log("🌐 Environment:", process.env.NODE_ENV || "production");
+//   console.log("📧 Email:", EMAIL_USER ? "Configured" : "Missing");
+//   console.log("📦 MongoDB:", MONGO_URI ? "Configured" : "Missing");
+//   // console.log("🎥 Google Meet:", WEBINAR_MEETING_LINK);
+//   // const WEBINAR_MEETING_LINK = process.env.GOOGLE_MEET_LINK;
+
+//   console.log("📱 WhatsApp:", WHATSAPP_COMMUNITY_LINK);
+//   console.log("========================================");
+// });
+
+// /* =========================================================
+//    START GMAIL CHECK
+// ========================================================= */
+
+// verifyEmailConfiguration();
+
+// /* =========================================================
+//    PERIODIC EMAIL REMINDER CHECK
+// ========================================================= */
+
+// /*
+//   Har 60 seconds check hoga.
+
+//   NOTE:
+//   Ye reminder automatically tabhi bhejega jab
+//   application running ho aur transporter ready ho.
+// */
+
+// setInterval(async () => {
+//   try {
+//     if (!transporter) {
+//       return;
+//     }
+
+//     const now = new Date();
+
+//     const webinarStartedOrNear = webinarDates.some(
+//       (date) => {
+//         const webinarTime = new Date(date);
+
+//         const difference =
+//           webinarTime.getTime() - now.getTime();
+
+//         /*
+//           Reminder window:
+//           webinar se 30 minutes pehle
+//         */
+
+//         return (
+//           difference > 0 &&
+//           difference <= 30 * 60 * 1000
+//         );
+//       }
+//     );
+
+//     if (!webinarStartedOrNear) {
+//       return;
+//     }
+
+//     const leads = await Lead.find({
+//       zoomReminderSent: false,
+//       zoomEmailSent: true,
+//     });
+
+//     if (leads.length === 0) {
+//       return;
+//     }
+
+//     console.log(
+//       `⏰ Sending reminders to ${leads.length} leads...`
+//     );
+
+//     for (const lead of leads) {
+//       const sent = await sendReminderEmail(lead);
+
+//       if (sent) {
+//         await Lead.findByIdAndUpdate(lead._id, {
+//           zoomReminderSent: true,
+//         });
+//       }
+//     }
+//   } catch (error) {
+//     console.error(
+//       "❌ Reminder scheduler error:",
+//       error.message
+//     );
+//   }
+// }, 60 * 1000);
+
+
+
 const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
@@ -6513,25 +7747,56 @@ app.use(express.static(__dirname));
 const PORT = process.env.PORT || 5000;
 
 const MONGO_URI = process.env.MONGO_URI;
+
 const EMAIL_USER = process.env.EMAIL_USER;
+
 const EMAIL_PASS = process.env.EMAIL_PASS;
 
 /* =========================================================
-   WEBINAR CONFIGURATION
+   WHATSAPP CONFIGURATION
 ========================================================= */
-
-// const WEBINAR_MEETING_LINK =
-//   "https://meet.google.com/uca-deoe-vnh?hs=151";
-// const WEBINAR_MEETING_LINK = process.env.GOOGLE_MEET_LINK;
 
 const WHATSAPP_COMMUNITY_LINK =
   "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
+
+/* =========================================================
+   WEBINAR DATES
+========================================================= */
 
 const webinarDates = [
   "2026-09-08T20:00:00+05:30",
   "2026-09-09T20:00:00+05:30",
   "2026-09-10T20:00:00+05:30",
 ];
+
+/*
+=========================================================
+IMPORTANT
+
+Google Meet configuration has intentionally been removed
+from the backend.
+
+The Google Meet link is controlled ONLY by index1.html.
+
+HTML:
+
+<a
+  href="https://meet.google.com/uca-deoe-vnh?hs=1"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  🎥 JOIN GOOGLE MEET WEBINAR
+</a>
+
+No Google Meet URL is stored in:
+- server.js
+- .env
+- MongoDB
+- API response
+- JavaScript
+=========================================================
+*/
+
 
 /* =========================================================
    DATABASE
@@ -6558,6 +7823,7 @@ mongoose
     console.error("Message:", error.message);
     console.error("========================================");
   });
+
 
 /* =========================================================
    LEAD SCHEMA
@@ -6601,16 +7867,6 @@ const leadSchema = new mongoose.Schema(
       default: null,
     },
 
-    zoomEmailSent: {
-      type: Boolean,
-      default: false,
-    },
-
-    zoomReminderSent: {
-      type: Boolean,
-      default: false,
-    },
-
     registrationDate: {
       type: Date,
       default: Date.now,
@@ -6623,156 +7879,246 @@ const leadSchema = new mongoose.Schema(
 
 const Lead = mongoose.model("Lead", leadSchema);
 
+
 /* =========================================================
    GMAIL SMTP
 ========================================================= */
 
 let transporter = null;
 
-/*
-  Gmail SMTP ko directly IPv4 address par connect karne ki
-  koshish ki ja rahi hai.
 
-  Example:
-  smtp.gmail.com
-       ↓
-  IPv4 address
-       ↓
-  Gmail SMTP :587
-*/
+/* =========================================================
+   CREATE GMAIL TRANSPORTER
+========================================================= */
 
 async function createGmailTransporter() {
+
   if (!EMAIL_USER || !EMAIL_PASS) {
+
     console.error("========================================");
     console.error("❌ EMAIL CONFIGURATION MISSING");
-    console.error("EMAIL_USER:", EMAIL_USER ? "SET" : "MISSING");
-    console.error("EMAIL_PASS:", EMAIL_PASS ? "SET" : "MISSING");
+    console.error(
+      "EMAIL_USER:",
+      EMAIL_USER ? "SET" : "MISSING"
+    );
+    console.error(
+      "EMAIL_PASS:",
+      EMAIL_PASS ? "SET" : "MISSING"
+    );
     console.error("========================================");
 
     return null;
   }
 
+
   try {
+
     console.log("========================================");
     console.log("🌐 Resolving Gmail IPv4...");
     console.log("Host: smtp.gmail.com");
     console.log("========================================");
 
-    const addresses = await new Promise((resolve, reject) => {
-      dns.resolve4("smtp.gmail.com", (error, result) => {
-        if (error) {
-          reject(error);
-          return;
-        }
 
-        resolve(result);
-      });
-    });
+    const addresses = await new Promise(
+      (resolve, reject) => {
+
+        dns.resolve4(
+          "smtp.gmail.com",
+          (error, result) => {
+
+            if (error) {
+              reject(error);
+              return;
+            }
+
+            resolve(result);
+          }
+        );
+
+      }
+    );
+
 
     console.log("========================================");
     console.log("🌐 GMAIL IPV4 DNS CHECK");
     console.log("========================================");
-    console.log("SMTP Host: smtp.gmail.com");
-    console.log("IPv4 Addresses:", addresses);
+    console.log(
+      "SMTP Host: smtp.gmail.com"
+    );
+    console.log(
+      "IPv4 Addresses:",
+      addresses
+    );
     console.log("========================================");
 
-    if (!addresses || addresses.length === 0) {
-      console.error("❌ No Gmail IPv4 address found");
+
+    if (
+      !addresses ||
+      addresses.length === 0
+    ) {
+
+      console.error(
+        "❌ No Gmail IPv4 address found"
+      );
+
       return null;
     }
 
+
     const smtpIP = addresses[0];
 
-    console.log("🎯 Using Gmail IPv4:", smtpIP);
 
-    const smtpTransporter = nodemailer.createTransport({
-      host: smtpIP,
-      port: 587,
-      secure: false,
-      family: 4,
+    console.log(
+      "🎯 Using Gmail IPv4:",
+      smtpIP
+    );
 
-      auth: {
-        user: EMAIL_USER,
-        pass: EMAIL_PASS,
-      },
 
-      connectionTimeout: 30000,
-      greetingTimeout: 30000,
-      socketTimeout: 30000,
+    const smtpTransporter =
+      nodemailer.createTransport({
 
-      tls: {
-        servername: "smtp.gmail.com",
-        rejectUnauthorized: true,
-      },
-    });
+        host: smtpIP,
+
+        port: 587,
+
+        secure: false,
+
+        family: 4,
+
+        auth: {
+          user: EMAIL_USER,
+          pass: EMAIL_PASS,
+        },
+
+        connectionTimeout: 30000,
+
+        greetingTimeout: 30000,
+
+        socketTimeout: 30000,
+
+        tls: {
+          servername: "smtp.gmail.com",
+          rejectUnauthorized: true,
+        },
+
+      });
+
 
     console.log("========================================");
     console.log("📧 Gmail transporter created");
     console.log("Host:", smtpIP);
     console.log("Port: 587");
     console.log("Network: IPv4");
-    console.log("TLS Servername: smtp.gmail.com");
+    console.log(
+      "TLS Servername: smtp.gmail.com"
+    );
     console.log("========================================");
 
+
     return smtpTransporter;
+
   } catch (error) {
+
     console.error("========================================");
     console.error("❌ Gmail IPv4 DNS ERROR");
     console.error("Code:", error.code);
-    console.error("Message:", error.message);
+    console.error(
+      "Message:",
+      error.message
+    );
     console.error("========================================");
 
     return null;
   }
 }
 
+
 /* =========================================================
    EMAIL VERIFICATION
 ========================================================= */
 
 async function verifyEmailConfiguration() {
+
   console.log("========================================");
-  console.log("📧 Verifying Gmail SMTP connection...");
+  console.log(
+    "📧 Verifying Gmail SMTP connection..."
+  );
   console.log("========================================");
 
-  transporter = await createGmailTransporter();
+
+  transporter =
+    await createGmailTransporter();
+
 
   if (!transporter) {
-    console.error("❌ Gmail transporter could not be created");
+
+    console.error(
+      "❌ Gmail transporter could not be created"
+    );
+
     return;
   }
 
+
   try {
+
     await transporter.verify();
 
+
     console.log("========================================");
-    console.log("✅ Gmail SMTP connection successful");
-    console.log("📧 Email:", EMAIL_USER);
+    console.log(
+      "✅ Gmail SMTP connection successful"
+    );
+    console.log(
+      "📧 Email:",
+      EMAIL_USER
+    );
     console.log("========================================");
+
   } catch (error) {
+
     console.error("========================================");
     console.error("❌ EMAIL SERVICE ERROR");
     console.error("Code:", error.code);
-    console.error("Command:", error.command || "N/A");
-    console.error("Response:", error.response || "N/A");
-    console.error("Response Code:", error.responseCode || "N/A");
-    console.error("Message:", error.message);
+    console.error(
+      "Command:",
+      error.command || "N/A"
+    );
+    console.error(
+      "Response:",
+      error.response || "N/A"
+    );
+    console.error(
+      "Response Code:",
+      error.responseCode || "N/A"
+    );
+    console.error(
+      "Message:",
+      error.message
+    );
     console.error("========================================");
   }
 }
 
+
 /* =========================================================
-   EMAIL HTML - REGISTRATION
+   REGISTRATION EMAIL HTML
 ========================================================= */
 
 function registrationEmailHTML(name) {
+
   return `
+
 <!DOCTYPE html>
+
 <html>
+
 <head>
+
   <meta charset="UTF-8">
 
   <style>
+
     body {
       margin: 0;
       padding: 0;
@@ -6828,19 +8174,15 @@ function registrationEmailHTML(name) {
       margin-top: 20px;
     }
 
-    .button {
+    .whatsapp {
       display: inline-block;
-      background: #2563eb;
+      background: #16a34a;
       color: #ffffff !important;
       text-decoration: none;
       padding: 14px 24px;
       border-radius: 8px;
       font-weight: bold;
       margin-top: 15px;
-    }
-
-    .whatsapp {
-      background: #16a34a;
     }
 
     .footer {
@@ -6850,103 +8192,169 @@ function registrationEmailHTML(name) {
       color: #6b7280;
       font-size: 13px;
     }
+
   </style>
+
 </head>
+
 
 <body>
 
+
   <div class="container">
 
+
     <div class="header">
-      <h1>🚀 I TECH AI</h1>
-      <p>Webinar Registration Confirmed</p>
+
+      <h1>
+        🚀 I TECH AI
+      </h1>
+
+      <p>
+        Webinar Registration Confirmed
+      </p>
+
     </div>
+
 
     <div class="content">
 
+
       <div class="success">
-        <strong>Registration Successful!</strong>
+
+        <strong>
+          Registration Successful!
+        </strong>
+
         <br>
+
         Your webinar registration has been successfully received.
+
       </div>
 
-      <p>Hi <strong>${name}</strong>,</p>
 
       <p>
-        Thank you for registering for the I TECH AI webinar.
-        We are excited to have you with us.
+        Hi <strong>${name}</strong>,
       </p>
+
+
+      <p>
+
+        Thank you for registering for the
+        I TECH AI webinar.
+
+        We are excited to have you with us.
+
+      </p>
+
 
       <div class="meeting">
 
-        <h2>🎥 Join Webinar</h2>
+        <h2>
+          🎥 Webinar Access
+        </h2>
 
         <p>
-          Click the button below to join the webinar:
-        </p>
 
-        <a
-          href="${WEBINAR_MEETING_LINK}"
-          class="button"
-          target="_blank"
-        >
-          Join Google Meet
-        </a>
+          Your registration has been confirmed.
+
+          Please use the Google Meet button
+          on the registration confirmation page
+          to join the webinar.
+
+        </p>
 
       </div>
 
+
       <div class="meeting">
 
-        <h2>📱 WhatsApp Channel</h2>
+        <h2>
+          📱 WhatsApp Channel
+        </h2>
 
         <p>
-          Join our WhatsApp channel for updates and reminders.
+
+          Join our WhatsApp channel for
+          updates and reminders.
+
         </p>
+
 
         <a
           href="${WHATSAPP_COMMUNITY_LINK}"
-          class="button whatsapp"
+          class="whatsapp"
           target="_blank"
+          rel="noopener noreferrer"
         >
+
           Join WhatsApp Channel
+
         </a>
 
       </div>
 
+
       <p style="margin-top:30px;">
-        Please save the webinar link and join on time.
+
+        Please save the webinar details
+        and join on time.
+
       </p>
+
 
       <p>
+
         Regards,<br>
-        <strong>I TECH AI Team</strong>
+
+        <strong>
+          I TECH AI Team
+        </strong>
+
       </p>
 
+
     </div>
 
+
     <div class="footer">
-      © 2026 I TECH AI. All rights reserved.
+
+      © 2026 I TECH AI.
+      All rights reserved.
+
     </div>
+
 
   </div>
 
+
 </body>
+
 </html>
+
 `;
+
 }
 
+
 /* =========================================================
-   EMAIL HTML - REMINDER
+   REMINDER EMAIL HTML
 ========================================================= */
 
 function reminderEmailHTML(name) {
+
   return `
+
 <!DOCTYPE html>
+
 <html>
+
 <head>
+
   <meta charset="UTF-8">
 
   <style>
+
     body {
       margin: 0;
       padding: 0;
@@ -6974,9 +8382,9 @@ function reminderEmailHTML(name) {
       color: #1f2937;
     }
 
-    .button {
+    .whatsapp {
       display: inline-block;
-      background: #2563eb;
+      background: #16a34a;
       color: white !important;
       text-decoration: none;
       padding: 14px 24px;
@@ -6984,641 +8392,1265 @@ function reminderEmailHTML(name) {
       font-weight: bold;
       margin-top: 15px;
     }
+
   </style>
 
 </head>
 
+
 <body>
+
 
   <div class="container">
 
+
     <div class="header">
-      <h1>⏰ Webinar Reminder</h1>
+
+      <h1>
+        ⏰ Webinar Reminder
+      </h1>
+
     </div>
+
 
     <div class="content">
 
-      <p>Hi <strong>${name}</strong>,</p>
 
       <p>
-        This is a reminder for your registered I TECH AI webinar.
+        Hi <strong>${name}</strong>,
       </p>
 
+
       <p>
-        Please join the webinar using the link below.
+
+        This is a reminder for your
+        registered I TECH AI webinar.
+
       </p>
+
+
+      <p>
+
+        Please open your registration
+        confirmation page to access
+        the Google Meet webinar button.
+
+      </p>
+
+
+      <p>
+
+        You can also stay connected
+        through our WhatsApp channel
+        for important updates.
+
+      </p>
+
 
       <a
-        href="${WEBINAR_MEETING_LINK}"
-        class="button"
+        href="${WHATSAPP_COMMUNITY_LINK}"
+        class="whatsapp"
         target="_blank"
+        rel="noopener noreferrer"
       >
-        Join Google Meet
+
+        Join WhatsApp Channel
+
       </a>
 
+
       <p style="margin-top:30px;">
+
         See you there!
+
       </p>
 
+
       <p>
+
         Regards,<br>
-        <strong>I TECH AI Team</strong>
+
+        <strong>
+          I TECH AI Team
+        </strong>
+
       </p>
+
 
     </div>
 
+
   </div>
 
+
 </body>
+
 </html>
+
 `;
+
 }
+
 
 /* =========================================================
    SEND REGISTRATION EMAIL
 ========================================================= */
 
 async function sendRegistrationEmail(lead) {
+
   try {
+
     if (!transporter) {
-      console.error("❌ Email transporter is not available");
+
+      console.error(
+        "❌ Email transporter is not available"
+      );
+
       return false;
     }
 
+
     const mailOptions = {
-      from: `"I TECH AI" <${EMAIL_USER}>`,
-      to: lead.email,
-      subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
-      html: registrationEmailHTML(lead.name),
+
+      from:
+        `"I TECH AI" <${EMAIL_USER}>`,
+
+      to:
+        lead.email,
+
+      subject:
+        "🎉 Your I TECH AI Webinar Registration is Confirmed",
+
+      html:
+        registrationEmailHTML(
+          lead.name
+        ),
+
     };
 
-    const info = await transporter.sendMail(mailOptions);
+
+    const info =
+      await transporter.sendMail(
+        mailOptions
+      );
+
 
     console.log("========================================");
-    console.log("✅ REGISTRATION EMAIL SENT");
-    console.log("To:", lead.email);
-    console.log("Message ID:", info.messageId);
+    console.log(
+      "✅ REGISTRATION EMAIL SENT"
+    );
+    console.log(
+      "To:",
+      lead.email
+    );
+    console.log(
+      "Message ID:",
+      info.messageId
+    );
     console.log("========================================");
+
 
     return true;
+
   } catch (error) {
+
     console.error("========================================");
-    console.error("❌ REGISTRATION EMAIL ERROR");
-    console.error("Code:", error.code);
-    console.error("Command:", error.command || "N/A");
-    console.error("Message:", error.message);
+    console.error(
+      "❌ REGISTRATION EMAIL ERROR"
+    );
+    console.error(
+      "Code:",
+      error.code
+    );
+    console.error(
+      "Command:",
+      error.command || "N/A"
+    );
+    console.error(
+      "Message:",
+      error.message
+    );
     console.error("========================================");
+
 
     return false;
   }
 }
+
 
 /* =========================================================
    SEND REMINDER EMAIL
 ========================================================= */
 
 async function sendReminderEmail(lead) {
+
   try {
+
     if (!transporter) {
-      console.error("❌ Email transporter is not available");
+
+      console.error(
+        "❌ Email transporter is not available"
+      );
+
       return false;
     }
 
+
     const mailOptions = {
-      from: `"I TECH AI" <${EMAIL_USER}>`,
-      to: lead.email,
-      subject: "⏰ I TECH AI Webinar Reminder",
-      html: reminderEmailHTML(lead.name),
+
+      from:
+        `"I TECH AI" <${EMAIL_USER}>`,
+
+      to:
+        lead.email,
+
+      subject:
+        "⏰ I TECH AI Webinar Reminder",
+
+      html:
+        reminderEmailHTML(
+          lead.name
+        ),
+
     };
 
-    const info = await transporter.sendMail(mailOptions);
+
+    const info =
+      await transporter.sendMail(
+        mailOptions
+      );
+
 
     console.log("========================================");
-    console.log("✅ REMINDER EMAIL SENT");
-    console.log("To:", lead.email);
-    console.log("Message ID:", info.messageId);
+    console.log(
+      "✅ REMINDER EMAIL SENT"
+    );
+    console.log(
+      "To:",
+      lead.email
+    );
+    console.log(
+      "Message ID:",
+      info.messageId
+    );
     console.log("========================================");
+
 
     return true;
+
   } catch (error) {
+
     console.error("========================================");
-    console.error("❌ REMINDER EMAIL ERROR");
-    console.error("Code:", error.code);
-    console.error("Message:", error.message);
+    console.error(
+      "❌ REMINDER EMAIL ERROR"
+    );
+    console.error(
+      "Code:",
+      error.code
+    );
+    console.error(
+      "Message:",
+      error.message
+    );
     console.error("========================================");
+
 
     return false;
   }
 }
+
 
 /* =========================================================
    HOME ROUTE
 ========================================================= */
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index1.html"));
+
+  res.sendFile(
+    path.join(
+      __dirname,
+      "index1.html"
+    )
+  );
+
 });
+
 
 /* =========================================================
    HEALTH CHECK
 ========================================================= */
 
 app.get("/health", (req, res) => {
+
   res.json({
+
     success: true,
-    message: "I TECH AI Webinar API is running",
-    serverTime: new Date().toISOString(),
+
+    message:
+      "I TECH AI Webinar API is running",
+
+    serverTime:
+      new Date().toISOString(),
+
 
     mongodb: {
-      connected: mongoose.connection.readyState === 1,
-      database: mongoose.connection.name || null,
-      host: mongoose.connection.host || null,
+
+      connected:
+        mongoose.connection.readyState === 1,
+
+      database:
+        mongoose.connection.name || null,
+
+      host:
+        mongoose.connection.host || null,
+
     },
+
 
     email: {
-      configured: Boolean(EMAIL_USER && EMAIL_PASS),
-      transporterReady: Boolean(transporter),
-      provider: "Gmail SMTP",
-      smtpHost: "smtp.gmail.com",
-      smtpPort: 587,
-      network: "IPv4",
+
+      configured:
+        Boolean(
+          EMAIL_USER &&
+          EMAIL_PASS
+        ),
+
+      transporterReady:
+        Boolean(transporter),
+
+      provider:
+        "Gmail SMTP",
+
+      smtpHost:
+        "smtp.gmail.com",
+
+      smtpPort:
+        587,
+
+      network:
+        "IPv4",
+
     },
 
+
     webinar: {
-      // meetingLink: WEBINAR_MEETING_LINK,
-      whatsappChannel: WHATSAPP_COMMUNITY_LINK,
-      dates: webinarDates,
+
+      whatsappChannel:
+        WHATSAPP_COMMUNITY_LINK,
+
+      dates:
+        webinarDates,
+
     },
+
   });
+
 });
+
 
 /* =========================================================
    REGISTER LEAD
 ========================================================= */
 
-app.post("/api/leads", async (req, res) => {
-  try {
-    console.log("========================================");
-    console.log("📥 NEW LEAD REQUEST");
-    console.log("========================================");
+app.post(
+  "/api/leads",
+  async (req, res) => {
 
-    const {
-      name,
-      phone,
-      email,
-      state,
-      communityJoined,
-    } = req.body;
+    try {
 
-    /* -------------------------------------------------------
-       BASIC VALIDATION
-    ------------------------------------------------------- */
+      console.log(
+        "========================================"
+      );
 
-    if (!name || !phone || !email || !state) {
-      return res.status(400).json({
-        success: false,
-        message: "Name, phone, email and state are required.",
-      });
-    }
+      console.log(
+        "📥 NEW LEAD REQUEST"
+      );
 
-    /* -------------------------------------------------------
-       COMMUNITY VALIDATION
-    ------------------------------------------------------- */
+      console.log(
+        "========================================"
+      );
 
-    if (
-      communityJoined !== true &&
-      communityJoined !== "true" &&
-      communityJoined !== 1 &&
-      communityJoined !== "1"
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Please join the WhatsApp channel before registering.",
-      });
-    }
 
-    /* -------------------------------------------------------
-       MONGODB CHECK
-    ------------------------------------------------------- */
+      const {
+        name,
+        phone,
+        email,
+        state,
+        communityJoined,
+      } = req.body;
 
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({
-        success: false,
-        message: "Database is currently unavailable. Please try again.",
-      });
-    }
 
-    /* -------------------------------------------------------
-       PHONE NORMALIZATION
-    ------------------------------------------------------- */
+      /* -----------------------------------------------------
+         BASIC VALIDATION
+      ----------------------------------------------------- */
 
-    let normalizedPhone = String(phone).replace(/\D/g, "");
+      if (
+        !name ||
+        !phone ||
+        !email ||
+        !state
+      ) {
 
-    if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) {
-      normalizedPhone = normalizedPhone.substring(2);
-    }
+        return res.status(400).json({
 
-    if (normalizedPhone.length !== 10) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid 10-digit phone number.",
-      });
-    }
+          success: false,
 
-    /* -------------------------------------------------------
-       EMAIL VALIDATION
-    ------------------------------------------------------- */
+          message:
+            "Name, phone, email and state are required.",
 
-    const normalizedEmail = String(email)
-      .trim()
-      .toLowerCase();
+        });
 
-    const emailRegex =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      }
 
-    if (!emailRegex.test(normalizedEmail)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid email address.",
-      });
-    }
 
-    /* -------------------------------------------------------
-       DUPLICATE PHONE CHECK
-    ------------------------------------------------------- */
+      /* -----------------------------------------------------
+         COMMUNITY VALIDATION
+      ----------------------------------------------------- */
 
-    const existingLead = await Lead.findOne({
-      phone: normalizedPhone,
-    });
+      if (
+        communityJoined !== true &&
+        communityJoined !== "true" &&
+        communityJoined !== 1 &&
+        communityJoined !== "1"
+      ) {
 
-    if (existingLead) {
-      return res.status(409).json({
-        success: false,
-        message: "This phone number is already registered.",
-      });
-    }
+        return res.status(400).json({
 
-    /* -------------------------------------------------------
-       SAVE LEAD
-    ------------------------------------------------------- */
+          success: false,
 
-    const lead = await Lead.create({
-      name: String(name).trim(),
-      phone: normalizedPhone,
-      email: normalizedEmail,
-      state: String(state).trim(),
+          message:
+            "Please join the WhatsApp channel before registering.",
 
-      communityJoined: true,
-      communityJoinDate: new Date(),
+        });
 
-      zoomEmailSent: false,
-      zoomReminderSent: false,
+      }
 
-      registrationDate: new Date(),
-    });
 
-    console.log("========================================");
-    console.log("✅ LEAD SAVED");
-    console.log("ID:", lead._id);
-    console.log("Name:", lead.name);
-    console.log("Phone:", lead.phone);
-    console.log("Email:", lead.email);
-    console.log("State:", lead.state);
-    console.log("📦 Database:", mongoose.connection.name);
-    console.log("========================================");
+      /* -----------------------------------------------------
+         MONGODB CHECK
+      ----------------------------------------------------- */
 
-    /* -------------------------------------------------------
-       SEND EMAIL IN BACKGROUND
-    ------------------------------------------------------- */
+      if (
+        mongoose.connection.readyState !== 1
+      ) {
 
-    sendRegistrationEmail(lead)
-      .then(async (sent) => {
-        if (sent) {
-          await Lead.findByIdAndUpdate(lead._id, {
-            zoomEmailSent: true,
-          });
+        return res.status(503).json({
 
-          console.log(
-            "✅ zoomEmailSent updated to true"
-          );
-        }
-      })
-      .catch((error) => {
-        console.error(
-          "❌ Background email error:",
-          error.message
+          success: false,
+
+          message:
+            "Database is currently unavailable. Please try again.",
+
+        });
+
+      }
+
+
+      /* -----------------------------------------------------
+         PHONE NORMALIZATION
+      ----------------------------------------------------- */
+
+      let normalizedPhone =
+        String(phone).replace(
+          /\D/g,
+          ""
         );
+
+
+      if (
+        normalizedPhone.startsWith("91") &&
+        normalizedPhone.length === 12
+      ) {
+
+        normalizedPhone =
+          normalizedPhone.substring(2);
+
+      }
+
+
+      if (
+        normalizedPhone.length !== 10
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "Please enter a valid 10-digit phone number.",
+
+        });
+
+      }
+
+
+      /* -----------------------------------------------------
+         EMAIL VALIDATION
+      ----------------------------------------------------- */
+
+      const normalizedEmail =
+        String(email)
+          .trim()
+          .toLowerCase();
+
+
+      const emailRegex =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+      if (
+        !emailRegex.test(
+          normalizedEmail
+        )
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "Please enter a valid email address.",
+
+        });
+
+      }
+
+
+      /* -----------------------------------------------------
+         DUPLICATE PHONE CHECK
+      ----------------------------------------------------- */
+
+      const existingLead =
+        await Lead.findOne({
+
+          phone:
+            normalizedPhone,
+
+        });
+
+
+      if (existingLead) {
+
+        return res.status(409).json({
+
+          success: false,
+
+          message:
+            "This phone number is already registered.",
+
+        });
+
+      }
+
+
+      /* -----------------------------------------------------
+         SAVE LEAD
+      ----------------------------------------------------- */
+
+      const lead =
+        await Lead.create({
+
+          name:
+            String(name).trim(),
+
+          phone:
+            normalizedPhone,
+
+          email:
+            normalizedEmail,
+
+          state:
+            String(state).trim(),
+
+          communityJoined:
+            true,
+
+          communityJoinDate:
+            new Date(),
+
+          registrationDate:
+            new Date(),
+
+        });
+
+
+      console.log(
+        "========================================"
+      );
+
+      console.log(
+        "✅ LEAD SAVED"
+      );
+
+      console.log(
+        "ID:",
+        lead._id
+      );
+
+      console.log(
+        "Name:",
+        lead.name
+      );
+
+      console.log(
+        "Phone:",
+        lead.phone
+      );
+
+      console.log(
+        "Email:",
+        lead.email
+      );
+
+      console.log(
+        "State:",
+        lead.state
+      );
+
+      console.log(
+        "📦 Database:",
+        mongoose.connection.name
+      );
+
+      console.log(
+        "========================================"
+      );
+
+
+      /* -----------------------------------------------------
+         SEND EMAIL IN BACKGROUND
+      ----------------------------------------------------- */
+
+      sendRegistrationEmail(lead)
+        .catch((error) => {
+
+          console.error(
+            "❌ Background email error:",
+            error.message
+          );
+
+        });
+
+
+      /* -----------------------------------------------------
+         RESPONSE
+      ----------------------------------------------------- */
+
+      return res.status(201).json({
+
+        success: true,
+
+        message:
+          "Registration successful. Webinar details have been processed.",
+
+        leadId:
+          lead._id,
+
+        whatsappCommunityLink:
+          WHATSAPP_COMMUNITY_LINK,
+
       });
 
-    /* -------------------------------------------------------
-       RESPONSE
-    ------------------------------------------------------- */
 
-    // return res.status(201).json({
-    //   success: true,
-    //   message:
-    //     "Registration successful. Webinar details have been processed.",
+    } catch (error) {
 
-    //   leadId: lead._id,
+      console.error(
+        "========================================"
+      );
 
-    //   webinarMeetingLink: WEBINAR_MEETING_LINK,
+      console.error(
+        "❌ LEAD REGISTRATION ERROR"
+      );
 
-    //   whatsappCommunityLink:
-    //     WHATSAPP_COMMUNITY_LINK,
-    // });
+      console.error(
+        "Name:",
+        error.name
+      );
 
-return res.status(201).json({
-  success: true,
-  message:
-    "Registration successful. Webinar details have been processed.",
+      console.error(
+        "Code:",
+        error.code
+      );
 
-  leadId: lead._id,
+      console.error(
+        "Message:",
+        error.message
+      );
 
-  // Frontend success button isi property ko use karega
-  // zoomLink: WEBINAR_MEETING_LINK,
-
-  // Existing property bhi rakhi gayi hai
-  // webinarMeetingLink: WEBINAR_MEETING_LINK,
-
-  whatsappCommunityLink:
-    WHATSAPP_COMMUNITY_LINK,
-});
+      console.error(
+        "========================================"
+      );
 
 
-  } catch (error) {
-    console.error("========================================");
-    console.error("❌ LEAD REGISTRATION ERROR");
-    console.error("Name:", error.name);
-    console.error("Code:", error.code);
-    console.error("Message:", error.message);
-    console.error("========================================");
+      /* -----------------------------------------------------
+         DUPLICATE KEY ERROR
+      ----------------------------------------------------- */
 
-    /* -------------------------------------------------------
-       DUPLICATE KEY ERROR
-    ------------------------------------------------------- */
+      if (
+        error.code === 11000
+      ) {
 
-    if (error.code === 11000) {
-      return res.status(409).json({
+        return res.status(409).json({
+
+          success: false,
+
+          message:
+            "This phone number is already registered.",
+
+        });
+
+      }
+
+
+      return res.status(500).json({
+
         success: false,
-        message: "This phone number is already registered.",
+
+        message:
+          "Server error. Please try again later.",
+
       });
+
     }
 
-    return res.status(500).json({
-      success: false,
-      message: "Server error. Please try again later.",
-    });
   }
-});
+);
+
 
 /* =========================================================
    GET ALL LEADS
 ========================================================= */
 
-app.get("/api/leads", async (req, res) => {
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({
-        success: false,
-        message: "Database is unavailable.",
+app.get(
+  "/api/leads",
+  async (req, res) => {
+
+    try {
+
+      if (
+        mongoose.connection.readyState !== 1
+      ) {
+
+        return res.status(503).json({
+
+          success: false,
+
+          message:
+            "Database is unavailable.",
+
+        });
+
+      }
+
+
+      const leads =
+        await Lead.find()
+          .sort({
+            registrationDate: -1,
+          })
+          .lean();
+
+
+      return res.json({
+
+        success: true,
+
+        count:
+          leads.length,
+
+        leads,
+
       });
+
+
+    } catch (error) {
+
+      console.error(
+        "❌ GET LEADS ERROR:",
+        error.message
+      );
+
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Unable to fetch leads.",
+
+      });
+
     }
 
-    const leads = await Lead.find()
-      .sort({
-        registrationDate: -1,
-      })
-      .lean();
-
-    return res.json({
-      success: true,
-      count: leads.length,
-      leads,
-    });
-  } catch (error) {
-    console.error(
-      "❌ GET LEADS ERROR:",
-      error.message
-    );
-
-    return res.status(500).json({
-      success: false,
-      message: "Unable to fetch leads.",
-    });
   }
-});
+);
+
 
 /* =========================================================
    GET LEAD BY PHONE
 ========================================================= */
 
-app.get("/api/leads/:phone", async (req, res) => {
-  try {
-    let phone = String(req.params.phone).replace(
-      /\D/g,
-      ""
-    );
+app.get(
+  "/api/leads/:phone",
+  async (req, res) => {
 
-    if (phone.startsWith("91") && phone.length === 12) {
-      phone = phone.substring(2);
-    }
+    try {
 
-    const lead = await Lead.findOne({
-      phone,
-    }).lean();
+      let phone =
+        String(
+          req.params.phone
+        ).replace(
+          /\D/g,
+          ""
+        );
 
-    if (!lead) {
-      return res.status(404).json({
-        success: false,
-        message: "Lead not found.",
+
+      if (
+        phone.startsWith("91") &&
+        phone.length === 12
+      ) {
+
+        phone =
+          phone.substring(2);
+
+      }
+
+
+      const lead =
+        await Lead.findOne({
+          phone,
+        }).lean();
+
+
+      if (!lead) {
+
+        return res.status(404).json({
+
+          success: false,
+
+          message:
+            "Lead not found.",
+
+        });
+
+      }
+
+
+      return res.json({
+
+        success: true,
+
+        lead,
+
       });
+
+
+    } catch (error) {
+
+      console.error(
+        "❌ GET LEAD ERROR:",
+        error.message
+      );
+
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Unable to fetch lead.",
+
+      });
+
     }
 
-    return res.json({
-      success: true,
-      lead,
-    });
-  } catch (error) {
-    console.error(
-      "❌ GET LEAD ERROR:",
-      error.message
-    );
-
-    return res.status(500).json({
-      success: false,
-      message: "Unable to fetch lead.",
-    });
   }
-});
+);
+
 
 /* =========================================================
    TEST EMAIL API
 ========================================================= */
 
-app.post("/api/test-email", async (req, res) => {
-  try {
-    const { email } = req.body;
+app.post(
+  "/api/test-email",
+  async (req, res) => {
 
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is required.",
+    try {
+
+      const {
+        email
+      } = req.body;
+
+
+      if (!email) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "Email is required.",
+
+        });
+
+      }
+
+
+      if (!transporter) {
+
+        return res.status(503).json({
+
+          success: false,
+
+          message:
+            "Gmail SMTP transporter is not ready.",
+
+        });
+
+      }
+
+
+      const info =
+        await transporter.sendMail({
+
+          from:
+            `"I TECH AI" <${EMAIL_USER}>`,
+
+          to:
+            email,
+
+          subject:
+            "I TECH AI - Test Email",
+
+          html: `
+
+            <div
+              style="
+                font-family:Arial,sans-serif;
+                padding:30px;
+              "
+            >
+
+              <h1>
+                ✅ Email Test Successful
+              </h1>
+
+              <p>
+
+                This is a test email
+                from the I TECH AI
+                webinar server.
+
+              </p>
+
+              <p>
+
+                Gmail SMTP connection
+                is working.
+
+              </p>
+
+            </div>
+
+          `,
+
+        });
+
+
+      console.log(
+        "========================================"
+      );
+
+      console.log(
+        "✅ TEST EMAIL SENT"
+      );
+
+      console.log(
+        "To:",
+        email
+      );
+
+      console.log(
+        "Message ID:",
+        info.messageId
+      );
+
+      console.log(
+        "========================================"
+      );
+
+
+      return res.json({
+
+        success: true,
+
+        message:
+          "Test email sent successfully.",
+
+        messageId:
+          info.messageId,
+
       });
+
+
+    } catch (error) {
+
+      console.error(
+        "========================================"
+      );
+
+      console.error(
+        "❌ TEST EMAIL ERROR"
+      );
+
+      console.error(
+        "Code:",
+        error.code
+      );
+
+      console.error(
+        "Command:",
+        error.command || "N/A"
+      );
+
+      console.error(
+        "Message:",
+        error.message
+      );
+
+      console.error(
+        "========================================"
+      );
+
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          error.message,
+
+        code:
+          error.code || null,
+
+      });
+
     }
 
-    if (!transporter) {
-      return res.status(503).json({
-        success: false,
-        message: "Gmail SMTP transporter is not ready.",
-      });
-    }
-
-    const info = await transporter.sendMail({
-      from: `"I TECH AI" <${EMAIL_USER}>`,
-      to: email,
-      subject: "I TECH AI - Test Email",
-      html: `
-        <div style="font-family:Arial,sans-serif;padding:30px;">
-          <h1>✅ Email Test Successful</h1>
-
-          <p>
-            This is a test email from the I TECH AI webinar server.
-          </p>
-
-          <p>
-            Gmail SMTP connection is working.
-          </p>
-        </div>
-      `,
-    });
-
-    console.log("========================================");
-    console.log("✅ TEST EMAIL SENT");
-    console.log("To:", email);
-    console.log("Message ID:", info.messageId);
-    console.log("========================================");
-
-    return res.json({
-      success: true,
-      message: "Test email sent successfully.",
-      messageId: info.messageId,
-    });
-  } catch (error) {
-    console.error("========================================");
-    console.error("❌ TEST EMAIL ERROR");
-    console.error("Code:", error.code);
-    console.error("Command:", error.command || "N/A");
-    console.error("Message:", error.message);
-    console.error("========================================");
-
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-      code: error.code || null,
-    });
   }
-});
+);
+
 
 /* =========================================================
    MANUAL REMINDER API
 ========================================================= */
 
-app.post("/api/send-reminders", async (req, res) => {
-  try {
-    const leads = await Lead.find({
-      zoomReminderSent: false,
-    });
+app.post(
+  "/api/send-reminders",
+  async (req, res) => {
 
-    console.log(
-      `📨 Reminder candidates: ${leads.length}`
-    );
+    try {
 
-    let sentCount = 0;
+      const leads =
+        await Lead.find();
 
-    for (const lead of leads) {
-      const sent = await sendReminderEmail(lead);
 
-      if (sent) {
-        await Lead.findByIdAndUpdate(lead._id, {
-          zoomReminderSent: true,
-        });
+      console.log(
+        `📨 Reminder candidates: ${leads.length}`
+      );
 
-        sentCount++;
+
+      let sentCount = 0;
+
+
+      for (const lead of leads) {
+
+        const sent =
+          await sendReminderEmail(
+            lead
+          );
+
+
+        if (sent) {
+
+          sentCount++;
+
+        }
+
       }
+
+
+      return res.json({
+
+        success: true,
+
+        message:
+          "Reminder process completed.",
+
+        totalCandidates:
+          leads.length,
+
+        sentCount,
+
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        "❌ REMINDER API ERROR:",
+        error.message
+      );
+
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Unable to send reminders.",
+
+      });
+
     }
 
-    return res.json({
-      success: true,
-      message: "Reminder process completed.",
-      totalCandidates: leads.length,
-      sentCount,
-    });
-  } catch (error) {
-    console.error(
-      "❌ REMINDER API ERROR:",
-      error.message
-    );
-
-    return res.status(500).json({
-      success: false,
-      message: "Unable to send reminders.",
-    });
   }
-});
+);
+
 
 /* =========================================================
    API 404
 ========================================================= */
 
-app.use("/api", (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "API endpoint not found.",
-    path: req.originalUrl,
-  });
-});
+app.use(
+  "/api",
+  (req, res) => {
+
+    res.status(404).json({
+
+      success: false,
+
+      message:
+        "API endpoint not found.",
+
+      path:
+        req.originalUrl,
+
+    });
+
+  }
+);
+
 
 /* =========================================================
    GLOBAL ERROR HANDLER
 ========================================================= */
 
-app.use((error, req, res, next) => {
-  console.error("========================================");
-  console.error("❌ GLOBAL SERVER ERROR");
-  console.error("Message:", error.message);
-  console.error("========================================");
+app.use(
+  (error, req, res, next) => {
 
-  res.status(500).json({
-    success: false,
-    message: "Internal server error.",
-  });
-});
+    console.error(
+      "========================================"
+    );
+
+    console.error(
+      "❌ GLOBAL SERVER ERROR"
+    );
+
+    console.error(
+      "Message:",
+      error.message
+    );
+
+    console.error(
+      "========================================"
+    );
+
+
+    res.status(500).json({
+
+      success: false,
+
+      message:
+        "Internal server error.",
+
+    });
+
+  }
+);
+
 
 /* =========================================================
    START SERVER
 ========================================================= */
 
-app.listen(PORT, () => {
-  console.log("");
-  console.log("========================================");
-  console.log("🚀 I TECH AI WEBINAR SERVER");
-  console.log("========================================");
-  console.log("🟢 Server running on port:", PORT);
-  console.log("🌐 Environment:", process.env.NODE_ENV || "production");
-  console.log("📧 Email:", EMAIL_USER ? "Configured" : "Missing");
-  console.log("📦 MongoDB:", MONGO_URI ? "Configured" : "Missing");
-  // console.log("🎥 Google Meet:", WEBINAR_MEETING_LINK);
-  // const WEBINAR_MEETING_LINK = process.env.GOOGLE_MEET_LINK;
+app.listen(
+  PORT,
+  () => {
 
-  console.log("📱 WhatsApp:", WHATSAPP_COMMUNITY_LINK);
-  console.log("========================================");
-});
+    console.log("");
+
+    console.log(
+      "========================================"
+    );
+
+    console.log(
+      "🚀 I TECH AI WEBINAR SERVER"
+    );
+
+    console.log(
+      "========================================"
+    );
+
+    console.log(
+      "🟢 Server running on port:",
+      PORT
+    );
+
+    console.log(
+      "🌐 Environment:",
+      process.env.NODE_ENV ||
+        "production"
+    );
+
+    console.log(
+      "📧 Email:",
+      EMAIL_USER
+        ? "Configured"
+        : "Missing"
+    );
+
+    console.log(
+      "📦 MongoDB:",
+      MONGO_URI
+        ? "Configured"
+        : "Missing"
+    );
+
+    console.log(
+      "📱 WhatsApp:",
+      WHATSAPP_COMMUNITY_LINK
+    );
+
+    console.log(
+      "🎥 Google Meet: Controlled by HTML"
+    );
+
+    console.log(
+      "========================================"
+    );
+
+  }
+);
+
 
 /* =========================================================
    START GMAIL CHECK
 ========================================================= */
 
 verifyEmailConfiguration();
+
 
 /* =========================================================
    PERIODIC EMAIL REMINDER CHECK
@@ -7627,69 +9659,90 @@ verifyEmailConfiguration();
 /*
   Har 60 seconds check hoga.
 
-  NOTE:
-  Ye reminder automatically tabhi bhejega jab
-  application running ho aur transporter ready ho.
+  Webinar se 30 minutes pehle
+  reminder email send ki jayegi.
+
+  Google Meet URL backend mein nahi hai.
 */
 
-setInterval(async () => {
-  try {
-    if (!transporter) {
-      return;
-    }
+setInterval(
+  async () => {
 
-    const now = new Date();
+    try {
 
-    const webinarStartedOrNear = webinarDates.some(
-      (date) => {
-        const webinarTime = new Date(date);
+      if (!transporter) {
+        return;
+      }
 
-        const difference =
-          webinarTime.getTime() - now.getTime();
 
-        /*
-          Reminder window:
-          webinar se 30 minutes pehle
-        */
+      const now =
+        new Date();
 
-        return (
-          difference > 0 &&
-          difference <= 30 * 60 * 1000
+
+      const webinarStartedOrNear =
+        webinarDates.some(
+          (date) => {
+
+            const webinarTime =
+              new Date(date);
+
+
+            const difference =
+              webinarTime.getTime() -
+              now.getTime();
+
+
+            return (
+              difference > 0 &&
+              difference <=
+                30 * 60 * 1000
+            );
+
+          }
         );
+
+
+      if (!webinarStartedOrNear) {
+        return;
       }
-    );
 
-    if (!webinarStartedOrNear) {
-      return;
-    }
 
-    const leads = await Lead.find({
-      zoomReminderSent: false,
-      zoomEmailSent: true,
-    });
+      const leads =
+        await Lead.find();
 
-    if (leads.length === 0) {
-      return;
-    }
 
-    console.log(
-      `⏰ Sending reminders to ${leads.length} leads...`
-    );
-
-    for (const lead of leads) {
-      const sent = await sendReminderEmail(lead);
-
-      if (sent) {
-        await Lead.findByIdAndUpdate(lead._id, {
-          zoomReminderSent: true,
-        });
+      if (
+        leads.length === 0
+      ) {
+        return;
       }
-    }
-  } catch (error) {
-    console.error(
-      "❌ Reminder scheduler error:",
-      error.message
-    );
-  }
-}, 60 * 1000);
 
+
+      console.log(
+        `⏰ Sending reminders to ${leads.length} leads...`
+      );
+
+
+      for (
+        const lead of leads
+      ) {
+
+        await sendReminderEmail(
+          lead
+        );
+
+      }
+
+
+    } catch (error) {
+
+      console.error(
+        "❌ Reminder scheduler error:",
+        error.message
+      );
+
+    }
+
+  },
+  60 * 1000
+);
