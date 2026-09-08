@@ -4134,9 +4134,30 @@ const Lead = mongoose.model("Lead", leadSchema);
 
 let transporter = null;
 
+// if (EMAIL_USER && EMAIL_PASS) {
+//   transporter = nodemailer.createTransport({
+//     service: "gmail",
+//     host: "smtp.gmail.com",
+//     port: 587,
+//     secure: false,
+
+//     auth: {
+//       user: EMAIL_USER,
+//       pass: EMAIL_PASS,
+//     },
+//     family: 4,
+
+
+//     connectionTimeout: 10000,
+//     greetingTimeout: 10000,
+//     socketTimeout: 15000,
+//   });
+// }
+
+let transporter = null;
+
 if (EMAIL_USER && EMAIL_PASS) {
   transporter = nodemailer.createTransport({
-    service: "gmail",
     host: "smtp.gmail.com",
     port: 587,
     secure: false,
@@ -4145,14 +4166,13 @@ if (EMAIL_USER && EMAIL_PASS) {
       user: EMAIL_USER,
       pass: EMAIL_PASS,
     },
-    family: 4,
 
-    
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
   });
 }
+
 
 /* =========================================================
    EMAIL VERIFICATION
