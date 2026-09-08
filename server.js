@@ -6522,7 +6522,7 @@ const EMAIL_PASS = process.env.EMAIL_PASS;
 
 // const WEBINAR_MEETING_LINK =
 //   "https://meet.google.com/uca-deoe-vnh?hs=151";
-const WEBINAR_MEETING_LINK = process.env.GOOGLE_MEET_LINK;
+// const WEBINAR_MEETING_LINK = process.env.GOOGLE_MEET_LINK;
 
 const WHATSAPP_COMMUNITY_LINK =
   "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
@@ -7145,7 +7145,7 @@ app.get("/health", (req, res) => {
     },
 
     webinar: {
-      meetingLink: WEBINAR_MEETING_LINK,
+      // meetingLink: WEBINAR_MEETING_LINK,
       whatsappChannel: WHATSAPP_COMMUNITY_LINK,
       dates: webinarDates,
     },
@@ -7335,10 +7335,10 @@ return res.status(201).json({
   leadId: lead._id,
 
   // Frontend success button isi property ko use karega
-  zoomLink: WEBINAR_MEETING_LINK,
+  // zoomLink: WEBINAR_MEETING_LINK,
 
   // Existing property bhi rakhi gayi hai
-  webinarMeetingLink: WEBINAR_MEETING_LINK,
+  // webinarMeetingLink: WEBINAR_MEETING_LINK,
 
   whatsappCommunityLink:
     WHATSAPP_COMMUNITY_LINK,
@@ -7608,8 +7608,8 @@ app.listen(PORT, () => {
   console.log("📧 Email:", EMAIL_USER ? "Configured" : "Missing");
   console.log("📦 MongoDB:", MONGO_URI ? "Configured" : "Missing");
   // console.log("🎥 Google Meet:", WEBINAR_MEETING_LINK);
-  const WEBINAR_MEETING_LINK = process.env.GOOGLE_MEET_LINK;
-  
+  // const WEBINAR_MEETING_LINK = process.env.GOOGLE_MEET_LINK;
+
   console.log("📱 WhatsApp:", WHATSAPP_COMMUNITY_LINK);
   console.log("========================================");
 });
