@@ -6520,8 +6520,9 @@ const EMAIL_PASS = process.env.EMAIL_PASS;
    WEBINAR CONFIGURATION
 ========================================================= */
 
-const WEBINAR_MEETING_LINK =
-  "https://meet.google.com/uca-deoe-vnh?hs=151";
+// const WEBINAR_MEETING_LINK =
+//   "https://meet.google.com/uca-deoe-vnh?hs=151";
+const WEBINAR_MEETING_LINK = process.env.GOOGLE_MEET_LINK;
 
 const WHATSAPP_COMMUNITY_LINK =
   "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
@@ -7313,18 +7314,37 @@ app.post("/api/leads", async (req, res) => {
        RESPONSE
     ------------------------------------------------------- */
 
-    return res.status(201).json({
-      success: true,
-      message:
-        "Registration successful. Webinar details have been processed.",
+    // return res.status(201).json({
+    //   success: true,
+    //   message:
+    //     "Registration successful. Webinar details have been processed.",
 
-      leadId: lead._id,
+    //   leadId: lead._id,
 
-      webinarMeetingLink: WEBINAR_MEETING_LINK,
+    //   webinarMeetingLink: WEBINAR_MEETING_LINK,
 
-      whatsappCommunityLink:
-        WHATSAPP_COMMUNITY_LINK,
-    });
+    //   whatsappCommunityLink:
+    //     WHATSAPP_COMMUNITY_LINK,
+    // });
+
+return res.status(201).json({
+  success: true,
+  message:
+    "Registration successful. Webinar details have been processed.",
+
+  leadId: lead._id,
+
+  // Frontend success button isi property ko use karega
+  zoomLink: WEBINAR_MEETING_LINK,
+
+  // Existing property bhi rakhi gayi hai
+  webinarMeetingLink: WEBINAR_MEETING_LINK,
+
+  whatsappCommunityLink:
+    WHATSAPP_COMMUNITY_LINK,
+});
+
+
   } catch (error) {
     console.error("========================================");
     console.error("❌ LEAD REGISTRATION ERROR");
@@ -7587,7 +7607,9 @@ app.listen(PORT, () => {
   console.log("🌐 Environment:", process.env.NODE_ENV || "production");
   console.log("📧 Email:", EMAIL_USER ? "Configured" : "Missing");
   console.log("📦 MongoDB:", MONGO_URI ? "Configured" : "Missing");
-  console.log("🎥 Google Meet:", WEBINAR_MEETING_LINK);
+  // console.log("🎥 Google Meet:", WEBINAR_MEETING_LINK);
+  const WEBINAR_MEETING_LINK = process.env.GOOGLE_MEET_LINK;
+  
   console.log("📱 WhatsApp:", WHATSAPP_COMMUNITY_LINK);
   console.log("========================================");
 });
