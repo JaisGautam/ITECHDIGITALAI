@@ -186,48 +186,7 @@ body{background:#fff7ed;color:#333;overflow-x:hidden}
         font-size: 18px;
     }
 }
-/* Container ko flex banayein taki logo left me rahe */
-.container {
-    display: flex;
-    justify-content: flex-start;  /* Left align */
-    align-items: center;
-    padding: 20px 40px;
-}
 
-/* Logo wrapper */
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;                    /* Image aur text ke beech space */
-    font-family: 'Poppins', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: #ffffff;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.logo:hover {
-    transform: scale(1.05);       /* Hover par thoda bada */
-}
-
-/* Logo image */
-.logo img {
-    width: 36px;                  /* Chhota size */
-    height: 36px;
-    object-fit: contain;
-    border-radius: 8px;           /* Thoda rounded corners */
-}
-
-/* Logo text */
-.logo span {
-    background: linear-gradient(90deg, #00d4ff, #7b2ff7);  /* Gradient text */
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 800;
-}
 footer{margin-top:55px;background:#222;color:#aaa;padding:25px;font-size:12px}
 @media(max-width:850px){.info-grid,.card-container,.feature-grid,.steps{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.info-grid,.card-container,.feature-grid,.steps,.success-actions{grid-template-columns:1fr}.hero{padding-top:28px}.mentor-info{text-align:center}.form-section{margin-left:10px;margin-right:10px}.business-section{padding:25px 16px}}
