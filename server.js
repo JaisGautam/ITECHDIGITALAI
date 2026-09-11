@@ -9707,6 +9707,42 @@ async function sendEmailViaGmail(lead) {
 //   }
 // }
 
+// async function sendEmailViaMailtrap(lead) {
+//   const token = process.env.MAILTRAP_API_TOKEN;
+//   if (!token) {
+//     console.log("⚠️ MAILTRAP_API_TOKEN missing");
+//     return false;
+//   }
+
+//   try {
+//     const response = await fetch("https://send.api.mailtrap.io/api/send", {
+//       method: "POST",
+//       headers: {
+//         "Authorization": `Bearer ${token}`,
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         from: { email: MAIL_FROM, name: "I TECH AI" },
+//         to: [{ email: lead.email, name: lead.name }],
+//         subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
+//         html: createRegistrationEmailHtml(lead),
+//       }),
+//     });
+
+//     if (!response.ok) {
+//       const err = await response.text();
+//       console.error("❌ Mailtrap API error:", err);
+//       return false;
+//     }
+
+//     console.log("✅ Email sent via Mailtrap API to:", lead.email);
+//     return true;
+//   } catch (error) {
+//     console.error("❌ Mailtrap API exception:", error.message);
+//     return false;
+//   }
+// }
+
 async function sendEmailViaMailtrap(lead) {
   const token = process.env.MAILTRAP_API_TOKEN;
   if (!token) {
@@ -9715,30 +9751,26 @@ async function sendEmailViaMailtrap(lead) {
   }
 
   try {
-    const response = await fetch("https://send.api.mailtrap.io/api/send", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.post(
+      "https://send.api.mailtrap.io/api/send",
+      {
         from: { email: MAIL_FROM, name: "I TECH AI" },
         to: [{ email: lead.email, name: lead.name }],
         subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
         html: createRegistrationEmailHtml(lead),
-      }),
-    });
-
-    if (!response.ok) {
-      const err = await response.text();
-      console.error("❌ Mailtrap API error:", err);
-      return false;
-    }
+      },
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     console.log("✅ Email sent via Mailtrap API to:", lead.email);
     return true;
   } catch (error) {
-    console.error("❌ Mailtrap API exception:", error.message);
+    console.error("❌ Mailtrap API error:", error.response?.data || error.message);
     return false;
   }
 }
