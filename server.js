@@ -8283,6 +8283,7 @@ const app = express();
 // APP CONFIGURATION
 // ============================================================
 
+require('dotenv').config();
 app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
@@ -9260,48 +9261,108 @@ app.post("/api/test-email", async (req, res) => {
 // START SERVER
 // ============================================================
 
-app.listen(PORT, async () => {
-  console.log(
-    `🚀 Server running on port ${PORT}`
-  );
+// // app.listen(PORT, async () => {
+// //   console.log(
+// //     console.log( "Server running on port" ${PORT})
+// //   );
+// //   console.log("=== MAILTRAP DEBUG ===");
+// // console.log("HOST:", process.env.MAILTRAP_HOST);
+// // console.log("USER:", process.env.MAILTRAP_USER);
+// // console.log("PASS length:", process.env.MAILTRAP_PASS?.length);
+// // console.log("FROM:", process.env.MAIL_FROM);
+// // console.log("======================");
+// //   );
 
-  // ----------------------------------------------------------
-  // Verify Mailtrap connection
-  // ----------------------------------------------------------
 
-  if (mailtrapTransporter) {
-    try {
-      await mailtrapTransporter.verify();
+// app.listen(PORT, async () => {
+//   console.log(`🚀 Server running on port ${PORT}`);
 
-      console.log(
-        "🟢 Mailtrap SMTP connection verified"
-      );
-    } catch (error) {
-      console.error(
-        "❌ Mailtrap SMTP verification failed:",
-        error.message
-      );
-    }
-  } else {
-    console.log(
-      "⚠️ Mailtrap is not configured."
-    );
-  }
+//   console.log("=== MAILTRAP DEBUG ===");
+//   console.log("HOST:", process.env.MAILTRAP_HOST);
+//   console.log("USER:", process.env.MAILTRAP_USER);
+//   console.log("PASS length:", process.env.MAILTRAP_PASS?.length);
+//   console.log("FROM:", process.env.MAIL_FROM);
+//   console.log("======================");
+
+//   // ... baaki ka code (Mailtrap verify, Gmail, Brevo)
+// });
+
+//   // ----------------------------------------------------------
+//   // Verify Mailtrap connection
+//   // ----------------------------------------------------------
+
+//   if (mailtrapTransporter) {
+//     try {
+//       await mailtrapTransporter.verify();
+
+//       console.log(
+//         "🟢 Mailtrap SMTP connection verified"
+//       );
+//     } catch (error) {
+//       console.error(
+//         "❌ Mailtrap SMTP verification failed:",
+//         error.message
+//       );
+//     }
+//   } else {
+//     console.log(
+//       "⚠️ Mailtrap is not configured."
+//     );
+//   }
 
   // ----------------------------------------------------------
   // Prepare Gmail fallback
   // ----------------------------------------------------------
 
-  if (EMAIL_USER && EMAIL_PASS) {
-    gmailTransporter =
-      await createGmailTransporter();
+  // if (EMAIL_USER && EMAIL_PASS) {
+  //   gmailTransporter =
+  //     await createGmailTransporter();
 
+  //   if (gmailTransporter) {
+  //     console.log(
+  //       "🟢 Gmail fallback transporter ready"
+  //     );
+  //   }
+  // }
+
+
+  app.listen(PORT, async () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+
+  console.log("=== MAILTRAP DEBUG ===");
+  console.log("HOST:", process.env.MAILTRAP_HOST);
+  console.log("USER:", process.env.MAILTRAP_USER);
+  console.log("PASS length:", process.env.MAILTRAP_PASS?.length);
+  console.log("FROM:", process.env.MAIL_FROM);
+  console.log("======================");
+
+  // Verify Mailtrap connection
+  if (mailtrapTransporter) {
+    try {
+      await mailtrapTransporter.verify();
+      console.log("🟢 Mailtrap SMTP connection verified");
+    } catch (error) {
+      console.error("❌ Mailtrap SMTP verification failed:", error.message);
+    }
+  } else {
+    console.log("⚠️ Mailtrap is not configured.");
+  }
+
+  // Gmail fallback
+  if (EMAIL_USER && EMAIL_PASS) {
+    gmailTransporter = await createGmailTransporter();
     if (gmailTransporter) {
-      console.log(
-        "🟢 Gmail fallback transporter ready"
-      );
+      console.log("🟢 Gmail fallback transporter ready");
     }
   }
+
+  // Provider summary
+  console.log("--------------------------------------------------");
+  console.log("📧 Primary email provider: Mailtrap");
+  console.log("📧 Gmail fallback:", gmailTransporter ? "Enabled" : "Disabled");
+  console.log("📧 Brevo fallback:", brevoClient ? "Enabled" : "Disabled");
+  console.log("--------------------------------------------------");
+});
 
   // ----------------------------------------------------------
   // Provider summary
@@ -9332,4 +9393,3 @@ app.listen(PORT, async () => {
   console.log(
     "--------------------------------------------------"
   );
-});
