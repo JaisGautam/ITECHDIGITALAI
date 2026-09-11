@@ -9416,6 +9416,21 @@
 // // ============================================================
 // // APP CONFIGURATION
 // // ============================================================
+const express = require("express");
+const path = require("path");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const nodemailer = require("nodemailer");
+const dns = require("dns");
+const SibApiV3Sdk = require("sib-api-v3-sdk");
+const axios = require("axios");                    // ← Axios bhi add karo
+require("dotenv").config();
+
+const app = express();                             // ← YE LINE MISSING HAI! Sabse important.
+
+try {
+  dns.setDefaultResultOrder("ipv4first");
+} catch (error) {}
 
 app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: "1mb" }));
@@ -9798,8 +9813,25 @@ async function sendEmailViaMailtrap(lead) {
 //   return { sent: false, provider: null };
 // }
 
+// async function sendRegistrationEmail(lead) {
+//   console.log("📧 Trying Mailtrap...");
+//   const mailtrapSent = await sendEmailViaMailtrap(lead);
+//   if (mailtrapSent) return { sent: true, provider: "Mailtrap" };
+
+//   console.log("📧 Trying Gmail fallback...");
+//   const gmailSent = await sendEmailViaGmail(lead);
+//   if (gmailSent) return { sent: true, provider: "Gmail" };
+
+//   console.log("📧 Trying Brevo fallback...");
+//   const brevoSent = await sendEmailViaBrevo(lead);
+//   if (brevoSent) return { sent: true, provider: "Brevo" };
+
+//   return { sent: false, provider: null };
+// }
+
+
 async function sendRegistrationEmail(lead) {
-  console.log("📧 Trying Mailtrap...");
+  console.log("📧 Trying Mailtrap API...");
   const mailtrapSent = await sendEmailViaMailtrap(lead);
   if (mailtrapSent) return { sent: true, provider: "Mailtrap" };
 
@@ -9807,10 +9839,7 @@ async function sendRegistrationEmail(lead) {
   const gmailSent = await sendEmailViaGmail(lead);
   if (gmailSent) return { sent: true, provider: "Gmail" };
 
-  console.log("📧 Trying Brevo fallback...");
-  const brevoSent = await sendEmailViaBrevo(lead);
-  if (brevoSent) return { sent: true, provider: "Brevo" };
-
+  console.log("❌ All email providers failed");
   return { sent: false, provider: null };
 }
 
