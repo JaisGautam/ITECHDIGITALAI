@@ -9638,27 +9638,59 @@ function createRegistrationEmailHtml(lead) {
 // MAILTRAP EMAIL
 // ============================================================
 
-async function sendEmailViaMailtrap(lead) {
-  if (!mailtrapTransporter) return false;
+// async function sendEmailViaMailtrap(lead) {
+//   if (!mailtrapTransporter) return false;
+
+//   try {
+//     const mailOptions = {
+//       from: `"I TECH AI" <${MAIL_FROM}>`,
+//       to: lead.email,
+//       subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
+//       html: createRegistrationEmailHtml(lead),
+//       text: `Hi ${lead.name},\n\nYour registration for the I TECH AI webinar is confirmed.\n\nDate: 8th, 9th & 10th September 2026\nTime: 8:00 PM – 9:00 PM\nPlatform: Google Meet\n\nJoin Google Meet: ${WEBINAR_MEETING_LINK}\n\nJoin WhatsApp Channel: ${WHATSAPP_COMMUNITY_LINK}\n\nRegards,\nI TECH AI Team`,
+//     };
+
+//     const result = await mailtrapTransporter.sendMail(mailOptions);
+//     console.log("✅ Email sent via Mailtrap to:", lead.email);
+//     console.log("   Message ID:", result.messageId);
+//     return true;
+//   } catch (error) {
+//     console.error("❌ Mailtrap email error:", error.message);
+//     if (error.response) {
+//       console.error("   SMTP response:", error.response);
+//     }
+//     return false;
+//   }
+// }
+
+async function sendEmailViaBrevo(lead) {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
+    console.log("⚠️ BREVO_API_KEY missing");
+    return false;
+  }
 
   try {
-    const mailOptions = {
-      from: `"I TECH AI" <${MAIL_FROM}>`,
-      to: lead.email,
-      subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
-      html: createRegistrationEmailHtml(lead),
-      text: `Hi ${lead.name},\n\nYour registration for the I TECH AI webinar is confirmed.\n\nDate: 8th, 9th & 10th September 2026\nTime: 8:00 PM – 9:00 PM\nPlatform: Google Meet\n\nJoin Google Meet: ${WEBINAR_MEETING_LINK}\n\nJoin WhatsApp Channel: ${WHATSAPP_COMMUNITY_LINK}\n\nRegards,\nI TECH AI Team`,
-    };
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: { name: "I TECH AI", email: MAIL_FROM },
+        to: [{ email: lead.email, name: lead.name }],
+        subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
+        htmlContent: createRegistrationEmailHtml(lead),
+      },
+      {
+        headers: {
+          "api-key": apiKey,               // ← lowercase, Bearer nahi
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const result = await mailtrapTransporter.sendMail(mailOptions);
-    console.log("✅ Email sent via Mailtrap to:", lead.email);
-    console.log("   Message ID:", result.messageId);
+    console.log("✅ Email sent via Brevo API to:", lead.email);
     return true;
   } catch (error) {
-    console.error("❌ Mailtrap email error:", error.message);
-    if (error.response) {
-      console.error("   SMTP response:", error.response);
-    }
+    console.error("❌ Brevo API error:", error.response?.data || error.message);
     return false;
   }
 }
@@ -9831,16 +9863,35 @@ async function sendEmailViaMailtrap(lead) {
 
 
 async function sendRegistrationEmail(lead) {
-  console.log("📧 Trying Mailtrap API...");
-  const mailtrapSent = await sendEmailViaMailtrap(lead);
-  if (mailtrapSent) return { sent: true, provider: "Mailtrap" };
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
+    console.log("⚠️ BREVO_API_KEY missing");
+    return { sent: false, provider: null };
+  }
 
-  console.log("📧 Trying Gmail fallback...");
-  const gmailSent = await sendEmailViaGmail(lead);
-  if (gmailSent) return { sent: true, provider: "Gmail" };
+  try {
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: { name: "I TECH AI", email: MAIL_FROM }, // MAIL_FROM wahi email hona chahiye jo Brevo mein verify kiya
+        to: [{ email: lead.email, name: lead.name }],
+        subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
+        htmlContent: createRegistrationEmailHtml(lead),
+      },
+      {
+        headers: {
+          "api-key": apiKey, // Bearer nahi lagana, sirf key
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-  console.log("❌ All email providers failed");
-  return { sent: false, provider: null };
+    console.log("✅ Email sent via Brevo API to:", lead.email);
+    return { sent: true, provider: "Brevo" };
+  } catch (error) {
+    console.error("❌ Brevo API error:", error.response?.data || error.message);
+    return { sent: false, provider: null };
+  }
 }
 
 // ============================================================
