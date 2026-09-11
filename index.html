@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title> Ravento AI | Start Your Online Business</title>
+<link rel="shortcut icon" href="./Raventoai.logo.png" type="image/x-icon">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
@@ -16,7 +17,7 @@ body{background:#fff7ed;color:#333;overflow-x:hidden}
 .logo{font-weight:800;font-size:25px;color:#d35400;margin-bottom:22px}
 .hero h1{font-size:clamp(30px,5vw,52px);color:#d35400;font-weight:800;line-height:1.18;margin:10px auto 16px;max-width:950px}
 .hero h1 span{color:#222}
-/* #divine{font-size:clamp(25px,4vw,35px );color:#d35400;font-weight:800;margin:55px 0 25px 800px ;line-height:1.25 ; display: ruby-text ; } */
+#divine{font-size:clamp(25px,4vw,35px );color:#d35400;font-weight:800;margin:55px 0 25px 700px ;line-height:1.25 ; display: ruby-text ; }
 .hero .subtitle{font-size:clamp(16px,2vw,21px);color:#555;max-width:850px;margin:0 auto 24px;line-height:1.7}
 .hero .highlight{display:inline-block;background:#fff;border:2px solid #ff9900;border-radius:40px;padding:9px 20px;font-weight:800;color:#222;margin-bottom:18px}
 .cta-button{display:block;width:100%;max-width:700px;margin:20px auto;padding:17px 25px;border:0;border-radius:10px;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;font-size:20px;font-weight:800;text-decoration:none;cursor:pointer;box-shadow:0 5px 18px rgba(255,140,0,.35);transition:.25s}
@@ -185,6 +186,48 @@ body{background:#fff7ed;color:#333;overflow-x:hidden}
         font-size: 18px;
     }
 }
+/* Container ko flex banayein taki logo left me rahe */
+.container {
+    display: flex;
+    justify-content: flex-start;  /* Left align */
+    align-items: center;
+    padding: 20px 40px;
+}
+
+/* Logo wrapper */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;                    /* Image aur text ke beech space */
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);       /* Hover par thoda bada */
+}
+
+/* Logo image */
+.logo img {
+    width: 36px;                  /* Chhota size */
+    height: 36px;
+    object-fit: contain;
+    border-radius: 8px;           /* Thoda rounded corners */
+}
+
+/* Logo text */
+.logo span {
+    background: linear-gradient(90deg, #00d4ff, #7b2ff7);  /* Gradient text */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+}
 footer{margin-top:55px;background:#222;color:#aaa;padding:25px;font-size:12px}
 @media(max-width:850px){.info-grid,.card-container,.feature-grid,.steps{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.info-grid,.card-container,.feature-grid,.steps,.success-actions{grid-template-columns:1fr}.hero{padding-top:28px}.mentor-info{text-align:center}.form-section{margin-left:10px;margin-right:10px}.business-section{padding:25px 16px}}
@@ -195,7 +238,13 @@ footer{margin-top:55px;background:#222;color:#aaa;padding:25px;font-size:12px}
 
 <section class="hero">
 <div class="container">
-<div class="logo">⚡  RAVENTO AI</div>
+<!-- <div class="logo">⚡  RAVENTO AI</div> -->
+
+<div class="logo">
+    <img src="./Raventoai.logo.png" alt="Ravento AI" class="logo-img">
+    <h1>RAVENTO AI</h1>
+</div>
+
 <DIV class="logo" id="logo"> DIVINE PARADISE </DIV>
 <div class="highlight">🚀 START YOUR ONLINE BUSINESS WITH ₹0 INVESTMENT*</div>
 <h1>NO INVENTORY • NO OFFICE • NO PACKAGING • NO STAFF</h1>
