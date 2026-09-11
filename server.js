@@ -7705,208 +7705,6 @@
 // // // //   dns.setDefaultResultOrder("ipv4first");
 // // // // } catch (error) {}
 
-// // // // const app = express();
-// // // // app.use(cors({ origin: "*" }));
-// // // // app.use(express.json());
-// // // // app.use(express.urlencoded({ extended: true }));
-// // // // app.use(express.static(__dirname));
-
-// // // // const PORT = process.env.PORT || 5000;
-// // // // const MONGO_URI = process.env.MONGO_URI;
-// // // // const EMAIL_USER = process.env.EMAIL_USER;
-// // // // const EMAIL_PASS = process.env.EMAIL_PASS;
-
-// // // // const WEBINAR_MEETING_LINK = process.env.GOOGLE_MEET_LINK || "https://meet.google.com/uca-deoe-vnh?hs=1";
-// // // // const WHATSAPP_COMMUNITY_LINK = "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
-
-// // // // // ✅ FIX 1: Agar index.html nahi hai toh index1.html try karo
-// // // // app.get("/", (req, res) => {
-// // // //   const files = ['index.html', 'index1.html', 'main.html'];
-// // // //   let sent = false;
-// // // //   for (const file of files) {
-// // // //     try {
-// // // //       if (require('fs').existsSync(path.join(__dirname, file))) {
-// // // //         res.sendFile(path.join(__dirname, file));
-// // // //         sent = true;
-// // // //         break;
-// // // //       }
-// // // //     } catch(e) {}
-// // // //   }
-// // // //   if (!sent) {
-// // // //     res.send("<h1>🚀 Server is running! Upload index.html file.</h1>");
-// // // //   }
-// // // // });
-
-// // // // // MongoDB Connection
-// // // // mongoose.connect(MONGO_URI)
-// // // //   .then(() => console.log("🟢 MongoDB connected"))
-// // // //   .catch(err => console.error("❌ MongoDB error:", err.message));
-
-// // // // // Lead Schema
-// // // // const leadSchema = new mongoose.Schema({
-// // // //   name: { type: String, required: true, trim: true },
-// // // //   phone: { type: String, required: true, unique: true, trim: true },
-// // // //   email: { type: String, required: true, lowercase: true, trim: true },
-// // // //   state: { type: String, required: true, trim: true },
-// // // //   communityJoined: { type: Boolean, default: false },
-// // // //   communityJoinDate: { type: Date, default: null },
-// // // //   zoomEmailSent: { type: Boolean, default: false },
-// // // //   zoomReminderSent: { type: Boolean, default: false },
-// // // //   registrationDate: { type: Date, default: Date.now },
-// // // // }, { timestamps: true });
-
-// // // // const Lead = mongoose.model("Lead", leadSchema);
-
-// // // // // ✅ FIX 2: Email Transporter with better timeout
-// // // // let transporter = null;
-// // // // async function createGmailTransporter() {
-// // // //   if (!EMAIL_USER || !EMAIL_PASS) return null;
-// // // //   try {
-// // // //     const addresses = await new Promise((resolve, reject) => {
-// // // //       dns.resolve4("smtp.gmail.com", (error, result) => {
-// // // //         error ? reject(error) : resolve(result);
-// // // //       });
-// // // //     });
-// // // //     if (!addresses || addresses.length === 0) return null;
-// // // //     const smtpIP = addresses[0];
-// // // //     console.log("🎯 Using Gmail IPv4:", smtpIP);
-    
-// // // //     const smtpTransporter = nodemailer.createTransport({
-// // // //       host: smtpIP,
-// // // //       port: 587,
-// // // //       secure: false,
-// // // //       family: 4,
-// // // //       auth: { user: EMAIL_USER, pass: EMAIL_PASS },
-// // // //       connectionTimeout: 60000,
-// // // //       greetingTimeout: 60000,
-// // // //       socketTimeout: 60000,
-// // // //       tls: { 
-// // // //         servername: "smtp.gmail.com", 
-// // // //         rejectUnauthorized: false 
-// // // //       },
-// // // //     });
-// // // //     return smtpTransporter;
-// // // //   } catch (error) {
-// // // //     console.error("❌ Email transporter error:", error.message);
-// // // //     return null;
-// // // //   }
-// // // // }
-
-// // // // // Email send function with fallback
-// // // // async function sendRegistrationEmail(lead) {
-// // // //   try {
-// // // //     if (!transporter) {
-// // // //       console.log("⚠️ Transporter not ready, trying to create...");
-// // // //       transporter = await createGmailTransporter();
-// // // //       if (!transporter) return false;
-// // // //     }
-    
-// // // //     const mailOptions = {
-// // // //       from: `"I TECH AI" <${EMAIL_USER}>`,
-// // // //       to: lead.email,
-// // // //       subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
-// // // //       html: `<h1>Hi ${lead.name}</h1><p>Join webinar: <a href="${WEBINAR_MEETING_LINK}">Click Here</a></p>`,
-// // // //     };
-    
-// // // //     await transporter.sendMail(mailOptions);
-// // // //     console.log("✅ Email sent to:", lead.email);
-// // // //     return true;
-// // // //   } catch (error) {
-// // // //     console.error("❌ Email error:", error.message);
-// // // //     return false;
-// // // //   }
-// // // // }
-
-// // // // // ✅ REGISTRATION API - WITH zoomLink
-// // // // app.post("/api/leads", async (req, res) => {
-// // // //   try {
-// // // //     const { name, phone, email, state, communityJoined } = req.body;
-    
-// // // //     if (!name || !phone || !email || !state) {
-// // // //       return res.status(400).json({ success: false, message: "All fields required" });
-// // // //     }
-    
-// // // //     let normalizedPhone = String(phone).replace(/\D/g, "");
-// // // //     if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) {
-// // // //       normalizedPhone = normalizedPhone.substring(2);
-// // // //     }
-// // // //     if (normalizedPhone.length !== 10) {
-// // // //       return res.status(400).json({ success: false, message: "Invalid phone number" });
-// // // //     }
-    
-// // // //     const existingLead = await Lead.findOne({ phone: normalizedPhone });
-// // // //     if (existingLead) {
-// // // //       return res.status(409).json({ success: false, message: "Phone already registered" });
-// // // //     }
-    
-// // // //     const lead = await Lead.create({
-// // // //       name: String(name).trim(),
-// // // //       phone: normalizedPhone,
-// // // //       email: String(email).trim().toLowerCase(),
-// // // //       state: String(state).trim(),
-// // // //       communityJoined: true,
-// // // //       communityJoinDate: new Date(),
-// // // //     });
-    
-// // // //     console.log("✅ Lead saved:", lead._id);
-    
-// // // //     // Send email in background (don't wait for it)
-// // // //     sendRegistrationEmail(lead).catch(err => console.error("Email failed:", err.message));
-    
-// // // //     // ✅ IMPORTANT: Return zoomLink
-// // // //     return res.status(201).json({
-// // // //       success: true,
-// // // //       message: "Registration successful!",
-// // // //       leadId: lead._id,
-// // // //       zoomLink: WEBINAR_MEETING_LINK,
-// // // //       whatsappCommunityLink: WHATSAPP_COMMUNITY_LINK,
-// // // //     });
-    
-// // // //   } catch (error) {
-// // // //     console.error("❌ Registration error:", error.message);
-// // // //     if (error.code === 11000) {
-// // // //       return res.status(409).json({ success: false, message: "Phone already registered" });
-// // // //     }
-// // // //     return res.status(500).json({ success: false, message: "Server error" });
-// // // //   }
-// // // // });
-
-// // // // // Health check
-// // // // app.get("/health", (req, res) => {
-// // // //   res.json({
-// // // //     success: true,
-// // // //     message: "Server is running",
-// // // //     mongodb: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
-// // // //     email: transporter ? "Configured" : "Pending",
-// // // //     zoomLink: WEBINAR_MEETING_LINK,
-// // // //   });
-// // // // });
-
-// // // // // Start server
-// // // // app.listen(PORT, async () => {
-// // // //   console.log(`🚀 Server running on port ${PORT}`);
-// // // //   transporter = await createGmailTransporter();
-// // // //   if (transporter) {
-// // // //     console.log("✅ Email transporter ready");
-// // // //   } else {
-// // // //     console.log("⚠️ Email transporter not ready (will retry on demand)");
-// // // //   }
-// // // // });
-
-
-// // // const express = require("express");
-// // // const path = require("path");
-// // // const mongoose = require("mongoose");
-// // // const cors = require("cors");
-// // // const nodemailer = require("nodemailer");
-// // // const dns = require("dns");
-// // // const SibApiV3Sdk = require("sib-api-v3-sdk");  // ✅ NEW
-// // // require("dotenv").config();
-
-// // // try {
-// // //   dns.setDefaultResultOrder("ipv4first");
-// // // } catch (error) {}
-
 // // // const app = express();
 // // // app.use(cors({ origin: "*" }));
 // // // app.use(express.json());
@@ -7917,94 +7715,9 @@
 // // // const MONGO_URI = process.env.MONGO_URI;
 // // // const EMAIL_USER = process.env.EMAIL_USER;
 // // // const EMAIL_PASS = process.env.EMAIL_PASS;
-// // // const BREVO_API_KEY = process.env.BREVO_API_KEY;  // ✅ NEW
 
 // // // const WEBINAR_MEETING_LINK = process.env.GOOGLE_MEET_LINK || "https://meet.google.com/uca-deoe-vnh?hs=1";
 // // // const WHATSAPP_COMMUNITY_LINK = "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
-
-// // // // ✅ NEW: Brevo Setup
-// // // let brevoClient = null;
-// // // function initBrevo() {
-// // //   if (!BREVO_API_KEY) {
-// // //     console.log("⚠️ BREVO_API_KEY missing - Brevo fallback disabled");
-// // //     return null;
-// // //   }
-// // //   try {
-// // //     const defaultClient = SibApiV3Sdk.ApiClient.instance;
-// // //     const apiKey = defaultClient.authentications["api-key"];
-// // //     apiKey.apiKey = BREVO_API_KEY;
-// // //     const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-// // //     console.log("✅ Brevo API initialized");
-// // //     return apiInstance;
-// // //   } catch (error) {
-// // //     console.error("❌ Brevo init error:", error.message);
-// // //     return null;
-// // //   }
-// // // }
-// // // brevoClient = initBrevo();
-
-// // // // ✅ NEW: Brevo Email Function
-// // // async function sendEmailViaBrevo(lead) {
-// // //   if (!brevoClient) return false;
-  
-// // //   try {
-// // //     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-    
-// // //     sendSmtpEmail.sender = {
-// // //       name: "I TECH AI",
-// // //       email: EMAIL_USER,
-// // //     };
-    
-// // //     sendSmtpEmail.to = [{
-// // //       email: lead.email,
-// // //       name: lead.name,
-// // //     }];
-    
-// // //     sendSmtpEmail.subject = "🎉 Your I TECH AI Webinar Registration is Confirmed";
-    
-// // //     sendSmtpEmail.htmlContent = `
-// // //       <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:25px;">
-// // //         <h2 style="color:#d35400;">🎉 Registration Confirmed</h2>
-// // //         <p>Hi <strong>${lead.name}</strong>,</p>
-// // //         <p>Your registration for the I TECH AI webinar is confirmed.</p>
-        
-// // //         <div style="background:#fff3e2;padding:15px;border-radius:10px;margin:20px 0;">
-// // //           <p><strong>📅 Date:</strong> 8th, 9th & 10th September 2026</p>
-// // //           <p><strong>🕗 Time:</strong> 8:00 PM – 9:00 PM</p>
-// // //           <p><strong>💻 Platform:</strong> Google Meet</p>
-// // //         </div>
-        
-// // //         <p style="text-align:center;">
-// // //           <a href="${WEBINAR_MEETING_LINK}" 
-// // //              style="display:inline-block;background:#2D8CFF;color:#fff;padding:14px 25px;text-decoration:none;border-radius:8px;font-weight:bold;">
-// // //             🎥 JOIN GOOGLE MEET
-// // //           </a>
-// // //         </p>
-        
-// // //         <p style="text-align:center;">
-// // //           <a href="${WHATSAPP_COMMUNITY_LINK}" 
-// // //              style="display:inline-block;background:#25D366;color:#fff;padding:14px 25px;text-decoration:none;border-radius:8px;font-weight:bold;">
-// // //             💬 JOIN WHATSAPP CHANNEL
-// // //           </a>
-// // //         </p>
-        
-// // //         <p>Regards,<br><strong>I TECH AI Team</strong></p>
-// // //       </div>
-// // //     `;
-    
-// // //     const result = await brevoClient.sendTransacEmail(sendSmtpEmail);
-// // //     console.log("✅ Email sent via Brevo to:", lead.email);
-// // //     console.log("   Message ID:", result.messageId);
-// // //     return true;
-    
-// // //   } catch (error) {
-// // //     console.error("❌ Brevo email error:", error.message);
-// // //     if (error.response?.body) {
-// // //       console.error("   Details:", JSON.stringify(error.response.body));
-// // //     }
-// // //     return false;
-// // //   }
-// // // }
 
 // // // // ✅ FIX 1: Agar index.html nahi hai toh index1.html try karo
 // // // app.get("/", (req, res) => {
@@ -8064,9 +7777,9 @@
 // // //       secure: false,
 // // //       family: 4,
 // // //       auth: { user: EMAIL_USER, pass: EMAIL_PASS },
-// // //       connectionTimeout: 15000,  // ✅ Reduced from 60000 to 15000
-// // //       greetingTimeout: 15000,    // ✅ Reduced
-// // //       socketTimeout: 15000,      // ✅ Reduced
+// // //       connectionTimeout: 60000,
+// // //       greetingTimeout: 60000,
+// // //       socketTimeout: 60000,
 // // //       tls: { 
 // // //         servername: "smtp.gmail.com", 
 // // //         rejectUnauthorized: false 
@@ -8079,77 +7792,29 @@
 // // //   }
 // // // }
 
-// // // // ✅ UPDATED: Gmail try karo, fail hone pe Brevo use karo
+// // // // Email send function with fallback
 // // // async function sendRegistrationEmail(lead) {
-// // //   // ============================================
-// // //   // STEP 1: Try Gmail first (Local pe kaam karega)
-// // //   // ============================================
 // // //   try {
 // // //     if (!transporter) {
-// // //       console.log("⚠️ Gmail transporter not ready, trying to create...");
+// // //       console.log("⚠️ Transporter not ready, trying to create...");
 // // //       transporter = await createGmailTransporter();
+// // //       if (!transporter) return false;
 // // //     }
     
-// // //     if (transporter) {
-// // //       const mailOptions = {
-// // //         from: `"I TECH AI" <${EMAIL_USER}>`,
-// // //         to: lead.email,
-// // //         subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
-// // //         html: `
-// // //           <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:25px;">
-// // //             <h2 style="color:#d35400;">🎉 Registration Confirmed</h2>
-// // //             <p>Hi <strong>${lead.name}</strong>,</p>
-// // //             <p>Your registration for the I TECH AI webinar is confirmed.</p>
-            
-// // //             <div style="background:#fff3e2;padding:15px;border-radius:10px;margin:20px 0;">
-// // //               <p><strong>📅 Date:</strong> 8th, 9th & 10th September 2026</p>
-// // //               <p><strong>🕗 Time:</strong> 8:00 PM – 9:00 PM</p>
-// // //               <p><strong>💻 Platform:</strong> Google Meet</p>
-// // //             </div>
-            
-// // //             <p style="text-align:center;">
-// // //               <a href="${WEBINAR_MEETING_LINK}" 
-// // //                  style="display:inline-block;background:#2D8CFF;color:#fff;padding:14px 25px;text-decoration:none;border-radius:8px;font-weight:bold;">
-// // //                 🎥 JOIN GOOGLE MEET
-// // //               </a>
-// // //             </p>
-            
-// // //             <p style="text-align:center;">
-// // //               <a href="${WHATSAPP_COMMUNITY_LINK}" 
-// // //                  style="display:inline-block;background:#25D366;color:#fff;padding:14px 25px;text-decoration:none;border-radius:8px;font-weight:bold;">
-// // //                 💬 JOIN WHATSAPP CHANNEL
-// // //               </a>
-// // //             </p>
-            
-// // //             <p>Regards,<br><strong>I TECH AI Team</strong></p>
-// // //           </div>
-// // //         `,
-// // //       };
-      
-// // //       await transporter.sendMail(mailOptions);
-// // //       console.log("✅ Email sent via Gmail to:", lead.email);
-// // //       return true;
-// // //     }
-// // //   } catch (gmailError) {
-// // //     console.log("⚠️ Gmail failed:", gmailError.message);
-// // //     console.log("🔄 Switching to Brevo fallback...");
+// // //     const mailOptions = {
+// // //       from: `"I TECH AI" <${EMAIL_USER}>`,
+// // //       to: lead.email,
+// // //       subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
+// // //       html: `<h1>Hi ${lead.name}</h1><p>Join webinar: <a href="${WEBINAR_MEETING_LINK}">Click Here</a></p>`,
+// // //     };
     
-// // //     // Transporter ko null karo taaki next time fresh try kare
-// // //     transporter = null;
-// // //   }
-  
-// // //   // ============================================
-// // //   // STEP 2: Fallback to Brevo (Render pe kaam karega)
-// // //   // ============================================
-// // //   console.log("📧 Trying Brevo...");
-// // //   const brevoSent = await sendEmailViaBrevo(lead);
-  
-// // //   if (brevoSent) {
+// // //     await transporter.sendMail(mailOptions);
+// // //     console.log("✅ Email sent to:", lead.email);
 // // //     return true;
+// // //   } catch (error) {
+// // //     console.error("❌ Email error:", error.message);
+// // //     return false;
 // // //   }
-  
-// // //   console.error("❌ Both Gmail and Brevo failed for:", lead.email);
-// // //   return false;
 // // // }
 
 // // // // ✅ REGISTRATION API - WITH zoomLink
@@ -8185,23 +7850,16 @@
     
 // // //     console.log("✅ Lead saved:", lead._id);
     
-// // //     // ✅ UPDATED: Await karo taaki confirm ho
-// // //     const emailSent = await sendRegistrationEmail(lead);
-    
-// // //     if (emailSent) {
-// // //       await Lead.findByIdAndUpdate(lead._id, { zoomEmailSent: true });
-// // //     }
+// // //     // Send email in background (don't wait for it)
+// // //     sendRegistrationEmail(lead).catch(err => console.error("Email failed:", err.message));
     
 // // //     // ✅ IMPORTANT: Return zoomLink
 // // //     return res.status(201).json({
 // // //       success: true,
-// // //       message: emailSent 
-// // //         ? "Registration successful! Check your email."
-// // //         : "Registration successful! Use links below.",
+// // //       message: "Registration successful!",
 // // //       leadId: lead._id,
 // // //       zoomLink: WEBINAR_MEETING_LINK,
 // // //       whatsappCommunityLink: WHATSAPP_COMMUNITY_LINK,
-// // //       emailSent: emailSent,
 // // //     });
     
 // // //   } catch (error) {
@@ -8219,35 +7877,9 @@
 // // //     success: true,
 // // //     message: "Server is running",
 // // //     mongodb: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
-// // //     email: {
-// // //       gmail: transporter ? "Ready" : "Not Ready",
-// // //       brevo: brevoClient ? "Ready" : "Not Configured",
-// // //       activeProvider: transporter ? "Gmail" : (brevoClient ? "Brevo" : "None"),
-// // //     },
+// // //     email: transporter ? "Configured" : "Pending",
 // // //     zoomLink: WEBINAR_MEETING_LINK,
 // // //   });
-// // // });
-
-// // // // ✅ NEW: Test Email Endpoint
-// // // app.post("/api/test-email", async (req, res) => {
-// // //   try {
-// // //     const { email } = req.body;
-    
-// // //     if (!email) {
-// // //       return res.status(400).json({ success: false, message: "Email required" });
-// // //     }
-    
-// // //     const testLead = { name: "Test User", email };
-// // //     const sent = await sendRegistrationEmail(testLead);
-    
-// // //     return res.json({
-// // //       success: sent,
-// // //       message: sent ? "Test email sent!" : "Test email failed",
-// // //     });
-    
-// // //   } catch (error) {
-// // //     return res.status(500).json({ success: false, message: error.message });
-// // //   }
 // // // });
 
 // // // // Start server
@@ -8262,1138 +7894,372 @@
 // // // });
 
 
-const express = require("express");
-const path = require("path");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const nodemailer = require("nodemailer");
-const dns = require("dns");
-const SibApiV3Sdk = require("sib-api-v3-sdk");
-require("dotenv").config();
-
-try {
-  dns.setDefaultResultOrder("ipv4first");
-} catch (error) {
-  // Ignore if Node.js does not support this setting.
-}
-
-const app = express();
-
-// ============================================================
-// APP CONFIGURATION
-// ============================================================
-
-require('dotenv').config();
-app.use(cors({ origin: "*" }));
-app.use(express.json({ limit: "1mb" }));
-app.use(express.urlencoded({ extended: true, limit: "1mb" }));
-app.use(express.static(__dirname ,));
-
-const PORT = Number(process.env.PORT) || 5000;
-
-const MONGO_URI = process.env.MONGO_URI;
-
-const EMAIL_USER = process.env.EMAIL_USER;
-const EMAIL_PASS = process.env.EMAIL_PASS;
-
-const BREVO_API_KEY = process.env.BREVO_API_KEY;
-
-// Mailtrap production SMTP configuration
-const MAILTRAP_HOST = process.env.MAILTRAP_HOST;
-const MAILTRAP_PORT = Number(process.env.MAILTRAP_PORT) || 587;
-const MAILTRAP_USER = process.env.MAILTRAP_USER;
-const MAILTRAP_PASS = process.env.MAILTRAP_PASS;
-
-// Sender must belong to your verified Mailtrap domain.
-const MAIL_FROM =
-  process.env.MAIL_FROM ||
-  process.env.EMAIL_USER ||
-  "noreply@example.com";
-
-const WEBINAR_MEETING_LINK =
-  process.env.GOOGLE_MEET_LINK ||
-  "https://meet.google.com/uca-deoe-vnh?hs=1";
-
-const WHATSAPP_COMMUNITY_LINK =
-  "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
-
-// ============================================================
-// EMAIL PROVIDER STATE
-// ============================================================
-
-let mailtrapTransporter = null;
-let gmailTransporter = null;
-let brevoClient = null;
-
-// ============================================================
-// MAILTRAP
-// ============================================================
-
-function createMailtrapTransporter() {
-  if (!MAILTRAP_HOST || !MAILTRAP_USER || !MAILTRAP_PASS) {
-    console.log(
-      "⚠️ Mailtrap configuration missing - Mailtrap disabled"
-    );
-    return null;
-  }
-
-  try {
-    const transporterInstance = nodemailer.createTransport({
-      host: MAILTRAP_HOST,
-      port: MAILTRAP_PORT,
-      secure: MAILTRAP_PORT === 465,
-
-      auth: {
-        user: MAILTRAP_USER,
-        pass: MAILTRAP_PASS,
-      },
-
-      connectionTimeout: 15000,
-      greetingTimeout: 15000,
-      socketTimeout: 30000,
-
-      tls: {
-        minVersion: "TLSv1.2",
-        rejectUnauthorized: true,
-      },
-    });
-
-    console.log("✅ Mailtrap SMTP transporter configured");
-
-    return transporterInstance;
-  } catch (error) {
-    console.error(
-      "❌ Mailtrap transporter error:",
-      error.message
-    );
-
-    return null;
-  }
-}
-
-// ============================================================
-// GMAIL FALLBACK
-// ============================================================
-
-async function createGmailTransporter() {
-  if (!EMAIL_USER || !EMAIL_PASS) {
-    console.log(
-      "⚠️ Gmail credentials missing - Gmail fallback disabled"
-    );
-
-    return null;
-  }
-
-  try {
-    const addresses = await new Promise((resolve, reject) => {
-      dns.resolve4("smtp.gmail.com", (error, result) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-
-        resolve(result);
-      });
-    });
-
-    if (!addresses || addresses.length === 0) {
-      console.error("❌ Gmail IPv4 address not found");
-      return null;
-    }
-
-    const smtpIP = addresses[0];
-
-    console.log("🎯 Using Gmail IPv4:", smtpIP);
-
-    const smtpTransporter = nodemailer.createTransport({
-      host: smtpIP,
-      port: 587,
-      secure: false,
-      family: 4,
-
-      auth: {
-        user: EMAIL_USER,
-        pass: EMAIL_PASS,
-      },
-
-      connectionTimeout: 15000,
-      greetingTimeout: 15000,
-      socketTimeout: 30000,
-
-      tls: {
-        servername: "smtp.gmail.com",
-        rejectUnauthorized: true,
-      },
-    });
-
-    return smtpTransporter;
-  } catch (error) {
-    console.error(
-      "❌ Gmail transporter error:",
-      error.message
-    );
-
-    return null;
-  }
-}
-
-// ============================================================
-// BREVO
-// ============================================================
-
-function initBrevo() {
-  if (!BREVO_API_KEY) {
-    console.log(
-      "⚠️ BREVO_API_KEY missing - Brevo fallback disabled"
-    );
-
-    return null;
-  }
-
-  try {
-    const defaultClient =
-      SibApiV3Sdk.ApiClient.instance;
-
-    const apiKey =
-      defaultClient.authentications["api-key"];
-
-    apiKey.apiKey = BREVO_API_KEY;
-
-    const apiInstance =
-      new SibApiV3Sdk.TransactionalEmailsApi();
-
-    console.log("✅ Brevo API initialized");
-
-    return apiInstance;
-  } catch (error) {
-    console.error(
-      "❌ Brevo initialization error:",
-      error.message
-    );
-
-    return null;
-  }
-}
-
-// ============================================================
-// INITIALIZE EMAIL PROVIDERS
-// ============================================================
-
-mailtrapTransporter = createMailtrapTransporter();
-brevoClient = initBrevo();
-
-// ============================================================
-// EMAIL HTML
-// ============================================================
-
-function createRegistrationEmailHtml(lead) {
-  const safeName = String(lead.name || "User")
-    .replace(/[<>]/g, "");
-
-  return `
-    <div
-      style="
-        font-family: Arial, sans-serif;
-        max-width: 600px;
-        margin: auto;
-        padding: 25px;
-        color: #222;
-      "
-    >
-      <h2 style="color:#d35400;">
-        🎉 Registration Confirmed
-      </h2>
-
-      <p>
-        Hi <strong>${safeName}</strong>,
-      </p>
-
-      <p>
-        Your registration for the I TECH AI webinar
-        is confirmed.
-      </p>
-
-      <div
-        style="
-          background:#fff3e2;
-          padding:15px;
-          border-radius:10px;
-          margin:20px 0;
-        "
-      >
-        <p>
-          <strong>📅 Date:</strong>
-          8th, 9th & 10th September 2026
-        </p>
-
-        <p>
-          <strong>🕗 Time:</strong>
-          8:00 PM – 9:00 PM
-        </p>
-
-        <p>
-          <strong>💻 Platform:</strong>
-          Google Meet
-        </p>
-      </div>
-
-      <p style="text-align:center;">
-        <a
-          href="${WEBINAR_MEETING_LINK}"
-          style="
-            display:inline-block;
-            background:#2D8CFF;
-            color:#fff;
-            padding:14px 25px;
-            text-decoration:none;
-            border-radius:8px;
-            font-weight:bold;
-          "
-        >
-          🎥 JOIN GOOGLE MEET
-        </a>
-      </p>
-
-      <p style="text-align:center;">
-        <a
-          href="${WHATSAPP_COMMUNITY_LINK}"
-          style="
-            display:inline-block;
-            background:#25D366;
-            color:#fff;
-            padding:14px 25px;
-            text-decoration:none;
-            border-radius:8px;
-            font-weight:bold;
-          "
-        >
-          💬 JOIN WHATSAPP CHANNEL
-        </a>
-      </p>
-
-      <p>
-        Regards,<br>
-        <strong>I TECH AI Team</strong>
-      </p>
-    </div>
-  `;
-}
-
-// ============================================================
-// MAILTRAP EMAIL
-// ============================================================
-
-async function sendEmailViaMailtrap(lead) {
-  if (!mailtrapTransporter) {
-    return false;
-  }
-
-  try {
-    const mailOptions = {
-      from: `"I TECH AI" <${MAIL_FROM}>`,
-      to: lead.email,
-
-      subject:
-        "🎉 Your I TECH AI Webinar Registration is Confirmed",
-
-      html: createRegistrationEmailHtml(lead),
-
-      text:
-        `Hi ${lead.name},
-
-Your registration for the I TECH AI webinar is confirmed.
-
-Date: 8th, 9th & 10th September 2026
-Time: 8:00 PM – 9:00 PM
-Platform: Google Meet
-
-Join Google Meet:
-${WEBINAR_MEETING_LINK}
-
-Join WhatsApp Channel:
-${WHATSAPP_COMMUNITY_LINK}
-
-Regards,
-I TECH AI Team`,
-    };
-
-    const result =
-      await mailtrapTransporter.sendMail(mailOptions);
-
-    console.log(
-      "✅ Email sent via Mailtrap to:",
-      lead.email
-    );
-
-    console.log(
-      "   Message ID:",
-      result.messageId
-    );
-
-    return true;
-  } catch (error) {
-    console.error(
-      "❌ Mailtrap email error:",
-      error.message
-    );
-
-    if (error.response) {
-      console.error(
-        "   SMTP response:",
-        error.response
-      );
-    }
-
-    return false;
-  }
-}
-
-// ============================================================
-// GMAIL EMAIL
-// ============================================================
-
-async function sendEmailViaGmail(lead) {
-  try {
-    if (!gmailTransporter) {
-      console.log(
-        "⚠️ Gmail transporter not ready."
-      );
-
-      gmailTransporter =
-        await createGmailTransporter();
-    }
-
-    if (!gmailTransporter) {
-      return false;
-    }
-
-    const mailOptions = {
-      from: `"I TECH AI" <${EMAIL_USER}>`,
-      to: lead.email,
-
-      subject:
-        "🎉 Your I TECH AI Webinar Registration is Confirmed",
-
-      html: createRegistrationEmailHtml(lead),
-
-      text:
-        `Hi ${lead.name},
-
-Your registration for the I TECH AI webinar is confirmed.
-
-Date: 8th, 9th & 10th September 2026
-Time: 8:00 PM – 9:00 PM
-Platform: Google Meet
-
-Join Google Meet:
-${WEBINAR_MEETING_LINK}
-
-Join WhatsApp Channel:
-${WHATSAPP_COMMUNITY_LINK}
-
-Regards,
-I TECH AI Team`,
-    };
-
-    const result =
-      await gmailTransporter.sendMail(mailOptions);
-
-    console.log(
-      "✅ Email sent via Gmail to:",
-      lead.email
-    );
-
-    console.log(
-      "   Message ID:",
-      result.messageId
-    );
-
-    return true;
-  } catch (error) {
-    console.error(
-      "❌ Gmail email error:",
-      error.message
-    );
-
-    gmailTransporter = null;
-
-    return false;
-  }
-}
-
-// ============================================================
-// BREVO EMAIL
-// ============================================================
-
-async function sendEmailViaBrevo(lead) {
-  if (!brevoClient) {
-    return false;
-  }
-
-  try {
-    const sendSmtpEmail =
-      new SibApiV3Sdk.SendSmtpEmail();
-
-    sendSmtpEmail.sender = {
-      name: "I TECH AI",
-      email: MAIL_FROM,
-    };
-
-    sendSmtpEmail.to = [
-      {
-        email: lead.email,
-        name: lead.name,
-      },
-    ];
-
-    sendSmtpEmail.subject =
-      "🎉 Your I TECH AI Webinar Registration is Confirmed";
-
-    sendSmtpEmail.htmlContent =
-      createRegistrationEmailHtml(lead);
-
-    const result =
-      await brevoClient.sendTransacEmail(
-        sendSmtpEmail
-      );
-
-    console.log(
-      "✅ Email sent via Brevo to:",
-      lead.email
-    );
-
-    console.log(
-      "   Message ID:",
-      result.messageId
-    );
-
-    return true;
-  } catch (error) {
-    console.error(
-      "❌ Brevo email error:",
-      error.message
-    );
-
-    if (error.response?.body) {
-      console.error(
-        "   Details:",
-        JSON.stringify(error.response.body)
-      );
-    }
-
-    return false;
-  }
-}
-
-// ============================================================
-// EMAIL ORCHESTRATION
-// ============================================================
-
-async function sendRegistrationEmail(lead) {
-  // ----------------------------------------------------------
-  // PROVIDER 1: MAILTRAP
-  // ----------------------------------------------------------
-
-  console.log(
-    "📧 Trying Mailtrap..."
-  );
-
-  const mailtrapSent =
-    await sendEmailViaMailtrap(lead);
-
-  if (mailtrapSent) {
-    return {
-      sent: true,
-      provider: "Mailtrap",
-    };
-  }
-
-  console.log(
-    "⚠️ Mailtrap failed."
-  );
-
-  // ----------------------------------------------------------
-  // PROVIDER 2: GMAIL FALLBACK
-  // ----------------------------------------------------------
-
-  console.log(
-    "📧 Trying Gmail fallback..."
-  );
-
-  const gmailSent =
-    await sendEmailViaGmail(lead);
-
-  if (gmailSent) {
-    return {
-      sent: true,
-      provider: "Gmail",
-    };
-  }
-
-  console.log(
-    "⚠️ Gmail failed."
-  );
-
-  // ----------------------------------------------------------
-  // PROVIDER 3: BREVO FALLBACK
-  // ----------------------------------------------------------
-
-  console.log(
-    "📧 Trying Brevo fallback..."
-  );
-
-  const brevoSent =
-    await sendEmailViaBrevo(lead);
-
-  if (brevoSent) {
-    return {
-      sent: true,
-      provider: "Brevo",
-    };
-  }
-
-  console.error(
-    "❌ All email providers failed for:",
-    lead.email
-  );
-
-  return {
-    sent: false,
-    provider: null,
-  };
-}
-
-// ============================================================
-// ROOT PAGE
-// ============================================================
-
-app.get("/", (req, res) => {
-  const files = [
-    "index.html",
-    "index1.html",
-    "main.html",
-  ];
-
-  for (const file of files) {
-    try {
-      const filePath =
-        path.join(__dirname, file);
-
-      if (require("fs").existsSync(filePath)) {
-        return res.sendFile(filePath);
-      }
-    } catch (error) {
-      console.error(
-        "File check error:",
-        error.message
-      );
-    }
-  }
-
-  return res.send(
-    "<h1>🚀 Server is running! Upload index.html file.</h1>"
-  );
-});
-
-// ============================================================
-// MONGODB
-// ============================================================
-
-if (!MONGO_URI) {
-  console.error(
-    "❌ MONGO_URI is missing."
-  );
-} else {
-  mongoose
-    .connect(MONGO_URI)
-    .then(() => {
-      console.log(
-        "🟢 MongoDB connected"
-      );
-    })
-    .catch((error) => {
-      console.error(
-        "❌ MongoDB error:",
-        error.message
-      );
-    });
-}
-
-// ============================================================
-// LEAD SCHEMA
-// ============================================================
-
-const leadSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    phone: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-    },
-
-    email: {
-      type: String,
-      required: true,
-      lowercase: true,
-      trim: true,
-    },
-
-    state: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    communityJoined: {
-      type: Boolean,
-      default: false,
-    },
-
-    communityJoinDate: {
-      type: Date,
-      default: null,
-    },
-
-    zoomEmailSent: {
-      type: Boolean,
-      default: false,
-    },
-
-    zoomReminderSent: {
-      type: Boolean,
-      default: false,
-    },
-
-    registrationDate: {
-      type: Date,
-      default: Date.now,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
-const Lead =
-  mongoose.models.Lead ||
-  mongoose.model("Lead", leadSchema);
-
-// ============================================================
-// REGISTRATION API
-// ============================================================
-
-app.post("/api/leads", async (req, res) => {
-  try {
-    const {
-      name,
-      phone,
-      email,
-      state,
-      communityJoined,
-    } = req.body;
-
-    // --------------------------------------------------------
-    // VALIDATION
-    // --------------------------------------------------------
-
-    if (
-      !name ||
-      !phone ||
-      !email ||
-      !state
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields required",
-      });
-    }
-
-    const normalizedName =
-      String(name).trim();
-
-    const normalizedEmail =
-      String(email)
-        .trim()
-        .toLowerCase();
-
-    const normalizedState =
-      String(state).trim();
-
-    let normalizedPhone =
-      String(phone).replace(/\D/g, "");
-
-    if (
-      normalizedPhone.startsWith("91") &&
-      normalizedPhone.length === 12
-    ) {
-      normalizedPhone =
-        normalizedPhone.substring(2);
-    }
-
-    if (normalizedPhone.length !== 10) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid phone number",
-      });
-    }
-
-    // Basic email validation
-    const emailRegex =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(normalizedEmail)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email address",
-      });
-    }
-
-    // --------------------------------------------------------
-    // DUPLICATE PHONE CHECK
-    // --------------------------------------------------------
-
-    const existingLead =
-      await Lead.findOne({
-        phone: normalizedPhone,
-      });
-
-    if (existingLead) {
-      return res.status(409).json({
-        success: false,
-        message: "Phone already registered",
-      });
-    }
-
-    // --------------------------------------------------------
-    // CREATE LEAD
-    // --------------------------------------------------------
-
-    const lead = await Lead.create({
-      name: normalizedName,
-      phone: normalizedPhone,
-      email: normalizedEmail,
-      state: normalizedState,
-
-      communityJoined:
-        communityJoined !== false,
-
-      communityJoinDate:
-        communityJoined !== false
-          ? new Date()
-          : null,
-    });
-
-    console.log(
-      "✅ Lead saved:",
-      lead._id.toString()
-    );
-
-    // --------------------------------------------------------
-    // SEND EMAIL
-    // --------------------------------------------------------
-
-    const emailResult =
-      await sendRegistrationEmail(lead);
-
-    if (emailResult.sent) {
-      await Lead.findByIdAndUpdate(
-        lead._id,
-        {
-          zoomEmailSent: true,
-        }
-      );
-    }
-
-    // --------------------------------------------------------
-    // RESPONSE
-    // --------------------------------------------------------
-
-    return res.status(201).json({
-      success: true,
-
-      message: emailResult.sent
-        ? "Registration successful! Check your email."
-        : "Registration successful! Use links below.",
-
-      leadId: lead._id,
-
-      zoomLink:
-        WEBINAR_MEETING_LINK,
-
-      whatsappCommunityLink:
-        WHATSAPP_COMMUNITY_LINK,
-
-      emailSent:
-        emailResult.sent,
-
-      emailProvider:
-        emailResult.provider,
-    });
-  } catch (error) {
-    console.error(
-      "❌ Registration error:",
-      error.message
-    );
-
-    if (error.code === 11000) {
-      return res.status(409).json({
-        success: false,
-        message: "Phone already registered",
-      });
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
-  }
-});
-
-// ============================================================
-// HEALTH CHECK
-// ============================================================
-
-app.get("/health", (req, res) => {
-  res.json({
-    success: true,
-
-    message:
-      "Server is running",
-
-    mongodb:
-      mongoose.connection.readyState === 1
-        ? "Connected"
-        : "Disconnected",
-
-    email: {
-      mailtrap:
-        mailtrapTransporter
-          ? "Configured"
-          : "Not Configured",
-
-      gmail:
-        gmailTransporter
-          ? "Ready"
-          : "Not Ready",
-
-      brevo:
-        brevoClient
-          ? "Configured"
-          : "Not Configured",
-
-      primaryProvider:
-        mailtrapTransporter
-          ? "Mailtrap"
-          : "None",
-    },
-
-    zoomLink:
-      WEBINAR_MEETING_LINK,
-  });
-});
-
-// ============================================================
-// EMAIL TEST ENDPOINT
-// ============================================================
-
-app.post("/api/test-email", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email required",
-      });
-    }
-
-    const emailRegex =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(String(email))) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email address",
-      });
-    }
-
-    const testLead = {
-      name: "Test User",
-      email: String(email).trim().toLowerCase(),
-    };
-
-    const result =
-      await sendRegistrationEmail(
-        testLead
-      );
-
-    return res.json({
-      success: result.sent,
-
-      message: result.sent
-        ? "Test email sent successfully!"
-        : "Test email failed.",
-
-      provider:
-        result.provider,
-    });
-  } catch (error) {
-    console.error(
-      "❌ Test email error:",
-      error.message
-    );
-
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-});
-
-// ============================================================
-// START SERVER
-// ============================================================
-
+// // const express = require("express");
+// // const path = require("path");
+// // const mongoose = require("mongoose");
+// // const cors = require("cors");
+// // const nodemailer = require("nodemailer");
+// // const dns = require("dns");
+// // const SibApiV3Sdk = require("sib-api-v3-sdk");  // ✅ NEW
+// // require("dotenv").config();
+
+// // try {
+// //   dns.setDefaultResultOrder("ipv4first");
+// // } catch (error) {}
+
+// // const app = express();
+// // app.use(cors({ origin: "*" }));
+// // app.use(express.json());
+// // app.use(express.urlencoded({ extended: true }));
+// // app.use(express.static(__dirname));
+
+// // const PORT = process.env.PORT || 5000;
+// // const MONGO_URI = process.env.MONGO_URI;
+// // const EMAIL_USER = process.env.EMAIL_USER;
+// // const EMAIL_PASS = process.env.EMAIL_PASS;
+// // const BREVO_API_KEY = process.env.BREVO_API_KEY;  // ✅ NEW
+
+// // const WEBINAR_MEETING_LINK = process.env.GOOGLE_MEET_LINK || "https://meet.google.com/uca-deoe-vnh?hs=1";
+// // const WHATSAPP_COMMUNITY_LINK = "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
+
+// // // ✅ NEW: Brevo Setup
+// // let brevoClient = null;
+// // function initBrevo() {
+// //   if (!BREVO_API_KEY) {
+// //     console.log("⚠️ BREVO_API_KEY missing - Brevo fallback disabled");
+// //     return null;
+// //   }
+// //   try {
+// //     const defaultClient = SibApiV3Sdk.ApiClient.instance;
+// //     const apiKey = defaultClient.authentications["api-key"];
+// //     apiKey.apiKey = BREVO_API_KEY;
+// //     const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+// //     console.log("✅ Brevo API initialized");
+// //     return apiInstance;
+// //   } catch (error) {
+// //     console.error("❌ Brevo init error:", error.message);
+// //     return null;
+// //   }
+// // }
+// // brevoClient = initBrevo();
+
+// // // ✅ NEW: Brevo Email Function
+// // async function sendEmailViaBrevo(lead) {
+// //   if (!brevoClient) return false;
+  
+// //   try {
+// //     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    
+// //     sendSmtpEmail.sender = {
+// //       name: "I TECH AI",
+// //       email: EMAIL_USER,
+// //     };
+    
+// //     sendSmtpEmail.to = [{
+// //       email: lead.email,
+// //       name: lead.name,
+// //     }];
+    
+// //     sendSmtpEmail.subject = "🎉 Your I TECH AI Webinar Registration is Confirmed";
+    
+// //     sendSmtpEmail.htmlContent = `
+// //       <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:25px;">
+// //         <h2 style="color:#d35400;">🎉 Registration Confirmed</h2>
+// //         <p>Hi <strong>${lead.name}</strong>,</p>
+// //         <p>Your registration for the I TECH AI webinar is confirmed.</p>
+        
+// //         <div style="background:#fff3e2;padding:15px;border-radius:10px;margin:20px 0;">
+// //           <p><strong>📅 Date:</strong> 8th, 9th & 10th September 2026</p>
+// //           <p><strong>🕗 Time:</strong> 8:00 PM – 9:00 PM</p>
+// //           <p><strong>💻 Platform:</strong> Google Meet</p>
+// //         </div>
+        
+// //         <p style="text-align:center;">
+// //           <a href="${WEBINAR_MEETING_LINK}" 
+// //              style="display:inline-block;background:#2D8CFF;color:#fff;padding:14px 25px;text-decoration:none;border-radius:8px;font-weight:bold;">
+// //             🎥 JOIN GOOGLE MEET
+// //           </a>
+// //         </p>
+        
+// //         <p style="text-align:center;">
+// //           <a href="${WHATSAPP_COMMUNITY_LINK}" 
+// //              style="display:inline-block;background:#25D366;color:#fff;padding:14px 25px;text-decoration:none;border-radius:8px;font-weight:bold;">
+// //             💬 JOIN WHATSAPP CHANNEL
+// //           </a>
+// //         </p>
+        
+// //         <p>Regards,<br><strong>I TECH AI Team</strong></p>
+// //       </div>
+// //     `;
+    
+// //     const result = await brevoClient.sendTransacEmail(sendSmtpEmail);
+// //     console.log("✅ Email sent via Brevo to:", lead.email);
+// //     console.log("   Message ID:", result.messageId);
+// //     return true;
+    
+// //   } catch (error) {
+// //     console.error("❌ Brevo email error:", error.message);
+// //     if (error.response?.body) {
+// //       console.error("   Details:", JSON.stringify(error.response.body));
+// //     }
+// //     return false;
+// //   }
+// // }
+
+// // // ✅ FIX 1: Agar index.html nahi hai toh index1.html try karo
+// // app.get("/", (req, res) => {
+// //   const files = ['index.html', 'index1.html', 'main.html'];
+// //   let sent = false;
+// //   for (const file of files) {
+// //     try {
+// //       if (require('fs').existsSync(path.join(__dirname, file))) {
+// //         res.sendFile(path.join(__dirname, file));
+// //         sent = true;
+// //         break;
+// //       }
+// //     } catch(e) {}
+// //   }
+// //   if (!sent) {
+// //     res.send("<h1>🚀 Server is running! Upload index.html file.</h1>");
+// //   }
+// // });
+
+// // // MongoDB Connection
+// // mongoose.connect(MONGO_URI)
+// //   .then(() => console.log("🟢 MongoDB connected"))
+// //   .catch(err => console.error("❌ MongoDB error:", err.message));
+
+// // // Lead Schema
+// // const leadSchema = new mongoose.Schema({
+// //   name: { type: String, required: true, trim: true },
+// //   phone: { type: String, required: true, unique: true, trim: true },
+// //   email: { type: String, required: true, lowercase: true, trim: true },
+// //   state: { type: String, required: true, trim: true },
+// //   communityJoined: { type: Boolean, default: false },
+// //   communityJoinDate: { type: Date, default: null },
+// //   zoomEmailSent: { type: Boolean, default: false },
+// //   zoomReminderSent: { type: Boolean, default: false },
+// //   registrationDate: { type: Date, default: Date.now },
+// // }, { timestamps: true });
+
+// // const Lead = mongoose.model("Lead", leadSchema);
+
+// // // ✅ FIX 2: Email Transporter with better timeout
+// // let transporter = null;
+// // async function createGmailTransporter() {
+// //   if (!EMAIL_USER || !EMAIL_PASS) return null;
+// //   try {
+// //     const addresses = await new Promise((resolve, reject) => {
+// //       dns.resolve4("smtp.gmail.com", (error, result) => {
+// //         error ? reject(error) : resolve(result);
+// //       });
+// //     });
+// //     if (!addresses || addresses.length === 0) return null;
+// //     const smtpIP = addresses[0];
+// //     console.log("🎯 Using Gmail IPv4:", smtpIP);
+    
+// //     const smtpTransporter = nodemailer.createTransport({
+// //       host: smtpIP,
+// //       port: 587,
+// //       secure: false,
+// //       family: 4,
+// //       auth: { user: EMAIL_USER, pass: EMAIL_PASS },
+// //       connectionTimeout: 15000,  // ✅ Reduced from 60000 to 15000
+// //       greetingTimeout: 15000,    // ✅ Reduced
+// //       socketTimeout: 15000,      // ✅ Reduced
+// //       tls: { 
+// //         servername: "smtp.gmail.com", 
+// //         rejectUnauthorized: false 
+// //       },
+// //     });
+// //     return smtpTransporter;
+// //   } catch (error) {
+// //     console.error("❌ Email transporter error:", error.message);
+// //     return null;
+// //   }
+// // }
+
+// // // ✅ UPDATED: Gmail try karo, fail hone pe Brevo use karo
+// // async function sendRegistrationEmail(lead) {
+// //   // ============================================
+// //   // STEP 1: Try Gmail first (Local pe kaam karega)
+// //   // ============================================
+// //   try {
+// //     if (!transporter) {
+// //       console.log("⚠️ Gmail transporter not ready, trying to create...");
+// //       transporter = await createGmailTransporter();
+// //     }
+    
+// //     if (transporter) {
+// //       const mailOptions = {
+// //         from: `"I TECH AI" <${EMAIL_USER}>`,
+// //         to: lead.email,
+// //         subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
+// //         html: `
+// //           <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:25px;">
+// //             <h2 style="color:#d35400;">🎉 Registration Confirmed</h2>
+// //             <p>Hi <strong>${lead.name}</strong>,</p>
+// //             <p>Your registration for the I TECH AI webinar is confirmed.</p>
+            
+// //             <div style="background:#fff3e2;padding:15px;border-radius:10px;margin:20px 0;">
+// //               <p><strong>📅 Date:</strong> 8th, 9th & 10th September 2026</p>
+// //               <p><strong>🕗 Time:</strong> 8:00 PM – 9:00 PM</p>
+// //               <p><strong>💻 Platform:</strong> Google Meet</p>
+// //             </div>
+            
+// //             <p style="text-align:center;">
+// //               <a href="${WEBINAR_MEETING_LINK}" 
+// //                  style="display:inline-block;background:#2D8CFF;color:#fff;padding:14px 25px;text-decoration:none;border-radius:8px;font-weight:bold;">
+// //                 🎥 JOIN GOOGLE MEET
+// //               </a>
+// //             </p>
+            
+// //             <p style="text-align:center;">
+// //               <a href="${WHATSAPP_COMMUNITY_LINK}" 
+// //                  style="display:inline-block;background:#25D366;color:#fff;padding:14px 25px;text-decoration:none;border-radius:8px;font-weight:bold;">
+// //                 💬 JOIN WHATSAPP CHANNEL
+// //               </a>
+// //             </p>
+            
+// //             <p>Regards,<br><strong>I TECH AI Team</strong></p>
+// //           </div>
+// //         `,
+// //       };
+      
+// //       await transporter.sendMail(mailOptions);
+// //       console.log("✅ Email sent via Gmail to:", lead.email);
+// //       return true;
+// //     }
+// //   } catch (gmailError) {
+// //     console.log("⚠️ Gmail failed:", gmailError.message);
+// //     console.log("🔄 Switching to Brevo fallback...");
+    
+// //     // Transporter ko null karo taaki next time fresh try kare
+// //     transporter = null;
+// //   }
+  
+// //   // ============================================
+// //   // STEP 2: Fallback to Brevo (Render pe kaam karega)
+// //   // ============================================
+// //   console.log("📧 Trying Brevo...");
+// //   const brevoSent = await sendEmailViaBrevo(lead);
+  
+// //   if (brevoSent) {
+// //     return true;
+// //   }
+  
+// //   console.error("❌ Both Gmail and Brevo failed for:", lead.email);
+// //   return false;
+// // }
+
+// // // ✅ REGISTRATION API - WITH zoomLink
+// // app.post("/api/leads", async (req, res) => {
+// //   try {
+// //     const { name, phone, email, state, communityJoined } = req.body;
+    
+// //     if (!name || !phone || !email || !state) {
+// //       return res.status(400).json({ success: false, message: "All fields required" });
+// //     }
+    
+// //     let normalizedPhone = String(phone).replace(/\D/g, "");
+// //     if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) {
+// //       normalizedPhone = normalizedPhone.substring(2);
+// //     }
+// //     if (normalizedPhone.length !== 10) {
+// //       return res.status(400).json({ success: false, message: "Invalid phone number" });
+// //     }
+    
+// //     const existingLead = await Lead.findOne({ phone: normalizedPhone });
+// //     if (existingLead) {
+// //       return res.status(409).json({ success: false, message: "Phone already registered" });
+// //     }
+    
+// //     const lead = await Lead.create({
+// //       name: String(name).trim(),
+// //       phone: normalizedPhone,
+// //       email: String(email).trim().toLowerCase(),
+// //       state: String(state).trim(),
+// //       communityJoined: true,
+// //       communityJoinDate: new Date(),
+// //     });
+    
+// //     console.log("✅ Lead saved:", lead._id);
+    
+// //     // ✅ UPDATED: Await karo taaki confirm ho
+// //     const emailSent = await sendRegistrationEmail(lead);
+    
+// //     if (emailSent) {
+// //       await Lead.findByIdAndUpdate(lead._id, { zoomEmailSent: true });
+// //     }
+    
+// //     // ✅ IMPORTANT: Return zoomLink
+// //     return res.status(201).json({
+// //       success: true,
+// //       message: emailSent 
+// //         ? "Registration successful! Check your email."
+// //         : "Registration successful! Use links below.",
+// //       leadId: lead._id,
+// //       zoomLink: WEBINAR_MEETING_LINK,
+// //       whatsappCommunityLink: WHATSAPP_COMMUNITY_LINK,
+// //       emailSent: emailSent,
+// //     });
+    
+// //   } catch (error) {
+// //     console.error("❌ Registration error:", error.message);
+// //     if (error.code === 11000) {
+// //       return res.status(409).json({ success: false, message: "Phone already registered" });
+// //     }
+// //     return res.status(500).json({ success: false, message: "Server error" });
+// //   }
+// // });
+
+// // // Health check
+// // app.get("/health", (req, res) => {
+// //   res.json({
+// //     success: true,
+// //     message: "Server is running",
+// //     mongodb: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
+// //     email: {
+// //       gmail: transporter ? "Ready" : "Not Ready",
+// //       brevo: brevoClient ? "Ready" : "Not Configured",
+// //       activeProvider: transporter ? "Gmail" : (brevoClient ? "Brevo" : "None"),
+// //     },
+// //     zoomLink: WEBINAR_MEETING_LINK,
+// //   });
+// // });
+
+// // // ✅ NEW: Test Email Endpoint
+// // app.post("/api/test-email", async (req, res) => {
+// //   try {
+// //     const { email } = req.body;
+    
+// //     if (!email) {
+// //       return res.status(400).json({ success: false, message: "Email required" });
+// //     }
+    
+// //     const testLead = { name: "Test User", email };
+// //     const sent = await sendRegistrationEmail(testLead);
+    
+// //     return res.json({
+// //       success: sent,
+// //       message: sent ? "Test email sent!" : "Test email failed",
+// //     });
+    
+// //   } catch (error) {
+// //     return res.status(500).json({ success: false, message: error.message });
+// //   }
+// // });
+
+// // // Start server
 // // app.listen(PORT, async () => {
-// //   console.log(
-// //     console.log( "Server running on port" ${PORT})
-// //   );
-// //   console.log("=== MAILTRAP DEBUG ===");
-// // console.log("HOST:", process.env.MAILTRAP_HOST);
-// // console.log("USER:", process.env.MAILTRAP_USER);
-// // console.log("PASS length:", process.env.MAILTRAP_PASS?.length);
-// // console.log("FROM:", process.env.MAIL_FROM);
-// // console.log("======================");
-// //   );
-
-
-// app.listen(PORT, async () => {
-//   console.log(`🚀 Server running on port ${PORT}`);
-
-//   console.log("=== MAILTRAP DEBUG ===");
-//   console.log("HOST:", process.env.MAILTRAP_HOST);
-//   console.log("USER:", process.env.MAILTRAP_USER);
-//   console.log("PASS length:", process.env.MAILTRAP_PASS?.length);
-//   console.log("FROM:", process.env.MAIL_FROM);
-//   console.log("======================");
-
-//   // ... baaki ka code (Mailtrap verify, Gmail, Brevo)
-// });
-
-//   // ----------------------------------------------------------
-//   // Verify Mailtrap connection
-//   // ----------------------------------------------------------
-
-//   if (mailtrapTransporter) {
-//     try {
-//       await mailtrapTransporter.verify();
-
-//       console.log(
-//         "🟢 Mailtrap SMTP connection verified"
-//       );
-//     } catch (error) {
-//       console.error(
-//         "❌ Mailtrap SMTP verification failed:",
-//         error.message
-//       );
-//     }
-//   } else {
-//     console.log(
-//       "⚠️ Mailtrap is not configured."
-//     );
-//   }
-
-  // ----------------------------------------------------------
-  // Prepare Gmail fallback
-  // ----------------------------------------------------------
-
-  // if (EMAIL_USER && EMAIL_PASS) {
-  //   gmailTransporter =
-  //     await createGmailTransporter();
-
-  //   if (gmailTransporter) {
-  //     console.log(
-  //       "🟢 Gmail fallback transporter ready"
-  //     );
-  //   }
-  // }
-
-
-  app.listen(PORT, async () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-
-  console.log("=== MAILTRAP DEBUG ===");
-  console.log("HOST:", process.env.MAILTRAP_HOST);
-  console.log("USER:", process.env.MAILTRAP_USER);
-  console.log("PASS length:", process.env.MAILTRAP_PASS?.length);
-  console.log("FROM:", process.env.MAIL_FROM);
-  console.log("======================");
-
-  // Verify Mailtrap connection
-  if (mailtrapTransporter) {
-    try {
-      await mailtrapTransporter.verify();
-      console.log("🟢 Mailtrap SMTP connection verified");
-    } catch (error) {
-      console.error("❌ Mailtrap SMTP verification failed:", error.message);
-    }
-  } else {
-    console.log("⚠️ Mailtrap is not configured.");
-  }
-
-  // Gmail fallback
-  if (EMAIL_USER && EMAIL_PASS) {
-    gmailTransporter = await createGmailTransporter();
-    if (gmailTransporter) {
-      console.log("🟢 Gmail fallback transporter ready");
-    }
-  }
-
-  // Provider summary
-  console.log("--------------------------------------------------");
-  console.log("📧 Primary email provider: Mailtrap");
-  console.log("📧 Gmail fallback:", gmailTransporter ? "Enabled" : "Disabled");
-  console.log("📧 Brevo fallback:", brevoClient ? "Enabled" : "Disabled");
-  console.log("--------------------------------------------------");
-});
-
-  // ----------------------------------------------------------
-  // Provider summary
-  // ----------------------------------------------------------
-
-  console.log(
-    "--------------------------------------------------"
-  );
-
-  console.log(
-    "📧 Primary email provider: Mailtrap"
-  );
-
-  console.log(
-    "📧 Gmail fallback:",
-    gmailTransporter
-      ? "Enabled"
-      : "Disabled"
-  );
-
-  console.log(
-    "📧 Brevo fallback:",
-    brevoClient
-      ? "Enabled"
-      : "Disabled"
-  );
-
-  console.log(
-    "--------------------------------------------------"
-  );
-
+// //   console.log(`🚀 Server running on port ${PORT}`);
+// //   transporter = await createGmailTransporter();
+// //   if (transporter) {
+// //     console.log("✅ Email transporter ready");
+// //   } else {
+// //     console.log("⚠️ Email transporter not ready (will retry on demand)");
+// //   }
+// // });
 
 
 // const express = require("express");
@@ -9417,11 +8283,11 @@ app.post("/api/test-email", async (req, res) => {
 // // APP CONFIGURATION
 // // ============================================================
 
+// require('dotenv').config();
 // app.use(cors({ origin: "*" }));
 // app.use(express.json({ limit: "1mb" }));
 // app.use(express.urlencoded({ extended: true, limit: "1mb" }));
-// app.use(express.static(path.join(__dirname, "public")));
-// app.use(express.static(__dirname));
+// app.use(express.static(__dirname ,));
 
 // const PORT = Number(process.env.PORT) || 5000;
 
@@ -9465,7 +8331,9 @@ app.post("/api/test-email", async (req, res) => {
 
 // function createMailtrapTransporter() {
 //   if (!MAILTRAP_HOST || !MAILTRAP_USER || !MAILTRAP_PASS) {
-//     console.log("⚠️ Mailtrap configuration missing - Mailtrap disabled");
+//     console.log(
+//       "⚠️ Mailtrap configuration missing - Mailtrap disabled"
+//     );
 //     return null;
 //   }
 
@@ -9494,7 +8362,11 @@ app.post("/api/test-email", async (req, res) => {
 
 //     return transporterInstance;
 //   } catch (error) {
-//     console.error("❌ Mailtrap transporter error:", error.message);
+//     console.error(
+//       "❌ Mailtrap transporter error:",
+//       error.message
+//     );
+
 //     return null;
 //   }
 // }
@@ -9505,7 +8377,10 @@ app.post("/api/test-email", async (req, res) => {
 
 // async function createGmailTransporter() {
 //   if (!EMAIL_USER || !EMAIL_PASS) {
-//     console.log("⚠️ Gmail credentials missing - Gmail fallback disabled");
+//     console.log(
+//       "⚠️ Gmail credentials missing - Gmail fallback disabled"
+//     );
+
 //     return null;
 //   }
 
@@ -9516,6 +8391,7 @@ app.post("/api/test-email", async (req, res) => {
 //           reject(error);
 //           return;
 //         }
+
 //         resolve(result);
 //       });
 //     });
@@ -9526,6 +8402,7 @@ app.post("/api/test-email", async (req, res) => {
 //     }
 
 //     const smtpIP = addresses[0];
+
 //     console.log("🎯 Using Gmail IPv4:", smtpIP);
 
 //     const smtpTransporter = nodemailer.createTransport({
@@ -9551,7 +8428,11 @@ app.post("/api/test-email", async (req, res) => {
 
 //     return smtpTransporter;
 //   } catch (error) {
-//     console.error("❌ Gmail transporter error:", error.message);
+//     console.error(
+//       "❌ Gmail transporter error:",
+//       error.message
+//     );
+
 //     return null;
 //   }
 // }
@@ -9562,21 +8443,34 @@ app.post("/api/test-email", async (req, res) => {
 
 // function initBrevo() {
 //   if (!BREVO_API_KEY) {
-//     console.log("⚠️ BREVO_API_KEY missing - Brevo fallback disabled");
+//     console.log(
+//       "⚠️ BREVO_API_KEY missing - Brevo fallback disabled"
+//     );
+
 //     return null;
 //   }
 
 //   try {
-//     const defaultClient = SibApiV3Sdk.ApiClient.instance;
-//     const apiKey = defaultClient.authentications["api-key"];
+//     const defaultClient =
+//       SibApiV3Sdk.ApiClient.instance;
+
+//     const apiKey =
+//       defaultClient.authentications["api-key"];
+
 //     apiKey.apiKey = BREVO_API_KEY;
 
-//     const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+//     const apiInstance =
+//       new SibApiV3Sdk.TransactionalEmailsApi();
 
 //     console.log("✅ Brevo API initialized");
+
 //     return apiInstance;
 //   } catch (error) {
-//     console.error("❌ Brevo initialization error:", error.message);
+//     console.error(
+//       "❌ Brevo initialization error:",
+//       error.message
+//     );
+
 //     return null;
 //   }
 // }
@@ -9593,29 +8487,94 @@ app.post("/api/test-email", async (req, res) => {
 // // ============================================================
 
 // function createRegistrationEmailHtml(lead) {
-//   const safeName = String(lead.name || "User").replace(/[<>]/g, "");
+//   const safeName = String(lead.name || "User")
+//     .replace(/[<>]/g, "");
 
 //   return `
-//     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 25px; color: #222;">
-//       <h2 style="color:#d35400;">🎉 Registration Confirmed</h2>
-//       <p>Hi <strong>${safeName}</strong>,</p>
-//       <p>Your registration for the I TECH AI webinar is confirmed.</p>
-//       <div style="background:#fff3e2; padding:15px; border-radius:10px; margin:20px 0;">
-//         <p><strong>📅 Date:</strong> 8th, 9th & 10th September 2026</p>
-//         <p><strong>🕗 Time:</strong> 8:00 PM – 9:00 PM</p>
-//         <p><strong>💻 Platform:</strong> Google Meet</p>
+//     <div
+//       style="
+//         font-family: Arial, sans-serif;
+//         max-width: 600px;
+//         margin: auto;
+//         padding: 25px;
+//         color: #222;
+//       "
+//     >
+//       <h2 style="color:#d35400;">
+//         🎉 Registration Confirmed
+//       </h2>
+
+//       <p>
+//         Hi <strong>${safeName}</strong>,
+//       </p>
+
+//       <p>
+//         Your registration for the I TECH AI webinar
+//         is confirmed.
+//       </p>
+
+//       <div
+//         style="
+//           background:#fff3e2;
+//           padding:15px;
+//           border-radius:10px;
+//           margin:20px 0;
+//         "
+//       >
+//         <p>
+//           <strong>📅 Date:</strong>
+//           8th, 9th & 10th September 2026
+//         </p>
+
+//         <p>
+//           <strong>🕗 Time:</strong>
+//           8:00 PM – 9:00 PM
+//         </p>
+
+//         <p>
+//           <strong>💻 Platform:</strong>
+//           Google Meet
+//         </p>
 //       </div>
+
 //       <p style="text-align:center;">
-//         <a href="${WEBINAR_MEETING_LINK}" style="display:inline-block; background:#2D8CFF; color:#fff; padding:14px 25px; text-decoration:none; border-radius:8px; font-weight:bold;">
+//         <a
+//           href="${WEBINAR_MEETING_LINK}"
+//           style="
+//             display:inline-block;
+//             background:#2D8CFF;
+//             color:#fff;
+//             padding:14px 25px;
+//             text-decoration:none;
+//             border-radius:8px;
+//             font-weight:bold;
+//           "
+//         >
 //           🎥 JOIN GOOGLE MEET
 //         </a>
 //       </p>
+
 //       <p style="text-align:center;">
-//         <a href="${WHATSAPP_COMMUNITY_LINK}" style="display:inline-block; background:#25D366; color:#fff; padding:14px 25px; text-decoration:none; border-radius:8px; font-weight:bold;">
+//         <a
+//           href="${WHATSAPP_COMMUNITY_LINK}"
+//           style="
+//             display:inline-block;
+//             background:#25D366;
+//             color:#fff;
+//             padding:14px 25px;
+//             text-decoration:none;
+//             border-radius:8px;
+//             font-weight:bold;
+//           "
+//         >
 //           💬 JOIN WHATSAPP CHANNEL
 //         </a>
 //       </p>
-//       <p>Regards,<br><strong>I TECH AI Team</strong></p>
+
+//       <p>
+//         Regards,<br>
+//         <strong>I TECH AI Team</strong>
+//       </p>
 //     </div>
 //   `;
 // }
@@ -9625,26 +8584,66 @@ app.post("/api/test-email", async (req, res) => {
 // // ============================================================
 
 // async function sendEmailViaMailtrap(lead) {
-//   if (!mailtrapTransporter) return false;
+//   if (!mailtrapTransporter) {
+//     return false;
+//   }
 
 //   try {
 //     const mailOptions = {
 //       from: `"I TECH AI" <${MAIL_FROM}>`,
 //       to: lead.email,
-//       subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
+
+//       subject:
+//         "🎉 Your I TECH AI Webinar Registration is Confirmed",
+
 //       html: createRegistrationEmailHtml(lead),
-//       text: `Hi ${lead.name},\n\nYour registration for the I TECH AI webinar is confirmed.\n\nDate: 8th, 9th & 10th September 2026\nTime: 8:00 PM – 9:00 PM\nPlatform: Google Meet\n\nJoin Google Meet: ${WEBINAR_MEETING_LINK}\n\nJoin WhatsApp Channel: ${WHATSAPP_COMMUNITY_LINK}\n\nRegards,\nI TECH AI Team`,
+
+//       text:
+//         `Hi ${lead.name},
+
+// Your registration for the I TECH AI webinar is confirmed.
+
+// Date: 8th, 9th & 10th September 2026
+// Time: 8:00 PM – 9:00 PM
+// Platform: Google Meet
+
+// Join Google Meet:
+// ${WEBINAR_MEETING_LINK}
+
+// Join WhatsApp Channel:
+// ${WHATSAPP_COMMUNITY_LINK}
+
+// Regards,
+// I TECH AI Team`,
 //     };
 
-//     const result = await mailtrapTransporter.sendMail(mailOptions);
-//     console.log("✅ Email sent via Mailtrap to:", lead.email);
-//     console.log("   Message ID:", result.messageId);
+//     const result =
+//       await mailtrapTransporter.sendMail(mailOptions);
+
+//     console.log(
+//       "✅ Email sent via Mailtrap to:",
+//       lead.email
+//     );
+
+//     console.log(
+//       "   Message ID:",
+//       result.messageId
+//     );
+
 //     return true;
 //   } catch (error) {
-//     console.error("❌ Mailtrap email error:", error.message);
+//     console.error(
+//       "❌ Mailtrap email error:",
+//       error.message
+//     );
+
 //     if (error.response) {
-//       console.error("   SMTP response:", error.response);
+//       console.error(
+//         "   SMTP response:",
+//         error.response
+//       );
 //     }
+
 //     return false;
 //   }
 // }
@@ -9656,27 +8655,68 @@ app.post("/api/test-email", async (req, res) => {
 // async function sendEmailViaGmail(lead) {
 //   try {
 //     if (!gmailTransporter) {
-//       console.log("⚠️ Gmail transporter not ready.");
-//       gmailTransporter = await createGmailTransporter();
+//       console.log(
+//         "⚠️ Gmail transporter not ready."
+//       );
+
+//       gmailTransporter =
+//         await createGmailTransporter();
 //     }
 
-//     if (!gmailTransporter) return false;
+//     if (!gmailTransporter) {
+//       return false;
+//     }
 
 //     const mailOptions = {
 //       from: `"I TECH AI" <${EMAIL_USER}>`,
 //       to: lead.email,
-//       subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
+
+//       subject:
+//         "🎉 Your I TECH AI Webinar Registration is Confirmed",
+
 //       html: createRegistrationEmailHtml(lead),
-//       text: `Hi ${lead.name},\n\nYour registration for the I TECH AI webinar is confirmed.\n\nDate: 8th, 9th & 10th September 2026\nTime: 8:00 PM – 9:00 PM\nPlatform: Google Meet\n\nJoin Google Meet: ${WEBINAR_MEETING_LINK}\n\nJoin WhatsApp Channel: ${WHATSAPP_COMMUNITY_LINK}\n\nRegards,\nI TECH AI Team`,
+
+//       text:
+//         `Hi ${lead.name},
+
+// Your registration for the I TECH AI webinar is confirmed.
+
+// Date: 8th, 9th & 10th September 2026
+// Time: 8:00 PM – 9:00 PM
+// Platform: Google Meet
+
+// Join Google Meet:
+// ${WEBINAR_MEETING_LINK}
+
+// Join WhatsApp Channel:
+// ${WHATSAPP_COMMUNITY_LINK}
+
+// Regards,
+// I TECH AI Team`,
 //     };
 
-//     const result = await gmailTransporter.sendMail(mailOptions);
-//     console.log("✅ Email sent via Gmail to:", lead.email);
-//     console.log("   Message ID:", result.messageId);
+//     const result =
+//       await gmailTransporter.sendMail(mailOptions);
+
+//     console.log(
+//       "✅ Email sent via Gmail to:",
+//       lead.email
+//     );
+
+//     console.log(
+//       "   Message ID:",
+//       result.messageId
+//     );
+
 //     return true;
 //   } catch (error) {
-//     console.error("❌ Gmail email error:", error.message);
+//     console.error(
+//       "❌ Gmail email error:",
+//       error.message
+//     );
+
 //     gmailTransporter = null;
+
 //     return false;
 //   }
 // }
@@ -9686,24 +8726,61 @@ app.post("/api/test-email", async (req, res) => {
 // // ============================================================
 
 // async function sendEmailViaBrevo(lead) {
-//   if (!brevoClient) return false;
+//   if (!brevoClient) {
+//     return false;
+//   }
 
 //   try {
-//     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-//     sendSmtpEmail.sender = { name: "I TECH AI", email: MAIL_FROM };
-//     sendSmtpEmail.to = [{ email: lead.email, name: lead.name }];
-//     sendSmtpEmail.subject = "🎉 Your I TECH AI Webinar Registration is Confirmed";
-//     sendSmtpEmail.htmlContent = createRegistrationEmailHtml(lead);
+//     const sendSmtpEmail =
+//       new SibApiV3Sdk.SendSmtpEmail();
 
-//     const result = await brevoClient.sendTransacEmail(sendSmtpEmail);
-//     console.log("✅ Email sent via Brevo to:", lead.email);
-//     console.log("   Message ID:", result.messageId);
+//     sendSmtpEmail.sender = {
+//       name: "I TECH AI",
+//       email: MAIL_FROM,
+//     };
+
+//     sendSmtpEmail.to = [
+//       {
+//         email: lead.email,
+//         name: lead.name,
+//       },
+//     ];
+
+//     sendSmtpEmail.subject =
+//       "🎉 Your I TECH AI Webinar Registration is Confirmed";
+
+//     sendSmtpEmail.htmlContent =
+//       createRegistrationEmailHtml(lead);
+
+//     const result =
+//       await brevoClient.sendTransacEmail(
+//         sendSmtpEmail
+//       );
+
+//     console.log(
+//       "✅ Email sent via Brevo to:",
+//       lead.email
+//     );
+
+//     console.log(
+//       "   Message ID:",
+//       result.messageId
+//     );
+
 //     return true;
 //   } catch (error) {
-//     console.error("❌ Brevo email error:", error.message);
+//     console.error(
+//       "❌ Brevo email error:",
+//       error.message
+//     );
+
 //     if (error.response?.body) {
-//       console.error("   Details:", JSON.stringify(error.response.body));
+//       console.error(
+//         "   Details:",
+//         JSON.stringify(error.response.body)
+//       );
 //     }
+
 //     return false;
 //   }
 // }
@@ -9713,35 +8790,133 @@ app.post("/api/test-email", async (req, res) => {
 // // ============================================================
 
 // async function sendRegistrationEmail(lead) {
-//   console.log("📧 Trying Mailtrap...");
-//   const mailtrapSent = await sendEmailViaMailtrap(lead);
-//   if (mailtrapSent) return { sent: true, provider: "Mailtrap" };
-//   console.log("⚠️ Mailtrap failed.");
+//   // ----------------------------------------------------------
+//   // PROVIDER 1: MAILTRAP
+//   // ----------------------------------------------------------
 
-//   console.log("📧 Trying Gmail fallback...");
-//   const gmailSent = await sendEmailViaGmail(lead);
-//   if (gmailSent) return { sent: true, provider: "Gmail" };
-//   console.log("⚠️ Gmail failed.");
+//   console.log(
+//     "📧 Trying Mailtrap..."
+//   );
 
-//   console.log("📧 Trying Brevo fallback...");
-//   const brevoSent = await sendEmailViaBrevo(lead);
-//   if (brevoSent) return { sent: true, provider: "Brevo" };
+//   const mailtrapSent =
+//     await sendEmailViaMailtrap(lead);
 
-//   console.error("❌ All email providers failed for:", lead.email);
-//   return { sent: false, provider: null };
+//   if (mailtrapSent) {
+//     return {
+//       sent: true,
+//       provider: "Mailtrap",
+//     };
+//   }
+
+//   console.log(
+//     "⚠️ Mailtrap failed."
+//   );
+
+//   // ----------------------------------------------------------
+//   // PROVIDER 2: GMAIL FALLBACK
+//   // ----------------------------------------------------------
+
+//   console.log(
+//     "📧 Trying Gmail fallback..."
+//   );
+
+//   const gmailSent =
+//     await sendEmailViaGmail(lead);
+
+//   if (gmailSent) {
+//     return {
+//       sent: true,
+//       provider: "Gmail",
+//     };
+//   }
+
+//   console.log(
+//     "⚠️ Gmail failed."
+//   );
+
+//   // ----------------------------------------------------------
+//   // PROVIDER 3: BREVO FALLBACK
+//   // ----------------------------------------------------------
+
+//   console.log(
+//     "📧 Trying Brevo fallback..."
+//   );
+
+//   const brevoSent =
+//     await sendEmailViaBrevo(lead);
+
+//   if (brevoSent) {
+//     return {
+//       sent: true,
+//       provider: "Brevo",
+//     };
+//   }
+
+//   console.error(
+//     "❌ All email providers failed for:",
+//     lead.email
+//   );
+
+//   return {
+//     sent: false,
+//     provider: null,
+//   };
 // }
+
+// // ============================================================
+// // ROOT PAGE
+// // ============================================================
+
+// app.get("/", (req, res) => {
+//   const files = [
+//     "index.html",
+//     "index1.html",
+//     "main.html",
+//   ];
+
+//   for (const file of files) {
+//     try {
+//       const filePath =
+//         path.join(__dirname, file);
+
+//       if (require("fs").existsSync(filePath)) {
+//         return res.sendFile(filePath);
+//       }
+//     } catch (error) {
+//       console.error(
+//         "File check error:",
+//         error.message
+//       );
+//     }
+//   }
+
+//   return res.send(
+//     "<h1>🚀 Server is running! Upload index.html file.</h1>"
+//   );
+// });
 
 // // ============================================================
 // // MONGODB
 // // ============================================================
 
 // if (!MONGO_URI) {
-//   console.error("❌ MONGO_URI is missing.");
+//   console.error(
+//     "❌ MONGO_URI is missing."
+//   );
 // } else {
 //   mongoose
 //     .connect(MONGO_URI)
-//     .then(() => console.log("🟢 MongoDB connected"))
-//     .catch((error) => console.error("❌ MongoDB error:", error.message));
+//     .then(() => {
+//       console.log(
+//         "🟢 MongoDB connected"
+//       );
+//     })
+//     .catch((error) => {
+//       console.error(
+//         "❌ MongoDB error:",
+//         error.message
+//       );
+//     });
 // }
 
 // // ============================================================
@@ -9750,20 +8925,65 @@ app.post("/api/test-email", async (req, res) => {
 
 // const leadSchema = new mongoose.Schema(
 //   {
-//     name: { type: String, required: true, trim: true },
-//     phone: { type: String, required: true, unique: true, trim: true },
-//     email: { type: String, required: true, lowercase: true, trim: true },
-//     state: { type: String, required: true, trim: true },
-//     communityJoined: { type: Boolean, default: false },
-//     communityJoinDate: { type: Date, default: null },
-//     zoomEmailSent: { type: Boolean, default: false },
-//     zoomReminderSent: { type: Boolean, default: false },
-//     registrationDate: { type: Date, default: Date.now },
+//     name: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//     },
+
+//     phone: {
+//       type: String,
+//       required: true,
+//       unique: true,
+//       trim: true,
+//     },
+
+//     email: {
+//       type: String,
+//       required: true,
+//       lowercase: true,
+//       trim: true,
+//     },
+
+//     state: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//     },
+
+//     communityJoined: {
+//       type: Boolean,
+//       default: false,
+//     },
+
+//     communityJoinDate: {
+//       type: Date,
+//       default: null,
+//     },
+
+//     zoomEmailSent: {
+//       type: Boolean,
+//       default: false,
+//     },
+
+//     zoomReminderSent: {
+//       type: Boolean,
+//       default: false,
+//     },
+
+//     registrationDate: {
+//       type: Date,
+//       default: Date.now,
+//     },
 //   },
-//   { timestamps: true }
+//   {
+//     timestamps: true,
+//   }
 // );
 
-// const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
+// const Lead =
+//   mongoose.models.Lead ||
+//   mongoose.model("Lead", leadSchema);
 
 // // ============================================================
 // // REGISTRATION API
@@ -9771,68 +8991,168 @@ app.post("/api/test-email", async (req, res) => {
 
 // app.post("/api/leads", async (req, res) => {
 //   try {
-//     const { name, phone, email, state, communityJoined } = req.body;
+//     const {
+//       name,
+//       phone,
+//       email,
+//       state,
+//       communityJoined,
+//     } = req.body;
 
-//     if (!name || !phone || !email || !state) {
-//       return res.status(400).json({ success: false, message: "All fields required" });
+//     // --------------------------------------------------------
+//     // VALIDATION
+//     // --------------------------------------------------------
+
+//     if (
+//       !name ||
+//       !phone ||
+//       !email ||
+//       !state
+//     ) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "All fields required",
+//       });
 //     }
 
-//     const normalizedName = String(name).trim();
-//     const normalizedEmail = String(email).trim().toLowerCase();
-//     const normalizedState = String(state).trim();
+//     const normalizedName =
+//       String(name).trim();
 
-//     let normalizedPhone = String(phone).replace(/\D/g, "");
-//     if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) {
-//       normalizedPhone = normalizedPhone.substring(2);
+//     const normalizedEmail =
+//       String(email)
+//         .trim()
+//         .toLowerCase();
+
+//     const normalizedState =
+//       String(state).trim();
+
+//     let normalizedPhone =
+//       String(phone).replace(/\D/g, "");
+
+//     if (
+//       normalizedPhone.startsWith("91") &&
+//       normalizedPhone.length === 12
+//     ) {
+//       normalizedPhone =
+//         normalizedPhone.substring(2);
 //     }
+
 //     if (normalizedPhone.length !== 10) {
-//       return res.status(400).json({ success: false, message: "Invalid phone number" });
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid phone number",
+//       });
 //     }
 
-//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//     // Basic email validation
+//     const emailRegex =
+//       /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 //     if (!emailRegex.test(normalizedEmail)) {
-//       return res.status(400).json({ success: false, message: "Invalid email address" });
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid email address",
+//       });
 //     }
 
-//     const existingLead = await Lead.findOne({ phone: normalizedPhone });
+//     // --------------------------------------------------------
+//     // DUPLICATE PHONE CHECK
+//     // --------------------------------------------------------
+
+//     const existingLead =
+//       await Lead.findOne({
+//         phone: normalizedPhone,
+//       });
+
 //     if (existingLead) {
-//       return res.status(409).json({ success: false, message: "Phone already registered" });
+//       return res.status(409).json({
+//         success: false,
+//         message: "Phone already registered",
+//       });
 //     }
+
+//     // --------------------------------------------------------
+//     // CREATE LEAD
+//     // --------------------------------------------------------
 
 //     const lead = await Lead.create({
 //       name: normalizedName,
 //       phone: normalizedPhone,
 //       email: normalizedEmail,
 //       state: normalizedState,
-//       communityJoined: communityJoined !== false,
-//       communityJoinDate: communityJoined !== false ? new Date() : null,
+
+//       communityJoined:
+//         communityJoined !== false,
+
+//       communityJoinDate:
+//         communityJoined !== false
+//           ? new Date()
+//           : null,
 //     });
 
-//     console.log("✅ Lead saved:", lead._id.toString());
+//     console.log(
+//       "✅ Lead saved:",
+//       lead._id.toString()
+//     );
 
-//     const emailResult = await sendRegistrationEmail(lead);
+//     // --------------------------------------------------------
+//     // SEND EMAIL
+//     // --------------------------------------------------------
+
+//     const emailResult =
+//       await sendRegistrationEmail(lead);
 
 //     if (emailResult.sent) {
-//       await Lead.findByIdAndUpdate(lead._id, { zoomEmailSent: true });
+//       await Lead.findByIdAndUpdate(
+//         lead._id,
+//         {
+//           zoomEmailSent: true,
+//         }
+//       );
 //     }
+
+//     // --------------------------------------------------------
+//     // RESPONSE
+//     // --------------------------------------------------------
 
 //     return res.status(201).json({
 //       success: true,
+
 //       message: emailResult.sent
 //         ? "Registration successful! Check your email."
 //         : "Registration successful! Use links below.",
+
 //       leadId: lead._id,
-//       zoomLink: WEBINAR_MEETING_LINK,
-//       whatsappCommunityLink: WHATSAPP_COMMUNITY_LINK,
-//       emailSent: emailResult.sent,
-//       emailProvider: emailResult.provider,
+
+//       zoomLink:
+//         WEBINAR_MEETING_LINK,
+
+//       whatsappCommunityLink:
+//         WHATSAPP_COMMUNITY_LINK,
+
+//       emailSent:
+//         emailResult.sent,
+
+//       emailProvider:
+//         emailResult.provider,
 //     });
 //   } catch (error) {
-//     console.error("❌ Registration error:", error.message);
+//     console.error(
+//       "❌ Registration error:",
+//       error.message
+//     );
+
 //     if (error.code === 11000) {
-//       return res.status(409).json({ success: false, message: "Phone already registered" });
+//       return res.status(409).json({
+//         success: false,
+//         message: "Phone already registered",
+//       });
 //     }
-//     return res.status(500).json({ success: false, message: "Server error" });
+
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error",
+//     });
 //   }
 // });
 
@@ -9843,15 +9163,39 @@ app.post("/api/test-email", async (req, res) => {
 // app.get("/health", (req, res) => {
 //   res.json({
 //     success: true,
-//     message: "Server is running",
-//     mongodb: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
+
+//     message:
+//       "Server is running",
+
+//     mongodb:
+//       mongoose.connection.readyState === 1
+//         ? "Connected"
+//         : "Disconnected",
+
 //     email: {
-//       mailtrap: mailtrapTransporter ? "Configured" : "Not Configured",
-//       gmail: gmailTransporter ? "Ready" : "Not Ready",
-//       brevo: brevoClient ? "Configured" : "Not Configured",
-//       primaryProvider: mailtrapTransporter ? "Mailtrap" : "None",
+//       mailtrap:
+//         mailtrapTransporter
+//           ? "Configured"
+//           : "Not Configured",
+
+//       gmail:
+//         gmailTransporter
+//           ? "Ready"
+//           : "Not Ready",
+
+//       brevo:
+//         brevoClient
+//           ? "Configured"
+//           : "Not Configured",
+
+//       primaryProvider:
+//         mailtrapTransporter
+//           ? "Mailtrap"
+//           : "None",
 //     },
-//     zoomLink: WEBINAR_MEETING_LINK,
+
+//     zoomLink:
+//       WEBINAR_MEETING_LINK,
 //   });
 // });
 
@@ -9862,13 +9206,22 @@ app.post("/api/test-email", async (req, res) => {
 // app.post("/api/test-email", async (req, res) => {
 //   try {
 //     const { email } = req.body;
+
 //     if (!email) {
-//       return res.status(400).json({ success: false, message: "Email required" });
+//       return res.status(400).json({
+//         success: false,
+//         message: "Email required",
+//       });
 //     }
 
-//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//     const emailRegex =
+//       /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 //     if (!emailRegex.test(String(email))) {
-//       return res.status(400).json({ success: false, message: "Invalid email address" });
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid email address",
+//       });
 //     }
 
 //     const testLead = {
@@ -9876,57 +9229,704 @@ app.post("/api/test-email", async (req, res) => {
 //       email: String(email).trim().toLowerCase(),
 //     };
 
-//     const result = await sendRegistrationEmail(testLead);
+//     const result =
+//       await sendRegistrationEmail(
+//         testLead
+//       );
 
 //     return res.json({
 //       success: result.sent,
-//       message: result.sent ? "Test email sent successfully!" : "Test email failed.",
-//       provider: result.provider,
+
+//       message: result.sent
+//         ? "Test email sent successfully!"
+//         : "Test email failed.",
+
+//       provider:
+//         result.provider,
 //     });
 //   } catch (error) {
-//     console.error("❌ Test email error:", error.message);
-//     return res.status(500).json({ success: false, message: error.message });
+//     console.error(
+//       "❌ Test email error:",
+//       error.message
+//     );
+
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
 //   }
 // });
 
 // // ============================================================
-// // START SERVER (Only for local development)
+// // START SERVER
 // // ============================================================
 
-// if (require.main === module) {
+// // // app.listen(PORT, async () => {
+// // //   console.log(
+// // //     console.log( "Server running on port" ${PORT})
+// // //   );
+// // //   console.log("=== MAILTRAP DEBUG ===");
+// // // console.log("HOST:", process.env.MAILTRAP_HOST);
+// // // console.log("USER:", process.env.MAILTRAP_USER);
+// // // console.log("PASS length:", process.env.MAILTRAP_PASS?.length);
+// // // console.log("FROM:", process.env.MAIL_FROM);
+// // // console.log("======================");
+// // //   );
+
+
+// // app.listen(PORT, async () => {
+// //   console.log(`🚀 Server running on port ${PORT}`);
+
+// //   console.log("=== MAILTRAP DEBUG ===");
+// //   console.log("HOST:", process.env.MAILTRAP_HOST);
+// //   console.log("USER:", process.env.MAILTRAP_USER);
+// //   console.log("PASS length:", process.env.MAILTRAP_PASS?.length);
+// //   console.log("FROM:", process.env.MAIL_FROM);
+// //   console.log("======================");
+
+// //   // ... baaki ka code (Mailtrap verify, Gmail, Brevo)
+// // });
+
+// //   // ----------------------------------------------------------
+// //   // Verify Mailtrap connection
+// //   // ----------------------------------------------------------
+
+// //   if (mailtrapTransporter) {
+// //     try {
+// //       await mailtrapTransporter.verify();
+
+// //       console.log(
+// //         "🟢 Mailtrap SMTP connection verified"
+// //       );
+// //     } catch (error) {
+// //       console.error(
+// //         "❌ Mailtrap SMTP verification failed:",
+// //         error.message
+// //       );
+// //     }
+// //   } else {
+// //     console.log(
+// //       "⚠️ Mailtrap is not configured."
+// //     );
+// //   }
+
+//   // ----------------------------------------------------------
+//   // Prepare Gmail fallback
+//   // ----------------------------------------------------------
+
+//   // if (EMAIL_USER && EMAIL_PASS) {
+//   //   gmailTransporter =
+//   //     await createGmailTransporter();
+
+//   //   if (gmailTransporter) {
+//   //     console.log(
+//   //       "🟢 Gmail fallback transporter ready"
+//   //     );
+//   //   }
+//   // }
+
+
 //   app.listen(PORT, async () => {
-//     console.log(`🚀 Server running on port ${PORT}`);
-//     console.log("=== MAILTRAP DEBUG ===");
-//     console.log("HOST:", process.env.MAILTRAP_HOST);
-//     console.log("USER:", process.env.MAILTRAP_USER);
-//     console.log("PASS length:", process.env.MAILTRAP_PASS?.length);
-//     console.log("FROM:", process.env.MAIL_FROM);
-//     console.log("======================");
+//   console.log(`🚀 Server running on port ${PORT}`);
 
-//     if (mailtrapTransporter) {
-//       try {
-//         await mailtrapTransporter.verify();
-//         console.log("🟢 Mailtrap SMTP connection verified");
-//       } catch (error) {
-//         console.error("❌ Mailtrap SMTP verification failed:", error.message);
-//       }
-//     } else {
-//       console.log("⚠️ Mailtrap is not configured.");
+//   console.log("=== MAILTRAP DEBUG ===");
+//   console.log("HOST:", process.env.MAILTRAP_HOST);
+//   console.log("USER:", process.env.MAILTRAP_USER);
+//   console.log("PASS length:", process.env.MAILTRAP_PASS?.length);
+//   console.log("FROM:", process.env.MAIL_FROM);
+//   console.log("======================");
+
+//   // Verify Mailtrap connection
+//   if (mailtrapTransporter) {
+//     try {
+//       await mailtrapTransporter.verify();
+//       console.log("🟢 Mailtrap SMTP connection verified");
+//     } catch (error) {
+//       console.error("❌ Mailtrap SMTP verification failed:", error.message);
 //     }
+//   } else {
+//     console.log("⚠️ Mailtrap is not configured.");
+//   }
 
-//     if (EMAIL_USER && EMAIL_PASS) {
-//       gmailTransporter = await createGmailTransporter();
-//       if (gmailTransporter) {
-//         console.log("🟢 Gmail fallback transporter ready");
-//       }
+//   // Gmail fallback
+//   if (EMAIL_USER && EMAIL_PASS) {
+//     gmailTransporter = await createGmailTransporter();
+//     if (gmailTransporter) {
+//       console.log("🟢 Gmail fallback transporter ready");
 //     }
+//   }
 
-//     console.log("--------------------------------------------------");
-//     console.log("📧 Primary email provider: Mailtrap");
-//     console.log("📧 Gmail fallback:", gmailTransporter ? "Enabled" : "Disabled");
-//     console.log("📧 Brevo fallback:", brevoClient ? "Enabled" : "Disabled");
-//     console.log("--------------------------------------------------");
-//   });
+//   // Provider summary
+//   console.log("--------------------------------------------------");
+//   console.log("📧 Primary email provider: Mailtrap");
+//   console.log("📧 Gmail fallback:", gmailTransporter ? "Enabled" : "Disabled");
+//   console.log("📧 Brevo fallback:", brevoClient ? "Enabled" : "Disabled");
+//   console.log("--------------------------------------------------");
+// });
+
+//   // ----------------------------------------------------------
+//   // Provider summary
+//   // ----------------------------------------------------------
+
+//   console.log(
+//     "--------------------------------------------------"
+//   );
+
+//   console.log(
+//     "📧 Primary email provider: Mailtrap"
+//   );
+
+//   console.log(
+//     "📧 Gmail fallback:",
+//     gmailTransporter
+//       ? "Enabled"
+//       : "Disabled"
+//   );
+
+//   console.log(
+//     "📧 Brevo fallback:",
+//     brevoClient
+//       ? "Enabled"
+//       : "Disabled"
+//   );
+
+//   console.log(
+//     "--------------------------------------------------"
+//   );
+
+
+
+// const express = require("express");
+// const path = require("path");
+// const mongoose = require("mongoose");
+// const cors = require("cors");
+// const nodemailer = require("nodemailer");
+// const dns = require("dns");
+// const SibApiV3Sdk = require("sib-api-v3-sdk");
+// require("dotenv").config();
+
+// try {
+//   dns.setDefaultResultOrder("ipv4first");
+// } catch (error) {
+//   // Ignore if Node.js does not support this setting.
 // }
 
-// module.exports = app;
+// const app = express();
+
+// // ============================================================
+// // APP CONFIGURATION
+// // ============================================================
+
+app.use(cors({ origin: "*" }));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+// app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(__dirname));
+
+const PORT = Number(process.env.PORT) || 5000;
+
+const MONGO_URI = process.env.MONGO_URI;
+
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS;
+
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+
+// Mailtrap production SMTP configuration
+const MAILTRAP_HOST = process.env.MAILTRAP_HOST;
+const MAILTRAP_PORT = Number(process.env.MAILTRAP_PORT) || 587;
+const MAILTRAP_USER = process.env.MAILTRAP_USER;
+const MAILTRAP_PASS = process.env.MAILTRAP_PASS;
+
+// Sender must belong to your verified Mailtrap domain.
+const MAIL_FROM =
+  process.env.MAIL_FROM ||
+  process.env.EMAIL_USER ||
+  "noreply@example.com";
+
+const WEBINAR_MEETING_LINK =
+  process.env.GOOGLE_MEET_LINK ||
+  "https://meet.google.com/uca-deoe-vnh?hs=1";
+
+const WHATSAPP_COMMUNITY_LINK =
+  "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
+
+// ============================================================
+// EMAIL PROVIDER STATE
+// ============================================================
+
+let mailtrapTransporter = null;
+let gmailTransporter = null;
+let brevoClient = null;
+
+// ============================================================
+// MAILTRAP
+// ============================================================
+
+function createMailtrapTransporter() {
+  if (!MAILTRAP_HOST || !MAILTRAP_USER || !MAILTRAP_PASS) {
+    console.log("⚠️ Mailtrap configuration missing - Mailtrap disabled");
+    return null;
+  }
+
+  try {
+    const transporterInstance = nodemailer.createTransport({
+      host: MAILTRAP_HOST,
+      port: MAILTRAP_PORT,
+      secure: MAILTRAP_PORT === 465,
+
+      auth: {
+        user: MAILTRAP_USER,
+        pass: MAILTRAP_PASS,
+      },
+
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 30000,
+
+      tls: {
+        minVersion: "TLSv1.2",
+        rejectUnauthorized: true,
+      },
+    });
+
+    console.log("✅ Mailtrap SMTP transporter configured");
+
+    return transporterInstance;
+  } catch (error) {
+    console.error("❌ Mailtrap transporter error:", error.message);
+    return null;
+  }
+}
+
+// ============================================================
+// GMAIL FALLBACK
+// ============================================================
+
+async function createGmailTransporter() {
+  if (!EMAIL_USER || !EMAIL_PASS) {
+    console.log("⚠️ Gmail credentials missing - Gmail fallback disabled");
+    return null;
+  }
+
+  try {
+    const addresses = await new Promise((resolve, reject) => {
+      dns.resolve4("smtp.gmail.com", (error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve(result);
+      });
+    });
+
+    if (!addresses || addresses.length === 0) {
+      console.error("❌ Gmail IPv4 address not found");
+      return null;
+    }
+
+    const smtpIP = addresses[0];
+    console.log("🎯 Using Gmail IPv4:", smtpIP);
+
+    const smtpTransporter = nodemailer.createTransport({
+      host: smtpIP,
+      port: 587,
+      secure: false,
+      family: 4,
+
+      auth: {
+        user: EMAIL_USER,
+        pass: EMAIL_PASS,
+      },
+
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 30000,
+
+      tls: {
+        servername: "smtp.gmail.com",
+        rejectUnauthorized: true,
+      },
+    });
+
+    return smtpTransporter;
+  } catch (error) {
+    console.error("❌ Gmail transporter error:", error.message);
+    return null;
+  }
+}
+
+// ============================================================
+// BREVO
+// ============================================================
+
+function initBrevo() {
+  if (!BREVO_API_KEY) {
+    console.log("⚠️ BREVO_API_KEY missing - Brevo fallback disabled");
+    return null;
+  }
+
+  try {
+    const defaultClient = SibApiV3Sdk.ApiClient.instance;
+    const apiKey = defaultClient.authentications["api-key"];
+    apiKey.apiKey = BREVO_API_KEY;
+
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+    console.log("✅ Brevo API initialized");
+    return apiInstance;
+  } catch (error) {
+    console.error("❌ Brevo initialization error:", error.message);
+    return null;
+  }
+}
+
+// ============================================================
+// INITIALIZE EMAIL PROVIDERS
+// ============================================================
+
+mailtrapTransporter = createMailtrapTransporter();
+brevoClient = initBrevo();
+
+// ============================================================
+// EMAIL HTML
+// ============================================================
+
+function createRegistrationEmailHtml(lead) {
+  const safeName = String(lead.name || "User").replace(/[<>]/g, "");
+
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 25px; color: #222;">
+      <h2 style="color:#d35400;">🎉 Registration Confirmed</h2>
+      <p>Hi <strong>${safeName}</strong>,</p>
+      <p>Your registration for the I TECH AI webinar is confirmed.</p>
+      <div style="background:#fff3e2; padding:15px; border-radius:10px; margin:20px 0;">
+        <p><strong>📅 Date:</strong> 8th, 9th & 10th September 2026</p>
+        <p><strong>🕗 Time:</strong> 8:00 PM – 9:00 PM</p>
+        <p><strong>💻 Platform:</strong> Google Meet</p>
+      </div>
+      <p style="text-align:center;">
+        <a href="${WEBINAR_MEETING_LINK}" style="display:inline-block; background:#2D8CFF; color:#fff; padding:14px 25px; text-decoration:none; border-radius:8px; font-weight:bold;">
+          🎥 JOIN GOOGLE MEET
+        </a>
+      </p>
+      <p style="text-align:center;">
+        <a href="${WHATSAPP_COMMUNITY_LINK}" style="display:inline-block; background:#25D366; color:#fff; padding:14px 25px; text-decoration:none; border-radius:8px; font-weight:bold;">
+          💬 JOIN WHATSAPP CHANNEL
+        </a>
+      </p>
+      <p>Regards,<br><strong>I TECH AI Team</strong></p>
+    </div>
+  `;
+}
+
+// ============================================================
+// MAILTRAP EMAIL
+// ============================================================
+
+async function sendEmailViaMailtrap(lead) {
+  if (!mailtrapTransporter) return false;
+
+  try {
+    const mailOptions = {
+      from: `"I TECH AI" <${MAIL_FROM}>`,
+      to: lead.email,
+      subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
+      html: createRegistrationEmailHtml(lead),
+      text: `Hi ${lead.name},\n\nYour registration for the I TECH AI webinar is confirmed.\n\nDate: 8th, 9th & 10th September 2026\nTime: 8:00 PM – 9:00 PM\nPlatform: Google Meet\n\nJoin Google Meet: ${WEBINAR_MEETING_LINK}\n\nJoin WhatsApp Channel: ${WHATSAPP_COMMUNITY_LINK}\n\nRegards,\nI TECH AI Team`,
+    };
+
+    const result = await mailtrapTransporter.sendMail(mailOptions);
+    console.log("✅ Email sent via Mailtrap to:", lead.email);
+    console.log("   Message ID:", result.messageId);
+    return true;
+  } catch (error) {
+    console.error("❌ Mailtrap email error:", error.message);
+    if (error.response) {
+      console.error("   SMTP response:", error.response);
+    }
+    return false;
+  }
+}
+
+// ============================================================
+// GMAIL EMAIL
+// ============================================================
+
+async function sendEmailViaGmail(lead) {
+  try {
+    if (!gmailTransporter) {
+      console.log("⚠️ Gmail transporter not ready.");
+      gmailTransporter = await createGmailTransporter();
+    }
+
+    if (!gmailTransporter) return false;
+
+    const mailOptions = {
+      from: `"I TECH AI" <${EMAIL_USER}>`,
+      to: lead.email,
+      subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
+      html: createRegistrationEmailHtml(lead),
+      text: `Hi ${lead.name},\n\nYour registration for the I TECH AI webinar is confirmed.\n\nDate: 8th, 9th & 10th September 2026\nTime: 8:00 PM – 9:00 PM\nPlatform: Google Meet\n\nJoin Google Meet: ${WEBINAR_MEETING_LINK}\n\nJoin WhatsApp Channel: ${WHATSAPP_COMMUNITY_LINK}\n\nRegards,\nI TECH AI Team`,
+    };
+
+    const result = await gmailTransporter.sendMail(mailOptions);
+    console.log("✅ Email sent via Gmail to:", lead.email);
+    console.log("   Message ID:", result.messageId);
+    return true;
+  } catch (error) {
+    console.error("❌ Gmail email error:", error.message);
+    gmailTransporter = null;
+    return false;
+  }
+}
+
+// ============================================================
+// BREVO EMAIL
+// ============================================================
+
+async function sendEmailViaBrevo(lead) {
+  if (!brevoClient) return false;
+
+  try {
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    sendSmtpEmail.sender = { name: "I TECH AI", email: MAIL_FROM };
+    sendSmtpEmail.to = [{ email: lead.email, name: lead.name }];
+    sendSmtpEmail.subject = "🎉 Your I TECH AI Webinar Registration is Confirmed";
+    sendSmtpEmail.htmlContent = createRegistrationEmailHtml(lead);
+
+    const result = await brevoClient.sendTransacEmail(sendSmtpEmail);
+    console.log("✅ Email sent via Brevo to:", lead.email);
+    console.log("   Message ID:", result.messageId);
+    return true;
+  } catch (error) {
+    console.error("❌ Brevo email error:", error.message);
+    if (error.response?.body) {
+      console.error("   Details:", JSON.stringify(error.response.body));
+    }
+    return false;
+  }
+}
+
+// ============================================================
+// EMAIL ORCHESTRATION
+// ============================================================
+
+async function sendRegistrationEmail(lead) {
+  console.log("📧 Trying Mailtrap...");
+  const mailtrapSent = await sendEmailViaMailtrap(lead);
+  if (mailtrapSent) return { sent: true, provider: "Mailtrap" };
+  console.log("⚠️ Mailtrap failed.");
+
+  console.log("📧 Trying Gmail fallback...");
+  const gmailSent = await sendEmailViaGmail(lead);
+  if (gmailSent) return { sent: true, provider: "Gmail" };
+  console.log("⚠️ Gmail failed.");
+
+  console.log("📧 Trying Brevo fallback...");
+  const brevoSent = await sendEmailViaBrevo(lead);
+  if (brevoSent) return { sent: true, provider: "Brevo" };
+
+  console.error("❌ All email providers failed for:", lead.email);
+  return { sent: false, provider: null };
+}
+
+// ============================================================
+// MONGODB
+// ============================================================
+
+if (!MONGO_URI) {
+  console.error("❌ MONGO_URI is missing.");
+} else {
+  mongoose
+    .connect(MONGO_URI)
+    .then(() => console.log("🟢 MongoDB connected"))
+    .catch((error) => console.error("❌ MongoDB error:", error.message));
+}
+
+// ============================================================
+// LEAD SCHEMA
+// ============================================================
+
+const leadSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    phone: { type: String, required: true, unique: true, trim: true },
+    email: { type: String, required: true, lowercase: true, trim: true },
+    state: { type: String, required: true, trim: true },
+    communityJoined: { type: Boolean, default: false },
+    communityJoinDate: { type: Date, default: null },
+    zoomEmailSent: { type: Boolean, default: false },
+    zoomReminderSent: { type: Boolean, default: false },
+    registrationDate: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
+
+const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
+
+// ============================================================
+// REGISTRATION API
+// ============================================================
+
+app.post("/api/leads", async (req, res) => {
+  try {
+    const { name, phone, email, state, communityJoined } = req.body;
+
+    if (!name || !phone || !email || !state) {
+      return res.status(400).json({ success: false, message: "All fields required" });
+    }
+
+    const normalizedName = String(name).trim();
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const normalizedState = String(state).trim();
+
+    let normalizedPhone = String(phone).replace(/\D/g, "");
+    if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) {
+      normalizedPhone = normalizedPhone.substring(2);
+    }
+    if (normalizedPhone.length !== 10) {
+      return res.status(400).json({ success: false, message: "Invalid phone number" });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+      return res.status(400).json({ success: false, message: "Invalid email address" });
+    }
+
+    const existingLead = await Lead.findOne({ phone: normalizedPhone });
+    if (existingLead) {
+      return res.status(409).json({ success: false, message: "Phone already registered" });
+    }
+
+    const lead = await Lead.create({
+      name: normalizedName,
+      phone: normalizedPhone,
+      email: normalizedEmail,
+      state: normalizedState,
+      communityJoined: communityJoined !== false,
+      communityJoinDate: communityJoined !== false ? new Date() : null,
+    });
+
+    console.log("✅ Lead saved:", lead._id.toString());
+
+    const emailResult = await sendRegistrationEmail(lead);
+
+    if (emailResult.sent) {
+      await Lead.findByIdAndUpdate(lead._id, { zoomEmailSent: true });
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: emailResult.sent
+        ? "Registration successful! Check your email."
+        : "Registration successful! Use links below.",
+      leadId: lead._id,
+      zoomLink: WEBINAR_MEETING_LINK,
+      whatsappCommunityLink: WHATSAPP_COMMUNITY_LINK,
+      emailSent: emailResult.sent,
+      emailProvider: emailResult.provider,
+    });
+  } catch (error) {
+    console.error("❌ Registration error:", error.message);
+    if (error.code === 11000) {
+      return res.status(409).json({ success: false, message: "Phone already registered" });
+    }
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// ============================================================
+// HEALTH CHECK
+// ============================================================
+
+app.get("/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "Server is running",
+    mongodb: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
+    email: {
+      mailtrap: mailtrapTransporter ? "Configured" : "Not Configured",
+      gmail: gmailTransporter ? "Ready" : "Not Ready",
+      brevo: brevoClient ? "Configured" : "Not Configured",
+      primaryProvider: mailtrapTransporter ? "Mailtrap" : "None",
+    },
+    zoomLink: WEBINAR_MEETING_LINK,
+  });
+});
+
+// ============================================================
+// EMAIL TEST ENDPOINT
+// ============================================================
+
+app.post("/api/test-email", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email required" });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(String(email))) {
+      return res.status(400).json({ success: false, message: "Invalid email address" });
+    }
+
+    const testLead = {
+      name: "Test User",
+      email: String(email).trim().toLowerCase(),
+    };
+
+    const result = await sendRegistrationEmail(testLead);
+
+    return res.json({
+      success: result.sent,
+      message: result.sent ? "Test email sent successfully!" : "Test email failed.",
+      provider: result.provider,
+    });
+  } catch (error) {
+    console.error("❌ Test email error:", error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================================
+// START SERVER (Only for local development)
+// ============================================================
+
+if (require.main === module) {
+  app.listen(PORT, async () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log("=== MAILTRAP DEBUG ===");
+    console.log("HOST:", process.env.MAILTRAP_HOST);
+    console.log("USER:", process.env.MAILTRAP_USER);
+    console.log("PASS length:", process.env.MAILTRAP_PASS?.length);
+    console.log("FROM:", process.env.MAIL_FROM);
+    console.log("======================");
+
+    if (mailtrapTransporter) {
+      try {
+        await mailtrapTransporter.verify();
+        console.log("🟢 Mailtrap SMTP connection verified");
+      } catch (error) {
+        console.error("❌ Mailtrap SMTP verification failed:", error.message);
+      }
+    } else {
+      console.log("⚠️ Mailtrap is not configured.");
+    }
+
+    if (EMAIL_USER && EMAIL_PASS) {
+      gmailTransporter = await createGmailTransporter();
+      if (gmailTransporter) {
+        console.log("🟢 Gmail fallback transporter ready");
+      }
+    }
+
+    console.log("--------------------------------------------------");
+    console.log("📧 Primary email provider: Mailtrap");
+    console.log("📧 Gmail fallback:", gmailTransporter ? "Enabled" : "Disabled");
+    console.log("📧 Brevo fallback:", brevoClient ? "Enabled" : "Disabled");
+    console.log("--------------------------------------------------");
+  });
+}
+
+module.exports = app;
