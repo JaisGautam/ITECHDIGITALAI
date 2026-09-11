@@ -20,6 +20,10 @@
       "dest": "server.js"
     },
     {
+      "src": "/health",
+      "dest": "server.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
