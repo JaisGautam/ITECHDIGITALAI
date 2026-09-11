@@ -9422,7 +9422,6 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 // app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(__dirname));
-
 const PORT = Number(process.env.PORT) || 5000;
 
 const MONGO_URI = process.env.MONGO_URI;
@@ -9585,7 +9584,7 @@ function initBrevo() {
 // INITIALIZE EMAIL PROVIDERS
 // ============================================================
 
-mailtrapTransporter = createMailtrapTransporter();
+// mailtrapTransporter = createMailtrapTransporter();
 brevoClient = initBrevo();
 
 // ============================================================
@@ -9685,25 +9684,61 @@ async function sendEmailViaGmail(lead) {
 // BREVO EMAIL
 // ============================================================
 
-async function sendEmailViaBrevo(lead) {
-  if (!brevoClient) return false;
+// async function sendEmailViaBrevo(lead) {
+//   if (!brevoClient) return false;
+
+//   try {
+//     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+//     sendSmtpEmail.sender = { name: "I TECH AI", email: MAIL_FROM };
+//     sendSmtpEmail.to = [{ email: lead.email, name: lead.name }];
+//     sendSmtpEmail.subject = "🎉 Your I TECH AI Webinar Registration is Confirmed";
+//     sendSmtpEmail.htmlContent = createRegistrationEmailHtml(lead);
+
+//     const result = await brevoClient.sendTransacEmail(sendSmtpEmail);
+//     console.log("✅ Email sent via Brevo to:", lead.email);
+//     console.log("   Message ID:", result.messageId);
+//     return true;
+//   } catch (error) {
+//     console.error("❌ Brevo email error:", error.message);
+//     if (error.response?.body) {
+//       console.error("   Details:", JSON.stringify(error.response.body));
+//     }
+//     return false;
+//   }
+// }
+
+async function sendEmailViaMailtrap(lead) {
+  const token = process.env.MAILTRAP_API_TOKEN;
+  if (!token) {
+    console.log("⚠️ MAILTRAP_API_TOKEN missing");
+    return false;
+  }
 
   try {
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-    sendSmtpEmail.sender = { name: "I TECH AI", email: MAIL_FROM };
-    sendSmtpEmail.to = [{ email: lead.email, name: lead.name }];
-    sendSmtpEmail.subject = "🎉 Your I TECH AI Webinar Registration is Confirmed";
-    sendSmtpEmail.htmlContent = createRegistrationEmailHtml(lead);
+    const response = await fetch("https://send.api.mailtrap.io/api/send", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: { email: MAIL_FROM, name: "I TECH AI" },
+        to: [{ email: lead.email, name: lead.name }],
+        subject: "🎉 Your I TECH AI Webinar Registration is Confirmed",
+        html: createRegistrationEmailHtml(lead),
+      }),
+    });
 
-    const result = await brevoClient.sendTransacEmail(sendSmtpEmail);
-    console.log("✅ Email sent via Brevo to:", lead.email);
-    console.log("   Message ID:", result.messageId);
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("❌ Mailtrap API error:", err);
+      return false;
+    }
+
+    console.log("✅ Email sent via Mailtrap API to:", lead.email);
     return true;
   } catch (error) {
-    console.error("❌ Brevo email error:", error.message);
-    if (error.response?.body) {
-      console.error("   Details:", JSON.stringify(error.response.body));
-    }
+    console.error("❌ Mailtrap API exception:", error.message);
     return false;
   }
 }
@@ -9712,22 +9747,38 @@ async function sendEmailViaBrevo(lead) {
 // EMAIL ORCHESTRATION
 // ============================================================
 
+// async function sendRegistrationEmail(lead) {
+//   console.log("📧 Trying Mailtrap...");
+//   const mailtrapSent = await sendEmailViaMailtrap(lead);
+//   if (mailtrapSent) return { sent: true, provider: "Mailtrap" };
+//   console.log("⚠️ Mailtrap failed.");
+
+//   console.log("📧 Trying Gmail fallback...");
+//   const gmailSent = await sendEmailViaGmail(lead);
+//   if (gmailSent) return { sent: true, provider: "Gmail" };
+//   console.log("⚠️ Gmail failed.");
+
+//   console.log("📧 Trying Brevo fallback...");
+//   const brevoSent = await sendEmailViaBrevo(lead);
+//   if (brevoSent) return { sent: true, provider: "Brevo" };
+
+//   console.error("❌ All email providers failed for:", lead.email);
+//   return { sent: false, provider: null };
+// }
+
 async function sendRegistrationEmail(lead) {
   console.log("📧 Trying Mailtrap...");
   const mailtrapSent = await sendEmailViaMailtrap(lead);
   if (mailtrapSent) return { sent: true, provider: "Mailtrap" };
-  console.log("⚠️ Mailtrap failed.");
 
   console.log("📧 Trying Gmail fallback...");
   const gmailSent = await sendEmailViaGmail(lead);
   if (gmailSent) return { sent: true, provider: "Gmail" };
-  console.log("⚠️ Gmail failed.");
 
   console.log("📧 Trying Brevo fallback...");
   const brevoSent = await sendEmailViaBrevo(lead);
   if (brevoSent) return { sent: true, provider: "Brevo" };
 
-  console.error("❌ All email providers failed for:", lead.email);
   return { sent: false, provider: null };
 }
 
