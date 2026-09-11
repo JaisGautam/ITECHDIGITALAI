@@ -18,5 +18,5 @@
     "sib-api-v3-sdk": "^8.5.0",
     "axios": "^1.7.9"
   },
-  "engines": { "node": "18.x" }
+  "engines": { "node": "24.x" }
 }
