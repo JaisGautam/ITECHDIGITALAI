@@ -9413,9 +9413,96 @@
 
 // const app = express();
 
+// // // ============================================================
+// // // APP CONFIGURATION
+// // // ============================================================
+// const express = require("express");
+// const path = require("path");
+// const mongoose = require("mongoose");
+// const cors = require("cors");
+// const nodemailer = require("nodemailer");
+// const dns = require("dns");
+// const SibApiV3Sdk = require("sib-api-v3-sdk");
+// const axios = require("axios");                    // ← Axios bhi add karo
+// require("dotenv").config();
+
+// const app = express();                             // ← YE LINE MISSING HAI! Sabse important.
+
+
+// const express = require("express");
+// const path = require("path");
+// const mongoose = require("mongoose");
+// const cors = require("cors");
+// const nodemailer = require("nodemailer");
+// const dns = require("dns");
+// const SibApiV3Sdk = require("sib-api-v3-sdk");
+// const axios = require("axios");
+// require("dotenv").config();
+
+// const app = express();                             // ✅ YE LINE HONI CHAHIYE
+
+// try {
+//   dns.setDefaultResultOrder("ipv4first");
+// } catch (error) {}
+
+// app.use(cors({ origin: "*" }));
+// app.use(express.json({ limit: "1mb" }));
+// app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+
+// // ✅ Public folder serve karo (images ke liye)
+// app.use(express.static(path.join(__dirname, "public")));
+
+// // ✅ Root folder bhi serve karo (index.html root me hai to)
+// app.use(express.static(__dirname));
+
+// const PORT = Number(process.env.PORT) || 5000;
+
+// try {
+//   dns.setDefaultResultOrder("ipv4first");
+// } catch (error) {}
+
+// app.use(cors({ origin: "*" }));
+// app.use(express.json({ limit: "1mb" }));
+// app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+// app.use(express.static(path.join(__dirname, "public")));
+// app.use(express.static(__dirname));
+// const PORT = Number(process.env.PORT) || 5000;
+
+// const MONGO_URI = process.env.MONGO_URI;
+
+// const EMAIL_USER = process.env.EMAIL_USER;
+// const EMAIL_PASS = process.env.EMAIL_PASS;
+
+// const BREVO_API_KEY = process.env.BREVO_API_KEY;
+
+// // Mailtrap production SMTP configuration
+// const MAILTRAP_HOST = process.env.MAILTRAP_HOST;
+// const MAILTRAP_PORT = Number(process.env.MAILTRAP_PORT) || 587;
+// const MAILTRAP_USER = process.env.MAILTRAP_USER;
+// const MAILTRAP_PASS = process.env.MAILTRAP_PASS;
+
+// // Sender must belong to your verified Mailtrap domain.
+// const MAIL_FROM =
+//   process.env.MAIL_FROM ||
+//   process.env.EMAIL_USER ||
+//   "noreply@example.com";
+
+// const WEBINAR_MEETING_LINK =
+//   process.env.GOOGLE_MEET_LINK ||
+//   "https://meet.google.com/uca-deoe-vnh?hs=1";
+
+// const WHATSAPP_COMMUNITY_LINK =
+//   "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
+
 // // ============================================================
-// // APP CONFIGURATION
+// // EMAIL PROVIDER STATE
 // // ============================================================
+
+// let mailtrapTransporter = null;
+// let gmailTransporter = null;
+// let brevoClient = null;
+
+
 const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
@@ -9423,10 +9510,10 @@ const cors = require("cors");
 const nodemailer = require("nodemailer");
 const dns = require("dns");
 const SibApiV3Sdk = require("sib-api-v3-sdk");
-const axios = require("axios");                    // ← Axios bhi add karo
+const axios = require("axios");
 require("dotenv").config();
 
-const app = express();                             // ← YE LINE MISSING HAI! Sabse important.
+const app = express();
 
 try {
   dns.setDefaultResultOrder("ipv4first");
@@ -9435,24 +9522,25 @@ try {
 app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+
+// ✅ Public folder (images)
 app.use(express.static(path.join(__dirname, "public")));
+
+// ✅ Root folder (index.html agar root me hai)
 app.use(express.static(__dirname));
+
 const PORT = Number(process.env.PORT) || 5000;
 
 const MONGO_URI = process.env.MONGO_URI;
-
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
-
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 
-// Mailtrap production SMTP configuration
 const MAILTRAP_HOST = process.env.MAILTRAP_HOST;
 const MAILTRAP_PORT = Number(process.env.MAILTRAP_PORT) || 587;
 const MAILTRAP_USER = process.env.MAILTRAP_USER;
 const MAILTRAP_PASS = process.env.MAILTRAP_PASS;
 
-// Sender must belong to your verified Mailtrap domain.
 const MAIL_FROM =
   process.env.MAIL_FROM ||
   process.env.EMAIL_USER ||
@@ -9472,6 +9560,9 @@ const WHATSAPP_COMMUNITY_LINK =
 let mailtrapTransporter = null;
 let gmailTransporter = null;
 let brevoClient = null;
+
+// ... (baaki code same rahega)
+
 
 // ============================================================
 // MAILTRAP
