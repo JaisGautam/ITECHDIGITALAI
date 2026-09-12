@@ -9529,6 +9529,10 @@ app.use(express.static(path.join(__dirname, "public")));
 // ✅ Root folder (index.html agar root me hai)
 app.use(express.static(__dirname));
 
+// ✅ Home page serve karo
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 const PORT = Number(process.env.PORT) || 5000;
 
 const MONGO_URI = process.env.MONGO_URI;
