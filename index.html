@@ -2139,7 +2139,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script> -->
-<script>
+<!-- <script>
 (() => {
     "use strict";
 
@@ -2206,10 +2206,322 @@ document.addEventListener("DOMContentLoaded", function () {
     // =========================================================
     // 📝 FORM SUBMIT HANDLER
     // =========================================================
+//     if (form) {
+//         form.addEventListener("submit", async (e) => {
+//             e.preventDefault();
+
+//             const selected = document.querySelector('input[name="communityStatus"]:checked');
+//             if (!selected) {
+//                 setStatus("Please select your WhatsApp Community status.", "error");
+//                 return;
+//             }
+//             if (selected.value === "no" && (!communityJoined || !communityJoined.checked)) {
+//                 setStatus("Please join the WhatsApp Community first.", "error");
+//                 return;
+//             }
+
+//             const name = document.getElementById("name").value.trim();
+//             const phone = document.getElementById("phone").value.trim();
+//             const email = document.getElementById("email").value.trim();
+//             const state = document.getElementById("state").value;
+
+//             if (!name || !phone || !email || !state) {
+//                 setStatus("Please fill all required fields.", "error");
+//                 return;
+//             }
+//             if (phone.replace(/\D/g, "").length < 10) {
+//                 setStatus("Please enter a valid WhatsApp number.", "error");
+//                 return;
+//             }
+
+//             if (submitBtn) {
+//                 submitBtn.disabled = true;
+//                 submitBtn.textContent = "⏳ SUBMITTING...";
+//             }
+//             if (loader) loader.style.display = "block";
+//             setStatus("⏳ Submitting your registration...");
+
+//             try {
+//                 const response = await fetch(`${API_URL}/leads`, {
+//                     method: "POST",
+//                     headers: {
+//                         "Content-Type": "application/json",
+//                         "Accept": "application/json"
+//                     },
+//                     body: JSON.stringify({ name, phone, email, state, communityJoined: true })
+//                 });
+
+//                 const result = await response.json();
+
+//                 if (!response.ok || !result.success) {
+//                     throw new Error(result.message || "Registration failed");
+//                 }
+
+//                 // ✅ Success message update
+//                 if (successMessage) {
+//                     successMessage.textContent = result.message || "Your registration is confirmed.";
+//                 }
+
+//                 // ✅ Zoom link update
+//                 if (result.zoomLink && successZoomBtn) {
+//                     successZoomBtn.href = result.zoomLink;
+//                 }
+
+//                 // ✅ WhatsApp link update
+//                 const whatsappBtn = document.querySelector('.success-whatsapp');
+//                 if (result.whatsappCommunityLink && whatsappBtn) {
+//                     whatsappBtn.href = result.whatsappCommunityLink;
+//                 }
+
+//                 // ✅ Form hide
+//                 if (form) form.style.display = "none";
+
+//                 // ✅ Heading + description hide
+//                 const formSection = form.closest(".form-section");
+//                 if (formSection) {
+//                     const heading = formSection.querySelector("h2");
+//                     const desc = formSection.querySelector(":scope > p");
+//                     if (heading) heading.style.display = "none";
+//                     if (desc) desc.style.display = "none";
+//                 }
+
+//                 // ✅ Success section dikhao
+//                 if (successSection) {
+//                     successSection.style.display = "block";
+//                     if (formSection) {
+//                         formSection.scrollIntoView({ behavior: "smooth", block: "start" });
+//                     }
+//                 }
+
+//                 showToast("🎉 Registration successful!");
+
+//             } catch (err) {
+//                 let errorMsg = err.message;
+//                 if (err.name === "AbortError") {
+//                     errorMsg = "Server is taking too long. Please try again.";
+//                 }
+
+//                 setStatus("❌ " + errorMsg, "error");
+//                 showToast("❌ " + errorMsg, true);
+
+//                 if (submitBtn) {
+//                     submitBtn.disabled = false;
+//                     submitBtn.textContent = "🚀 SUBMIT REGISTRATION";
+//                 }
+//             } finally {
+//                 if (loader) loader.style.display = "none";
+//             }
+//         });
+//     }
+// })();
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    // Validations
+    const selected = document.querySelector('input[name="communityStatus"]:checked');
+    if (!selected) {
+        setStatus("Please select your WhatsApp Community status.", "error");
+        return;
+    }
+    if (selected.value === "no" && (!communityJoined || !communityJoined.checked)) {
+        setStatus("Please join the WhatsApp Community first.", "error");
+        return;
+    }
+
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const state = document.getElementById("state").value;
+
+    if (!name || !phone || !email || !state) {
+        setStatus("Please fill all required fields.", "error");
+        return;
+    }
+    if (phone.replace(/\D/g, "").length < 10) {
+        setStatus("Please enter a valid WhatsApp number.", "error");
+        return;
+    }
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "⏳ SUBMITTING...";
+    }
+    if (loader) loader.style.display = "block";
+    setStatus("⏳ Submitting your registration...");
+
+    try {
+        // ⚡ 8-second timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+        const response = await fetch(`${API_URL}/leads`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({ name, phone, email, state, communityJoined: true }),
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || "Registration failed");
+        }
+
+        // ✅ Success
+        if (successMessage) {
+            successMessage.textContent = "✅ Registration successful! Join the webinar using the link below.";
+        }
+        if (result.zoomLink && successZoomBtn) {
+            successZoomBtn.href = result.zoomLink;
+        }
+        const whatsappBtn = document.querySelector('.success-whatsapp');
+        if (result.whatsappCommunityLink && whatsappBtn) {
+            whatsappBtn.href = result.whatsappCommunityLink;
+        }
+
+        // ✅ Form hide
+        if (form) form.style.display = "none";
+
+        const formSection = form.closest(".form-section");
+        if (formSection) {
+            const heading = formSection.querySelector("h2");
+            const desc = formSection.querySelector(":scope > p");
+            if (heading) heading.style.display = "none";
+            if (desc) desc.style.display = "none";
+        }
+
+        if (successSection) {
+            successSection.style.display = "block";
+            if (formSection) {
+                formSection.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        }
+
+        showToast("🎉 Registration successful!");
+        window.dispatchEvent(new Event("registration-success"));
+
+    } catch (err) {
+        let errorMsg = err.message;
+        if (err.name === "AbortError") {
+            errorMsg = "Server is taking too long. Please try again.";
+        }
+        setStatus("❌ " + errorMsg, "error");
+        showToast("❌ " + errorMsg, true);
+
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "🚀 SUBMIT REGISTRATION";
+        }
+    } finally {
+        if (loader) loader.style.display = "none";
+    }
+});
+
+// =========================================================
+// FAQ ACCORDION
+// =========================================================
+document.addEventListener("DOMContentLoaded", function () {
+    const faqQuestions = document.querySelectorAll(".faq-question");
+
+    faqQuestions.forEach(function (question) {
+        question.addEventListener("click", function () {
+            const currentItem = this.closest(".faq-item");
+
+            document.querySelectorAll(".faq-item").forEach(function (item) {
+                if (item !== currentItem) {
+                    item.classList.remove("active");
+                }
+            });
+
+            currentItem.classList.toggle("active");
+        });
+    });
+});
+
+</script> -->
+
+<script>
+(() => {
+    "use strict";
+
+    const API_URL = "https://itechdigitalai.onrender.com/api";
+    const WHATSAPP_COMMUNITY_LINK = "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
+
+    const form = document.getElementById("leadForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const loader = document.getElementById("loader");
+    const status = document.getElementById("formStatus");
+    const joinBtn = document.getElementById("whatsappJoinBtn");
+    const joinedCheck = document.getElementById("joinedCheck");
+    const communityJoined = document.getElementById("communityJoined");
+    const successSection = document.getElementById("successSection");
+    const successZoomBtn = document.getElementById("successZoomBtn");
+    const successMessage = document.getElementById("successMessage");
+    const toast = document.getElementById("toast");
+
+    function setStatus(msg, type = "") {
+        if (!status) return;
+        status.textContent = msg;
+        status.className = "form-status " + type;
+    }
+
+    function showToast(msg, error = false) {
+        if (!toast) return;
+        toast.textContent = msg;
+        toast.className = "toast" + (error ? " error" : "") + " show";
+        setTimeout(() => toast.classList.remove("show"), 4000);
+    }
+
+    // =========================================================
+    // Community Radio Buttons
+    // =========================================================
+    document.querySelectorAll('input[name="communityStatus"]').forEach(r => {
+        r.addEventListener("change", () => {
+            if (r.checked && r.value === "no") {
+                if (joinBtn) joinBtn.style.display = "block";
+                if (joinedCheck) joinedCheck.style.display = "block";
+                if (communityJoined) communityJoined.checked = false;
+                if (submitBtn) submitBtn.disabled = true;
+                setStatus("👉 First join the WhatsApp Community, then tick 'I have joined'.");
+            }
+            if (r.checked && r.value === "yes") {
+                if (joinBtn) joinBtn.style.display = "none";
+                if (joinedCheck) joinedCheck.style.display = "none";
+                if (communityJoined) communityJoined.checked = false;
+                if (submitBtn) submitBtn.disabled = false;
+                setStatus("✅ Great! You can now submit your registration.", "success");
+            }
+        });
+    });
+
+    // =========================================================
+    // Community Joined Checkbox
+    // =========================================================
+    if (communityJoined) {
+        communityJoined.addEventListener("change", () => {
+            if (submitBtn) submitBtn.disabled = !communityJoined.checked;
+            setStatus(
+                communityJoined.checked
+                    ? "✅ You can now submit your registration."
+                    : "Please join the WhatsApp Community first.",
+                communityJoined.checked ? "success" : "error"
+            );
+        });
+    }
+
+    // =========================================================
+    // 📝 FORM SUBMIT HANDLER
+    // =========================================================
     if (form) {
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
+            // Validations
             const selected = document.querySelector('input[name="communityStatus"]:checked');
             if (!selected) {
                 setStatus("Please select your WhatsApp Community status.", "error");
@@ -2242,32 +2554,38 @@ document.addEventListener("DOMContentLoaded", function () {
             setStatus("⏳ Submitting your registration...");
 
             try {
+                // ⚡ 8-second timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
+
                 const response = await fetch(`${API_URL}/leads`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "Accept": "application/json"
                     },
-                    body: JSON.stringify({ name, phone, email, state, communityJoined: true })
+                    body: JSON.stringify({ name, phone, email, state, communityJoined: true }),
+                    signal: controller.signal
                 });
 
+                clearTimeout(timeoutId);
                 const result = await response.json();
 
                 if (!response.ok || !result.success) {
                     throw new Error(result.message || "Registration failed");
                 }
 
-                // ✅ Success message update
+                // ✅ Success message
                 if (successMessage) {
-                    successMessage.textContent = result.message || "Your registration is confirmed.";
+                    successMessage.textContent = "✅ Registration successful! Join the webinar using the link below.";
                 }
 
-                // ✅ Zoom link update
+                // ✅ Zoom link
                 if (result.zoomLink && successZoomBtn) {
                     successZoomBtn.href = result.zoomLink;
                 }
 
-                // ✅ WhatsApp link update
+                // ✅ WhatsApp link
                 const whatsappBtn = document.querySelector('.success-whatsapp');
                 if (result.whatsappCommunityLink && whatsappBtn) {
                     whatsappBtn.href = result.whatsappCommunityLink;
@@ -2294,13 +2612,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
                 showToast("🎉 Registration successful!");
+                window.dispatchEvent(new Event("registration-success"));
 
             } catch (err) {
                 let errorMsg = err.message;
                 if (err.name === "AbortError") {
                     errorMsg = "Server is taking too long. Please try again.";
                 }
-
                 setStatus("❌ " + errorMsg, "error");
                 showToast("❌ " + errorMsg, true);
 
@@ -2313,30 +2631,31 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-})();
 
+    // =========================================================
+    // FAQ ACCORDION
+    // =========================================================
+    document.addEventListener("DOMContentLoaded", function () {
+        const faqQuestions = document.querySelectorAll(".faq-question");
 
-// =========================================================
-// FAQ ACCORDION
-// =========================================================
-document.addEventListener("DOMContentLoaded", function () {
-    const faqQuestions = document.querySelectorAll(".faq-question");
+        faqQuestions.forEach(function (question) {
+            question.addEventListener("click", function () {
+                const currentItem = this.closest(".faq-item");
 
-    faqQuestions.forEach(function (question) {
-        question.addEventListener("click", function () {
-            const currentItem = this.closest(".faq-item");
+                document.querySelectorAll(".faq-item").forEach(function (item) {
+                    if (item !== currentItem) {
+                        item.classList.remove("active");
+                    }
+                });
 
-            document.querySelectorAll(".faq-item").forEach(function (item) {
-                if (item !== currentItem) {
-                    item.classList.remove("active");
-                }
+                currentItem.classList.toggle("active");
             });
-
-            currentItem.classList.toggle("active");
         });
     });
-});
 
+})();   // ✅ IIFE close — script ke end mein
 </script>
+
+
 </body>
 </html>
