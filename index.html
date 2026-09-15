@@ -2854,19 +2854,37 @@ footer {
     <h2 id="divine">DIVINE PARADISE</h2>
 
 </div>
+</div>
 
-<footer>
-© 2026 I TECH DDIGITAL AI. All Rights Reserved.
-</footer>
-
-
-
-
-<!-- /.container -->
-<!-- =========================================================
-     LIVE STATS COUNTER (Footer ke upar)
-========================================================= -->
+<!-- ✅ YAHAN LIVE STATS ADD KARO -->
 <!-- <div class="live-stats">
+    <div class="stats-container">
+        <div class="stat-item">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+                <div class="stat-number" id="visitorCount">5276</div>
+                <div class="stat-label">Total Visitors</div>
+            </div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon">📝</div>
+            <div class="stat-info">
+                <div class="stat-number" id="formSubmitCount">2.4K</div>
+                <div class="stat-label">Registrations</div>
+            </div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon">🟢</div>
+            <div class="stat-info">
+                <div class="stat-number" id="onlineCount">976</div>
+                <div class="stat-label">Online Now</div>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+
+<div class="live-stats">
     <div class="stats-container">
         <div class="stat-item">
             <div class="stat-icon">👥</div>
@@ -2875,7 +2893,6 @@ footer {
                 <div class="stat-label">Total Visitors</div>
             </div>
         </div>
-
         <div class="stat-item">
             <div class="stat-icon">📝</div>
             <div class="stat-info">
@@ -2883,7 +2900,6 @@ footer {
                 <div class="stat-label">Registrations</div>
             </div>
         </div>
-
         <div class="stat-item">
             <div class="stat-icon">🟢</div>
             <div class="stat-info">
@@ -2892,619 +2908,14 @@ footer {
             </div>
         </div>
     </div>
-</div> -->
+</div>
 
 
-<!-- =========================================================
-     JAVASCRIPT
-========================================================= -->
-<!-- <script>
-(() => {
-    "use strict";
 
-    const API_URL = "https://itechdigitalai.onrender.com/api";
-    const WHATSAPP_COMMUNITY_LINK = "https://chat.whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
+<footer>
+© 2018 I TECH DDIGITAL AI. All Rights Reserved.
+</footer>
 
-    const form = document.getElementById("leadForm");
-    const submitBtn = document.getElementById("submitBtn");
-    const loader = document.getElementById("loader");
-    const status = document.getElementById("formStatus");
-    const joinBtn = document.getElementById("whatsappJoinBtn");
-    const joinedCheck = document.getElementById("joinedCheck");
-    const communityJoined = document.getElementById("communityJoined");
-    const successSection = document.getElementById("successSection");
-    const successZoomBtn = document.getElementById("successZoomBtn");
-    const successMessage = document.getElementById("successMessage");
-    const toast = document.getElementById("toast");
-
-    // Replace placeholder links
-    document.querySelectorAll('a[href*="YOUR_COMMUNITY_LINK"]').forEach(a => a.href = WHATSAPP_COMMUNITY_LINK);
-
-    function setStatus(msg, type = "") {
-        if (!status) return;
-        status.textContent = msg;
-        status.className = "form-status " + type;
-    }
-
-    function showToast(msg, error = false) {
-        if (!toast) return;
-        toast.textContent = msg;
-        toast.className = "toast" + (error ? " error" : "") + " show";
-        setTimeout(() => toast.classList.remove("show"), 4000);
-    }
-
-    // Community status radio buttons
-    document.querySelectorAll('input[name="communityStatus"]').forEach(r => {
-        r.addEventListener("change", () => {
-            if (r.checked && r.value === "no") {
-                if (joinBtn) joinBtn.style.display = "block";
-                if (joinedCheck) joinedCheck.style.display = "block";
-                if (communityJoined) communityJoined.checked = false;
-                if (submitBtn) submitBtn.disabled = true;
-                setStatus("👉 First join the WhatsApp Community, then tick 'I have joined'.");
-            }
-            if (r.checked && r.value === "yes") {
-                if (joinBtn) joinBtn.style.display = "none";
-                if (joinedCheck) joinedCheck.style.display = "none";
-                if (communityJoined) communityJoined.checked = false;
-                if (submitBtn) submitBtn.disabled = false;
-                setStatus("✅ Great! You can now submit your registration.", "success");
-            }
-        });
-    });
-
-    // Community joined checkbox
-    if (communityJoined) {
-        communityJoined.addEventListener("change", () => {
-            if (submitBtn) submitBtn.disabled = !communityJoined.checked;
-            setStatus(
-                communityJoined.checked
-                    ? "✅ You can now submit your registration."
-                    : "Please join the WhatsApp Community first.",
-                communityJoined.checked ? "success" : "error"
-            );
-        });
-    }
-
-    // Form submit
-//     if (form) {
-//         form.addEventListener("submit", async (e) => {
-//             e.preventDefault();
-
-//             const selected = document.querySelector('input[name="communityStatus"]:checked');
-//             if (!selected) {
-//                 setStatus("Please select your WhatsApp Community status.", "error");
-//                 return;
-//             }
-//             if (selected.value === "no" && (!communityJoined || !communityJoined.checked)) {
-//                 setStatus("Please join the WhatsApp Community first.", "error");
-//                 return;
-//             }
-
-//             const name = document.getElementById("name").value.trim();
-//             const phone = document.getElementById("phone").value.trim();
-//             const email = document.getElementById("email").value.trim();
-//             const state = document.getElementById("state").value;
-
-//             if (!name || !phone || !email || !state) {
-//                 setStatus("Please fill all required fields.", "error");
-//                 return;
-//             }
-//             if (phone.replace(/\D/g, "").length < 10) {
-//                 setStatus("Please enter a valid WhatsApp number.", "error");
-//                 return;
-//             }
-
-//             if (submitBtn) submitBtn.disabled = true;
-//             if (loader) loader.style.display = "block";
-//             setStatus("Submitting your registration...");
-
-//             try {
-//                 const response = await fetch(`${API_URL}/leads`, {
-//                     method: "POST",
-//                     headers: {
-//                         "Content-Type": "application/json",
-//                         "Accept": "application/json"
-//                     },
-//                     body: JSON.stringify({
-//                         name,
-//                         phone,
-//                         email,
-//                         state,
-//                         communityJoined: true
-//                     })
-//                 });
-
-//                 const result = await response.json();
-
-//                 if (!response.ok || !result.success) {
-//                     throw new Error(result.message || "Registration failed");
-//                 }
-
-//                 if (result.zoomLink && successZoomBtn) {
-//                     successZoomBtn.href = result.zoomLink;
-//                 }
-
-//                 if (successMessage) {
-//                     successMessage.textContent = result.message || "Your registration is confirmed.";
-//                 }
-
-//                 if (successSection) {
-//                     successSection.style.display = "block";
-//                     successSection.scrollIntoView({ behavior: "smooth", block: "center" });
-//                 }
-
-//                 const formSection = form.closest(".form-section");
-//                 if (formSection) formSection.style.display = "none";
-
-//                 showToast("🎉 Registration successful!");
-
-//             } catch (err) {
-//                 setStatus("❌ " + err.message, "error");
-//                 showToast("❌ " + err.message, true);
-//                 if (submitBtn) submitBtn.disabled = false;
-//             } finally {
-//                 if (loader) loader.style.display = "none";
-//             }
-//         });
-//     }
-// })();
-
-// =========================================================
-// 📝 FORM SUBMIT HANDLER (FIXED)
-// =========================================================
-if (form) {
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        // Validations
-        const selected = document.querySelector('input[name="communityStatus"]:checked');
-        if (!selected) {
-            setStatus("Please select your WhatsApp Community status.", "error");
-            return;
-        }
-        if (selected.value === "no" && (!communityJoined || !communityJoined.checked)) {
-            setStatus("Please join the WhatsApp Community first.", "error");
-            return;
-        }
-
-        const name = document.getElementById("name").value.trim();
-        const phone = document.getElementById("phone").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const state = document.getElementById("state").value;
-
-        if (!name || !phone || !email || !state) {
-            setStatus("Please fill all required fields.", "error");
-            return;
-        }
-        if (phone.replace(/\D/g, "").length < 10) {
-            setStatus("Please enter a valid WhatsApp number.", "error");
-            return;
-        }
-
-        // UI lock
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = "⏳ SUBMITTING...";
-        }
-        if (loader) loader.style.display = "block";
-        setStatus("⏳ Submitting your registration...");
-
-        try {
-            const response = await fetch(`${API_URL}/leads`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify({ 
-                    name, 
-                    phone, 
-                    email, 
-                    state, 
-                    communityJoined: true 
-                })
-            });
-
-            const result = await response.json();
-
-            if (!response.ok || !result.success) {
-                throw new Error(result.message || "Registration failed");
-            }
-
-            // ✅ SUCCESS MESSAGE UPDATE
-            if (successMessage) {
-                successMessage.textContent = result.message || "Your registration is confirmed.";
-            }
-
-            // ✅ ZOOM LINK UPDATE
-            if (result.zoomLink && successZoomBtn) {
-                successZoomBtn.href = result.zoomLink;
-            }
-
-            // ✅ WHATSAPP LINK UPDATE
-            const whatsappBtn = document.querySelector('.success-whatsapp');
-            if (result.whatsappCommunityLink && whatsappBtn) {
-                whatsappBtn.href = result.whatsappCommunityLink;
-            }
-
-            // ✅ FORM HIDE KARO
-            if (form) form.style.display = "none";
-
-            // ✅ FORM KA HEADING + DESCRIPTION HIDE KARO
-            const formSection = form.closest(".form-section");
-            if (formSection) {
-                const heading = formSection.querySelector("h2");
-                const desc = formSection.querySelector(":scope > p");
-                if (heading) heading.style.display = "none";
-                if (desc) desc.style.display = "none";
-            }
-
-            // ✅ SUCCESS SECTION DIKHAO (form ke andar)
-            if (successSection) {
-                successSection.style.display = "block";
-                
-                // Form section par scroll karo (page upar na jaye)
-                if (formSection) {
-                    formSection.scrollIntoView({ behavior: "smooth", block: "start" });
-                }
-            }
-
-            showToast("🎉 Registration successful!");
-
-            // ✅ REGISTRATION COUNTER UPDATE
-            if (result.totalRegistrations !== undefined) {
-                const counter = document.getElementById("formSubmitCount");
-                if (counter) {
-                    counter.textContent = result.totalRegistrations;
-                }
-            }
-
-        } catch (err) {
-            let errorMsg = err.message;
-            if (err.name === "AbortError") {
-                errorMsg = "Server is taking too long. Please try again.";
-            }
-
-            setStatus("❌ " + errorMsg, "error");
-            showToast("❌ " + errorMsg, true);
-
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = "🚀 SUBMIT REGISTRATION";
-            }
-        } finally {
-            if (loader) loader.style.display = "none";
-        }
-    });
-}
-
-// =========================================================
-// FAQ ACCORDION
-// =========================================================
-document.addEventListener("DOMContentLoaded", function () {
-    const faqQuestions = document.querySelectorAll(".faq-question");
-
-    faqQuestions.forEach(function (question) {
-        question.addEventListener("click", function () {
-            const currentItem = this.closest(".faq-item");
-
-            document.querySelectorAll(".faq-item").forEach(function (item) {
-                if (item !== currentItem) {
-                    item.classList.remove("active");
-                }
-            });
-
-            currentItem.classList.toggle("active");
-        });
-    });
-});
-</script> -->
-<!-- <script>
-(() => {
-    "use strict";
-
-    const API_URL = "https://itechdigitalai.onrender.com/api";
-    const WHATSAPP_COMMUNITY_LINK = "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
-
-    const form = document.getElementById("leadForm");
-    const submitBtn = document.getElementById("submitBtn");
-    const loader = document.getElementById("loader");
-    const status = document.getElementById("formStatus");
-    const joinBtn = document.getElementById("whatsappJoinBtn");
-    const joinedCheck = document.getElementById("joinedCheck");
-    const communityJoined = document.getElementById("communityJoined");
-    const successSection = document.getElementById("successSection");
-    const successZoomBtn = document.getElementById("successZoomBtn");
-    const successMessage = document.getElementById("successMessage");
-    const toast = document.getElementById("toast");
-
-    function setStatus(msg, type = "") {
-        if (!status) return;
-        status.textContent = msg;
-        status.className = "form-status " + type;
-    }
-
-    function showToast(msg, error = false) {
-        if (!toast) return;
-        toast.textContent = msg;
-        toast.className = "toast" + (error ? " error" : "") + " show";
-        setTimeout(() => toast.classList.remove("show"), 4000);
-    }
-
-    // Community radio buttons
-    document.querySelectorAll('input[name="communityStatus"]').forEach(r => {
-        r.addEventListener("change", () => {
-            if (r.checked && r.value === "no") {
-                if (joinBtn) joinBtn.style.display = "block";
-                if (joinedCheck) joinedCheck.style.display = "block";
-                if (communityJoined) communityJoined.checked = false;
-                if (submitBtn) submitBtn.disabled = true;
-                setStatus("👉 First join the WhatsApp Community, then tick 'I have joined'.");
-            }
-            if (r.checked && r.value === "yes") {
-                if (joinBtn) joinBtn.style.display = "none";
-                if (joinedCheck) joinedCheck.style.display = "none";
-                if (communityJoined) communityJoined.checked = false;
-                if (submitBtn) submitBtn.disabled = false;
-                setStatus("✅ Great! You can now submit your registration.", "success");
-            }
-        });
-    });
-
-    if (communityJoined) {
-        communityJoined.addEventListener("change", () => {
-            if (submitBtn) submitBtn.disabled = !communityJoined.checked;
-            setStatus(
-                communityJoined.checked
-                    ? "✅ You can now submit your registration."
-                    : "Please join the WhatsApp Community first.",
-                communityJoined.checked ? "success" : "error"
-            );
-        });
-    }
-
-    // =========================================================
-    // 📝 FORM SUBMIT HANDLER
-    // =========================================================
-//     if (form) {
-//         form.addEventListener("submit", async (e) => {
-//             e.preventDefault();
-
-//             const selected = document.querySelector('input[name="communityStatus"]:checked');
-//             if (!selected) {
-//                 setStatus("Please select your WhatsApp Community status.", "error");
-//                 return;
-//             }
-//             if (selected.value === "no" && (!communityJoined || !communityJoined.checked)) {
-//                 setStatus("Please join the WhatsApp Community first.", "error");
-//                 return;
-//             }
-
-//             const name = document.getElementById("name").value.trim();
-//             const phone = document.getElementById("phone").value.trim();
-//             const email = document.getElementById("email").value.trim();
-//             const state = document.getElementById("state").value;
-
-//             if (!name || !phone || !email || !state) {
-//                 setStatus("Please fill all required fields.", "error");
-//                 return;
-//             }
-//             if (phone.replace(/\D/g, "").length < 10) {
-//                 setStatus("Please enter a valid WhatsApp number.", "error");
-//                 return;
-//             }
-
-//             if (submitBtn) {
-//                 submitBtn.disabled = true;
-//                 submitBtn.textContent = "⏳ SUBMITTING...";
-//             }
-//             if (loader) loader.style.display = "block";
-//             setStatus("⏳ Submitting your registration...");
-
-//             try {
-//                 const response = await fetch(`${API_URL}/leads`, {
-//                     method: "POST",
-//                     headers: {
-//                         "Content-Type": "application/json",
-//                         "Accept": "application/json"
-//                     },
-//                     body: JSON.stringify({ name, phone, email, state, communityJoined: true })
-//                 });
-
-//                 const result = await response.json();
-
-//                 if (!response.ok || !result.success) {
-//                     throw new Error(result.message || "Registration failed");
-//                 }
-
-//                 // ✅ Success message update
-//                 if (successMessage) {
-//                     successMessage.textContent = result.message || "Your registration is confirmed.";
-//                 }
-
-//                 // ✅ Zoom link update
-//                 if (result.zoomLink && successZoomBtn) {
-//                     successZoomBtn.href = result.zoomLink;
-//                 }
-
-//                 // ✅ WhatsApp link update
-//                 const whatsappBtn = document.querySelector('.success-whatsapp');
-//                 if (result.whatsappCommunityLink && whatsappBtn) {
-//                     whatsappBtn.href = result.whatsappCommunityLink;
-//                 }
-
-//                 // ✅ Form hide
-//                 if (form) form.style.display = "none";
-
-//                 // ✅ Heading + description hide
-//                 const formSection = form.closest(".form-section");
-//                 if (formSection) {
-//                     const heading = formSection.querySelector("h2");
-//                     const desc = formSection.querySelector(":scope > p");
-//                     if (heading) heading.style.display = "none";
-//                     if (desc) desc.style.display = "none";
-//                 }
-
-//                 // ✅ Success section dikhao
-//                 if (successSection) {
-//                     successSection.style.display = "block";
-//                     if (formSection) {
-//                         formSection.scrollIntoView({ behavior: "smooth", block: "start" });
-//                     }
-//                 }
-
-//                 showToast("🎉 Registration successful!");
-
-//             } catch (err) {
-//                 let errorMsg = err.message;
-//                 if (err.name === "AbortError") {
-//                     errorMsg = "Server is taking too long. Please try again.";
-//                 }
-
-//                 setStatus("❌ " + errorMsg, "error");
-//                 showToast("❌ " + errorMsg, true);
-
-//                 if (submitBtn) {
-//                     submitBtn.disabled = false;
-//                     submitBtn.textContent = "🚀 SUBMIT REGISTRATION";
-//                 }
-//             } finally {
-//                 if (loader) loader.style.display = "none";
-//             }
-//         });
-//     }
-// })();
-
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    // Validations
-    const selected = document.querySelector('input[name="communityStatus"]:checked');
-    if (!selected) {
-        setStatus("Please select your WhatsApp Community status.", "error");
-        return;
-    }
-    if (selected.value === "no" && (!communityJoined || !communityJoined.checked)) {
-        setStatus("Please join the WhatsApp Community first.", "error");
-        return;
-    }
-
-    const name = document.getElementById("name").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const state = document.getElementById("state").value;
-
-    if (!name || !phone || !email || !state) {
-        setStatus("Please fill all required fields.", "error");
-        return;
-    }
-    if (phone.replace(/\D/g, "").length < 10) {
-        setStatus("Please enter a valid WhatsApp number.", "error");
-        return;
-    }
-
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = "⏳ SUBMITTING...";
-    }
-    if (loader) loader.style.display = "block";
-    setStatus("⏳ Submitting your registration...");
-
-    try {
-        // ⚡ 8-second timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
-
-        const response = await fetch(`${API_URL}/leads`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify({ name, phone, email, state, communityJoined: true }),
-            signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-            throw new Error(result.message || "Registration failed");
-        }
-
-        // ✅ Success
-        if (successMessage) {
-            successMessage.textContent = "✅ Registration successful! Join the webinar using the link below.";
-        }
-        if (result.zoomLink && successZoomBtn) {
-            successZoomBtn.href = result.zoomLink;
-        }
-        const whatsappBtn = document.querySelector('.success-whatsapp');
-        if (result.whatsappCommunityLink && whatsappBtn) {
-            whatsappBtn.href = result.whatsappCommunityLink;
-        }
-
-        // ✅ Form hide
-        if (form) form.style.display = "none";
-
-        const formSection = form.closest(".form-section");
-        if (formSection) {
-            const heading = formSection.querySelector("h2");
-            const desc = formSection.querySelector(":scope > p");
-            if (heading) heading.style.display = "none";
-            if (desc) desc.style.display = "none";
-        }
-
-        if (successSection) {
-            successSection.style.display = "block";
-            if (formSection) {
-                formSection.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-        }
-
-        showToast("🎉 Registration successful!");
-        window.dispatchEvent(new Event("registration-success"));
-
-    } catch (err) {
-        let errorMsg = err.message;
-        if (err.name === "AbortError") {
-            errorMsg = "Server is taking too long. Please try again.";
-        }
-        setStatus("❌ " + errorMsg, "error");
-        showToast("❌ " + errorMsg, true);
-
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = "🚀 SUBMIT REGISTRATION";
-        }
-    } finally {
-        if (loader) loader.style.display = "none";
-    }
-});
-
-// =========================================================
-// FAQ ACCORDION
-// =========================================================
-document.addEventListener("DOMContentLoaded", function () {
-    const faqQuestions = document.querySelectorAll(".faq-question");
-
-    faqQuestions.forEach(function (question) {
-        question.addEventListener("click", function () {
-            const currentItem = this.closest(".faq-item");
-
-            document.querySelectorAll(".faq-item").forEach(function (item) {
-                if (item !== currentItem) {
-                    item.classList.remove("active");
-                }
-            });
-
-            currentItem.classList.toggle("active");
-        });
-    });
-});
-
-</script> -->
 
 <script>
 (() => {
@@ -3715,8 +3126,229 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 })();   // ✅ IIFE close — script ke end mein
-</script>
 
+
+// =========================================================
+// 🔥 LIVE STATS — Visitors & Registrations Sirf Badhenge
+//    Online Now — Fluctuate Karega
+// =========================================================
+(function() {
+    "use strict";
+
+    const API_URL = "https://helpdesk.onrender.com"; // ← Apna URL daalo
+
+    // ---------------------------------------------------------
+    // 🎯 STARTING VALUES (Yahan se shuru hoga)
+    // ---------------------------------------------------------
+    let visitorCount = 5276;        // Total Visitors — sirf badhega
+    let registrationCount = 2400;   // Registrations — sirf badhega
+    let onlineCount = 976;          // Online Now — upar neeche
+
+    // ---------------------------------------------------------
+    // 🔢 Number Format (5,276 / 2.4K / 12K)
+    // ---------------------------------------------------------
+    function formatNumber(num) {
+        if (num >= 100000) return (num / 1000).toFixed(0) + "K";
+        if (num >= 10000) return (num / 1000).toFixed(1).replace(/\.0$/, "") + "K";
+        return num.toLocaleString("en-IN");
+    }
+
+    // ---------------------------------------------------------
+    // 🎬 Smooth Animation
+    // ---------------------------------------------------------
+    function animateTo(el, from, to, duration = 800) {
+        if (!el || from === to) return;
+
+        el.classList.add("bump");
+        setTimeout(() => el.classList.remove("bump"), 500);
+
+        const steps = 20;
+        let step = 0;
+        const diff = to - from;
+
+        const interval = setInterval(() => {
+            step++;
+            const val = Math.round(from + (diff * step / steps));
+            el.textContent = formatNumber(val);
+            if (step >= steps) {
+                clearInterval(interval);
+                el.textContent = formatNumber(to);
+            }
+        }, duration / steps);
+    }
+
+    // ---------------------------------------------------------
+    // 👥 VISITORS — Har 4-8 sec me 1-2-3 badhao (kabhi kam nahi)
+    // ---------------------------------------------------------
+    function growVisitors() {
+        const delay = 4000 + Math.random() * 4000; // 4-8 sec
+        setTimeout(() => {
+            const increase = Math.floor(Math.random() * 3) + 1; // 1, 2, ya 3
+            const oldVal = visitorCount;
+            visitorCount += increase;
+
+            const el = document.getElementById("visitorCount");
+            if (el) {
+                const displayed = parseInt(el.textContent.replace(/[^\d]/g, "")) || oldVal;
+                animateTo(el, displayed, visitorCount, 700);
+            }
+
+            // Fir se schedule karo
+            growVisitors();
+        }, delay);
+    }
+
+    // ---------------------------------------------------------
+    // 📝 REGISTRATIONS — Har 20-40 sec me 1-2 badhao (kabhi kam nahi)
+    //    ⚠️ Rule: Registrations < Total Visitors (hamesha)
+    // ---------------------------------------------------------
+    function growRegistrations() {
+        const delay = 20000 + Math.random() * 20000; // 20-40 sec
+        setTimeout(() => {
+            // Random increase (1 ya 2) — slow growth
+            const increase = Math.random() > 0.7 ? 2 : 1;
+            let newValue = registrationCount + increase;
+
+            // ✅ SAFETY CHECK: Registrations kabhi Visitors se zyada nahi
+            // Visitors ka 40% se zyada nahi hona chahiye registration
+            const maxAllowed = Math.floor(visitorCount * 0.4);
+            if (newValue > maxAllowed) {
+                newValue = maxAllowed;
+            }
+
+            // Agar increase nahi ho sakta, skip karo
+            if (newValue <= registrationCount) {
+                growRegistrations();
+                return;
+            }
+
+            const oldVal = registrationCount;
+            registrationCount = newValue;
+
+            const el = document.getElementById("formSubmitCount");
+            if (el) {
+                const displayed = parseInt(el.textContent.replace(/[^\d]/g, "")) || oldVal;
+                animateTo(el, displayed, registrationCount, 700);
+            }
+
+            growRegistrations();
+        }, delay);
+    }
+
+    // ---------------------------------------------------------
+    // 🟢 ONLINE NOW — Har 3-5 sec me upar neeche (fluctuate)
+    // ---------------------------------------------------------
+    function fluctuateOnline() {
+        const delay = 3000 + Math.random() * 2000; // 3-5 sec
+        setTimeout(() => {
+            // Random change: -5 se +5
+            const change = Math.floor(Math.random() * 11) - 5;
+            let newValue = onlineCount + change;
+
+            // Minimum aur maximum limit
+            newValue = Math.max(50, newValue);
+            newValue = Math.min(500, newValue);
+
+            const oldVal = onlineCount;
+            onlineCount = newValue;
+
+            const el = document.getElementById("onlineCount");
+            if (el) {
+                const displayed = parseInt(el.textContent.replace(/[^\d]/g, "")) || oldVal;
+                animateTo(el, displayed, onlineCount, 500);
+            }
+
+            fluctuateOnline();
+        }, delay);
+    }
+
+    // ---------------------------------------------------------
+    // 🚀 INITIAL SETUP (Page load par ek baar)
+    // ---------------------------------------------------------
+    function setInitialValues() {
+        const vEl = document.getElementById("visitorCount");
+        const rEl = document.getElementById("formSubmitCount");
+        const oEl = document.getElementById("onlineCount");
+
+        if (vEl) vEl.textContent = formatNumber(visitorCount);
+        if (rEl) rEl.textContent = formatNumber(registrationCount);
+        if (oEl) oEl.textContent = formatNumber(onlineCount);
+    }
+
+    // ---------------------------------------------------------
+    // 🌐 BACKEND SYNC (Real data ko respect karo)
+    //    ⚠️ Agar backend ka number zyada hai to display badhao
+    //    ⚠️ Kabhi kam mat karo
+    // ---------------------------------------------------------
+    async function syncWithBackend() {
+        try {
+            const res = await fetch(`${API_URL}/stats`);
+            const data = await res.json();
+
+            if (!data.success) return;
+
+            // Visitors: sirf tab badhao jab backend zyada de
+            if (data.visitors !== undefined && data.visitors > visitorCount) {
+                const el = document.getElementById("visitorCount");
+                const displayed = el ? parseInt(el.textContent.replace(/[^\d]/g, "")) || visitorCount : visitorCount;
+                visitorCount = data.visitors;
+                if (el) animateTo(el, displayed, visitorCount, 800);
+            }
+
+            // Registrations: sirf tab badhao jab backend zyada de
+            // Aur rule follow karo: reg < visitors
+            if (data.registrations !== undefined) {
+                const maxAllowed = Math.floor(visitorCount * 0.4);
+                const targetReg = Math.min(data.registrations, maxAllowed);
+
+                if (targetReg > registrationCount) {
+                    const el = document.getElementById("formSubmitCount");
+                    const displayed = el ? parseInt(el.textContent.replace(/[^\d]/g, "")) || registrationCount : registrationCount;
+                    registrationCount = targetReg;
+                    if (el) animateTo(el, displayed, registrationCount, 800);
+                }
+            }
+
+            // Online: backend de sirf reference ke liye, display fluctuate karega
+            // (yahan kuch nahi karenge)
+
+        } catch (err) {
+            console.warn("Stats sync failed:", err);
+        }
+    }
+
+    // ---------------------------------------------------------
+    // 🎬 START EVERYTHING
+    // ---------------------------------------------------------
+    document.addEventListener("DOMContentLoaded", function() {
+        setInitialValues();
+
+        // Backend se sync karo (agar available ho)
+        syncWithBackend();
+        setInterval(syncWithBackend, 60000); // Har 1 min me
+
+        // Live growth/fluctuation start karo
+        growVisitors();
+        setTimeout(growRegistrations, 5000); // 5 sec baad start
+        fluctuateOnline();
+    });
+
+})();
+
+
+
+</script>
+<!-- =========================================================
+     SAHAYAK HELP DESK WIDGET
+========================================================= -->
+<script 
+    src="https://helpdesk-dasb.onrender.com/widget.js"
+    data-accent="#ff9900"
+    data-position="right"
+    data-label="Need Help?"
+    data-greeting="1"
+    defer>
+</script>
 
 </body>
 </html>
