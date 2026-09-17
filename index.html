@@ -1277,6 +1277,48 @@ footer {
 </style> -->
 
 <style>
+
+.site-footer {
+  width: 100%;
+  padding: 20px 15px;
+  background: #111827;
+  color: #ffffff;
+  text-align: center;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.footer-copy {
+  margin-bottom: 10px;
+}
+
+.call-us {
+  display: inline-block;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  transition: 0.3s ease;
+}
+
+.call-us:hover {
+  background: #ffffff;
+  color: #111827;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+  .site-footer {
+    font-size: 13px;
+  }
+
+  .call-us {
+    margin-top: 2px;
+  }
+}
+    
 /* =========================================================
    LIVE STATS COUNTER
 ========================================================= */
@@ -2912,10 +2954,18 @@ footer {
 
 
 
-<footer>
+<!-- <footer>
 © 2018 I TECH DDIGITAL AI. All Rights Reserved.
-</footer>
+</footer> -->
+<footer class="site-footer">
+  <div class="footer-copy">
+    © 2018 I TECH DIGITAL AI. All Rights Reserved.
+  </div>
 
+  <a href="tel:2269645824" class="call-us">
+    📞 Call Us: 2269645824
+  </a>
+</footer>
 
 <script>
 (() => {
