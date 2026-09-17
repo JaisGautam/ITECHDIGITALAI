@@ -1277,6 +1277,104 @@ footer {
 </style> -->
 
 <style>
+    .call-us-card {
+width: 100%;
+max-width: 520px;
+margin: 25px auto;
+padding: 28px 30px;
+background: #ffffff;
+border: 1px solid #e8e8e8;
+border-radius: 16px;
+box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+text-align: center;
+box-sizing: border-box;
+}
+
+.call-us-content {
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+.call-us-label {
+display: inline-block;
+margin-bottom: 8px;
+padding: 5px 12px;
+background: #fff3e8;
+color: #f97316;
+border-radius: 20px;
+font-size: 13px;
+font-weight: 600;
+}
+
+.call-us-card h3 {
+margin: 0 0 10px;
+font-size: 28px;
+font-weight: 700;
+color: #222;
+}
+
+.toll-free {
+margin: 0 0 12px;
+font-size: 16px;
+color: #555;
+}
+
+.toll-free a {
+color: #f97316;
+font-weight: 700;
+text-decoration: none;
+}
+
+.inquiry-text {
+max-width: 420px;
+margin: 0 0 20px;
+font-size: 14px;
+line-height: 1.6;
+color: #666;
+}
+
+.call-now-btn {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+min-width: 140px;
+padding: 12px 22px;
+background: #f97316;
+color: #fff;
+border-radius: 8px;
+font-size: 15px;
+font-weight: 600;
+text-decoration: none;
+transition: all 0.25s ease;
+}
+
+.call-now-btn:hover {
+background: #ea580c;
+transform: translateY(-2px);
+box-shadow: 0 6px 15px rgba(249, 115, 22, 0.25);
+}
+
+@media (max-width: 600px) {
+.call-us-card {
+padding: 24px 18px;
+margin: 20px auto;
+}
+
+.call-us-card h3 {
+font-size: 24px;
+}
+
+.inquiry-text {
+font-size: 13px;
+}
+
+.call-now-btn {
+width: 100%;
+max-width: 220px;
+}
+}
+
 
 .site-footer {
   width: 100%;
@@ -2958,6 +3056,30 @@ footer {
 © 2018 I TECH DDIGITAL AI. All Rights Reserved.
 </footer> -->
 <footer class="site-footer">
+     <div class="call-us-card">
+  <div class="call-us-content">
+    <span class="call-us-label">Need Help?</span>
+
+
+<h3>Call Us</h3>
+
+<p class="toll-free">
+  Toll-Free Number:
+  <a href="tel:+91 2269645824">+912269645824 </a>
+</p>
+
+<p class="inquiry-text">
+  Have any inquiry? Call us and get your questions cleared.
+  Our team is here to help you.
+</p>
+
+<a href="tel:+91 2269645824" class="call-now-btn">
+  📞 Call Now
+</a>
+
+
+  </div>
+</div>
   <div class="footer-copy">
     © 2018 I TECH DIGITAL AI. All Rights Reserved.
   </div>
