@@ -1277,6 +1277,179 @@ footer {
 </style> -->
 
 <style>
+
+    /* =========================================================
+   SITE FOOTER
+========================================================= */
+.site-footer {
+    width: 100%;
+    background: #222;
+    padding: 40px 20px 20px;
+    margin-top: 55px;
+    text-align: center;
+}
+
+/* =========================================================
+   CALL US CARD — WHITE BOX
+========================================================= */
+.call-us-card {
+    max-width: 480px;
+    margin: 0 auto 25px;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 28px 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    border-top: 5px solid #ff9900;
+    text-align: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.call-us-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 38px rgba(255, 153, 0, 0.25);
+}
+
+.call-us-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Small "Need Help?" label */
+.call-us-label {
+    display: inline-block;
+    background: #fff3df;
+    color: #d35400;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+}
+
+/* "Call Us" heading */
+.call-us-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #d35400;
+    margin: 0 0 12px;
+    line-height: 1.2;
+}
+
+/* Toll-free line */
+.toll-free {
+    font-size: 15px;
+    color: #444;
+    font-weight: 600;
+    margin: 0 0 10px;
+    line-height: 1.5;
+}
+
+.toll-free a {
+    color: #ff8c00;
+    font-weight: 800;
+    text-decoration: none;
+    font-size: 17px;
+    letter-spacing: 0.3px;
+    transition: color 0.2s ease;
+}
+
+.toll-free a:hover {
+    color: #d35400;
+    text-decoration: underline;
+}
+
+/* Inquiry text */
+.inquiry-text {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.6;
+    margin: 0 0 18px;
+    max-width: 360px;
+}
+
+/* Call Now button */
+.call-now-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #000;
+    font-weight: 800;
+    font-size: 16px;
+    padding: 13px 32px;
+    border-radius: 10px;
+    text-decoration: none;
+    box-shadow: 0 5px 18px rgba(255, 140, 0, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    letter-spacing: 0.3px;
+}
+
+.call-now-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 22px rgba(255, 140, 0, 0.45);
+}
+
+.call-now-btn:active {
+    transform: translateY(0) scale(0.99);
+}
+
+/* =========================================================
+   FOOTER COPY (Below Card)
+========================================================= */
+.footer-copy {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: #aaa;
+    font-size: 12px;
+    line-height: 1.6;
+    letter-spacing: 0.3px;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+@media (max-width: 600px) {
+    .site-footer {
+        padding: 30px 14px 18px;
+    }
+
+    .call-us-card {
+        padding: 22px 18px;
+        border-radius: 14px;
+    }
+
+    .call-us-title {
+        font-size: 21px;
+    }
+
+    .toll-free {
+        font-size: 14px;
+    }
+
+    .toll-free a {
+        font-size: 15px;
+    }
+
+    .inquiry-text {
+        font-size: 12.5px;
+    }
+
+    .call-now-btn {
+        width: 100%;
+        font-size: 15px;
+        padding: 12px 20px;
+    }
+
+    .footer-copy {
+        font-size: 11px;
+        padding-top: 14px;
+    }
+}
 /* =========================================================
    LIVE STATS COUNTER
 ========================================================= */
@@ -2887,7 +3060,7 @@ footer {
 <!-- <footer>
 © 2018 I TECH DDIGITAL AI. All Rights Reserved.
 </footer> -->
-<footer class="site-footer">
+<!-- <footer class="site-footer">
      <div class="call-us-card">
   <div class="call-us-content">
     <span class="call-us-label">Need Help?</span>
@@ -2913,14 +3086,48 @@ footer {
   </div>
 </div>
   <div class="footer-copy">
-    © 2018 I TECH DIGITAL AI. All Rights Reserved.
+    © 2018 RAVENTO AI . All Rights Reserved.
   </div>
 
-  <a href="tel:2269645824" class="call-us">
-    📞 Call Us: 2269645824
-  </a>
-</footer>
+  
+</footer> -->
+<footer class="site-footer">
 
+  <!-- =========================
+       CALL US CARD (White Box)
+  ========================== -->
+  <div class="call-us-card">
+    <div class="call-us-content">
+
+      <span class="call-us-label">Need Help?</span>
+
+      <h3 class="call-us-title">Call Us</h3>
+
+      <p class="toll-free">
+        Toll-Free Number:
+        <a href="tel:+912269645824">+91 22 6964 5824</a>
+      </p>
+
+      <p class="inquiry-text">
+        Have any inquiry? Call us and get your questions cleared.
+        Our team is here to help you.
+      </p>
+
+      <a href="tel:+912269645824" class="call-now-btn">
+        📞 Call Now
+      </a>
+
+    </div>
+  </div>
+
+  <!-- =========================
+       FOOTER COPY (Below Card)
+  ========================== -->
+  <div class="footer-copy">
+    © 2018 RAVENTO AI. All Rights Reserved.
+  </div>
+
+</footer>
 
 <script>
 (() => {
