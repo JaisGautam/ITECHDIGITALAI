@@ -10146,23 +10146,31 @@
 //   setInterval(cleanupOnlineUsers, 15000);
 // });
 
-
+// server.js
+// LOC: ~500
 
 require("dotenv").config();
 
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
 const dns = require("dns");
 
+// MongoDB Atlas DNS issue workaround
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
-console.log("🔎 DNS SERVERS:", dns.getServers());
-console.log("🔎 MONGO URI EXISTS:", !!process.env.MONGO_URI);
+
 const express = require("express");
-const path = require("path");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
 const app = express();
 
+/* =========================================================
+   BASIC APP CONFIG
+========================================================= */
+
 app.use(cors({ origin: "*" }));
+
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
@@ -10173,677 +10181,739 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+/* =========================================================
+   ENV CONFIG
+========================================================= */
+
 const PORT = Number(process.env.PORT) || 5000;
+
 const MONGO_URI = process.env.MONGO_URI;
 
-// 🔑 Webhook Verify Token (Environment variable se ya direct fallback)
-const WEBHOOK_VERIFY_TOKEN = process.env.WEBHOOK_VERIFY_TOKEN || "MySecretToken12345";
-
-const WEBINAR_MEETING_LINK =
-  process.env.GOOGLE_MEET_LINK ||
-  "https://meet.google.com/uca-deoe-vnh?hs=1";
+const GOOGLE_MEET_LINK =
+  process.env.GOOGLE_MEET_LINK || "https://meet.google.com/uca-deoe-vnh?hs=1";
 
 const WHATSAPP_COMMUNITY_LINK =
+  process.env.WHATSAPP_COMMUNITY_LINK ||
   "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
 
-// ============================================================
-// 📊 LIVE STATS
-// ============================================================
+/* =========================================================
+   WEBHOOK VERIFY TOKEN
+   Automatically generate and save in .env if missing
+========================================================= */
+
+function getOrCreateWebhookToken() {
+  const envPath = path.join(__dirname, ".env");
+
+  let token = process.env.WEBHOOK_VERIFY_TOKEN;
+
+  if (token && token.trim()) {
+    return token.trim();
+  }
+
+  token = crypto.randomBytes(32).toString("hex");
+
+  let envContent = "";
+
+  if (fs.existsSync(envPath)) {
+    envContent = fs.readFileSync(envPath, "utf8");
+  }
+
+  if (envContent.length > 0 && !envContent.endsWith("\n")) {
+    envContent += "\n";
+  }
+
+  envContent += `WEBHOOK_VERIFY_TOKEN=${token}\n`;
+
+  fs.writeFileSync(envPath, envContent, "utf8");
+
+  process.env.WEBHOOK_VERIFY_TOKEN = token;
+
+  console.log("");
+  console.log("==============================================");
+  console.log("🔐 NEW WEBHOOK VERIFY TOKEN GENERATED");
+  console.log("==============================================");
+  console.log(token);
+  console.log("==============================================");
+  console.log("Saved automatically inside .env");
+  console.log("Use this SAME token in Meta Webhook settings.");
+  console.log("==============================================");
+  console.log("");
+
+  return token;
+}
+
+const WEBHOOK_VERIFY_TOKEN = getOrCreateWebhookToken();
+
+/* =========================================================
+   WHATSAPP CLOUD API CONFIG
+========================================================= */
+
+const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN || "";
+
+const WHATSAPP_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || "";
+
+const WHATSAPP_TEMPLATE_NAME =
+  process.env.WHATSAPP_TEMPLATE_NAME || "seminar_reminder";
+
+const WHATSAPP_TEMPLATE_LANGUAGE =
+  process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en_US";
+
+/*
+   Keep this configurable because Meta can change
+   supported Graph API versions.
+*/
+const GRAPH_API_VERSION = process.env.GRAPH_API_VERSION || "v23.0";
+
+/* =========================================================
+   MONGODB
+========================================================= */
+
+if (!MONGO_URI) {
+  console.error("❌ MONGO_URI missing in .env");
+}
+
+/* =========================================================
+   LEAD SCHEMA
+========================================================= */
+
+const leadSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      index: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+
+    state: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    communityJoined: {
+      type: Boolean,
+      default: false,
+    },
+
+    communityJoinDate: {
+      type: Date,
+      default: null,
+    },
+
+    registrationDate: {
+      type: Date,
+      default: Date.now,
+    },
+
+    source: {
+      type: String,
+      default: "website",
+    },
+
+    campaign: {
+      type: String,
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+const Lead = mongoose.model("Lead", leadSchema);
+
+/* =========================================================
+   WHATSAPP MESSAGE SCHEMA
+========================================================= */
+
+const whatsappMessageSchema = new mongoose.Schema(
+  {
+    phone: {
+      type: String,
+      required: true,
+      index: true,
+    },
+
+    direction: {
+      type: String,
+      enum: ["outgoing", "incoming", "status"],
+      required: true,
+    },
+
+    messageId: {
+      type: String,
+      index: true,
+      default: null,
+    },
+
+    messageType: {
+      type: String,
+      default: null,
+    },
+
+    status: {
+      type: String,
+      default: null,
+    },
+
+    text: {
+      type: String,
+      default: null,
+    },
+
+    raw: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+const WhatsAppMessage = mongoose.model(
+  "WhatsAppMessage",
+  whatsappMessageSchema,
+);
+
+/* =========================================================
+   STATS
+========================================================= */
 
 const stats = {
   totalVisitors: 0,
   totalRegistrations: 0,
-  onlineUsers: new Map(),
-  startTime: Date.now(),
+  onlineUsers: new Set(),
 };
 
-function cleanupOnlineUsers() {
-  const now = Date.now();
-  for (const [id, timestamp] of stats.onlineUsers.entries()) {
-    if (now - timestamp > 30000) stats.onlineUsers.delete(id);
-  }
-}
-
-// ============================================================
-// MONGODB — FAST CONNECT
-// ============================================================
+/* =========================================================
+   MONGODB CONNECTION
+========================================================= */
 
 mongoose.set("bufferCommands", false);
 
-mongoose
-  .connect(MONGO_URI, {
-    serverSelectionTimeoutMS: 3000,
-    socketTimeoutMS: 10000,
-    maxPoolSize: 10,
-    minPoolSize: 2,
-    connectTimeoutMS: 5000,
-  })
-  .then(() => console.log("🟢 MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB error:", err.message));
+async function connectMongoDB() {
+  if (!MONGO_URI) {
+    console.error("❌ MONGO_URI is missing.");
+    return;
+  }
 
-// ============================================================
-// LEAD SCHEMA
-// ============================================================
+  try {
+    await mongoose.connect(MONGO_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 10000,
+      maxPoolSize: 10,
+      minPoolSize: 2,
+      connectTimeoutMS: 5000,
+    });
 
-const leadSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true, trim: true },
-    phone: { type: String, required: true, unique: true, trim: true },
-    email: { type: String, required: true, lowercase: true, trim: true },
-    state: { type: String, required: true, trim: true },
-    communityJoined: { type: Boolean, default: false },
-    communityJoinDate: { type: Date, default: null },
-    registrationDate: { type: Date, default: Date.now },
-  },
-  { timestamps: true }
-);
+    console.log("🟢 MONGODB CONNECTED");
+  } catch (error) {
+    console.error("❌ MONGODB CONNECTION ERROR:");
+    console.error(error.message);
+  }
+}
 
-const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
+/* =========================================================
+   PHONE NORMALIZATION
+========================================================= */
 
-// ============================================================
-// 📲 META WHATSAPP WEBHOOK ENDPOINTS
-// ============================================================
+function normalizeIndianPhone(phone) {
+  let value = String(phone || "").replace(/\D/g, "");
 
-// 1. GET Route: Meta Verification ke liye
+  if (value.startsWith("00")) {
+    value = value.substring(2);
+  }
+
+  // Already +91XXXXXXXXXX
+  if (value.startsWith("91") && value.length === 12) {
+    return value;
+  }
+
+  // 10 digit Indian number
+  if (value.length === 10) {
+    return `91${value}`;
+  }
+
+  throw new Error("Invalid Indian phone number. Use 10 digit Indian number.");
+}
+
+/* =========================================================
+   WHATSAPP TEMPLATE SENDER
+========================================================= */
+
+async function sendWhatsAppTemplate({
+  phone,
+  name,
+  meetingLink = GOOGLE_MEET_LINK,
+  communityLink = WHATSAPP_COMMUNITY_LINK,
+  companyName = "RAVANTOAI",
+}) {
+  if (!WHATSAPP_ACCESS_TOKEN) {
+    throw new Error("WHATSAPP_ACCESS_TOKEN is missing in .env");
+  }
+
+  if (!WHATSAPP_PHONE_NUMBER_ID) {
+    throw new Error("WHATSAPP_PHONE_NUMBER_ID is missing in .env");
+  }
+
+  const recipient = normalizeIndianPhone(phone);
+
+  const url =
+    `https://graph.facebook.com/${GRAPH_API_VERSION}/` +
+    `${WHATSAPP_PHONE_NUMBER_ID}/messages`;
+
+  const payload = {
+    messaging_product: "whatsapp",
+
+    recipient_type: "individual",
+
+    to: recipient,
+
+    type: "template",
+
+    template: {
+      name: WHATSAPP_TEMPLATE_NAME,
+
+      language: {
+        code: WHATSAPP_TEMPLATE_LANGUAGE,
+      },
+
+      components: [
+        {
+          type: "body",
+
+          parameters: [
+            {
+              type: "text",
+              text: String(name || "there"),
+            },
+
+            {
+              type: "text",
+              text: String(meetingLink),
+            },
+
+            {
+              type: "text",
+              text: String(communityLink),
+            },
+
+            {
+              type: "text",
+              text: String(companyName),
+            },
+          ],
+        },
+      ],
+    },
+  };
+
+  const response = await fetch(url, {
+    method: "POST",
+
+    headers: {
+      Authorization: `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const message =
+      data?.error?.message || `WhatsApp API returned HTTP ${response.status}`;
+
+    const error = new Error(message);
+
+    error.status = response.status;
+    error.meta = data;
+
+    throw error;
+  }
+
+  return {
+    recipient,
+
+    messageId: data?.messages?.[0]?.id || null,
+
+    response: data,
+  };
+}
+
+/* =========================================================
+   WEBSITE LEAD API
+========================================================= */
+
+app.post("/api/leads", async (req, res) => {
+  try {
+    const { name, phone, email, state, communityJoined, source, campaign } =
+      req.body;
+
+    if (!name || !phone || !email || !state) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, phone, email and state are required.",
+      });
+    }
+
+    const normalizedPhone = String(phone).replace(/\D/g, "").slice(-10);
+
+    if (normalizedPhone.length !== 10) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Indian phone number.",
+      });
+    }
+
+    const existingLead = await Lead.findOne({
+      phone: normalizedPhone,
+    });
+
+    if (existingLead) {
+      return res.status(409).json({
+        success: false,
+        message: "Lead already exists.",
+        lead: existingLead,
+      });
+    }
+
+    const lead = await Lead.create({
+      name,
+      phone: normalizedPhone,
+      email,
+      state,
+
+      communityJoined: communityJoined === true || communityJoined === "true",
+
+      communityJoinDate:
+        communityJoined === true || communityJoined === "true"
+          ? new Date()
+          : null,
+
+      source: source || "website",
+
+      campaign: campaign || null,
+    });
+
+    stats.totalRegistrations++;
+
+    return res.status(201).json({
+      success: true,
+
+      message: "Registration successful.",
+
+      lead,
+
+      googleMeetLink: GOOGLE_MEET_LINK,
+
+      whatsappCommunityLink: WHATSAPP_COMMUNITY_LINK,
+    });
+  } catch (error) {
+    console.error("❌ Lead API error:", error);
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "Phone number already registered.",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error.",
+    });
+  }
+});
+
+/* =========================================================
+   SEND ONE WHATSAPP TEMPLATE
+========================================================= */
+
+app.post("/api/whatsapp/send-template", async (req, res) => {
+  try {
+    const { phone, name, meetingLink, communityLink, companyName } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone is required.",
+      });
+    }
+
+    const result = await sendWhatsAppTemplate({
+      phone,
+      name,
+      meetingLink,
+      communityLink,
+      companyName,
+    });
+
+    await WhatsAppMessage.create({
+      phone: result.recipient,
+
+      direction: "outgoing",
+
+      messageId: result.messageId,
+
+      messageType: "template",
+
+      status: "accepted",
+
+      raw: result.response,
+    });
+
+    return res.json({
+      success: true,
+
+      message: "WhatsApp template sent.",
+
+      messageId: result.messageId,
+
+      phone: result.recipient,
+    });
+  } catch (error) {
+    console.error("❌ WhatsApp send error:", error.meta || error.message);
+
+    return res.status(error.status || 500).json({
+      success: false,
+
+      message: error.message,
+
+      meta: error.meta || null,
+    });
+  }
+});
+
+/* =========================================================
+   WHATSAPP WEBHOOK VERIFICATION
+========================================================= */
+
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
+
   const token = req.query["hub.verify_token"];
+
   const challenge = req.query["hub.challenge"];
 
-  if (mode === "subscribe" && token === WEBHOOK_VERIFY_TOKEN) {
-    console.log("🟢 WEBHOOK VERIFIED SUCCESSFULLY!");
-    return res.status(200).send(challenge);
-  } else {
-    console.error("❌ WEBHOOK VERIFICATION FAILED: Token Mismatch");
-    return res.sendStatus(403);
-  }
-});
+  console.log("");
+  console.log("========== WEBHOOK VERIFICATION ==========");
 
-// 2. POST Route: WhatsApp Messages aur Status Updates (Delivered, Read) receive karne ke liye
-app.post("/webhook", (req, res) => {
-  const body = req.body;
+  console.log("Mode:", mode);
 
-  if (body.object === "whatsapp_business_account") {
-    // Meta hamesha HTTP 200 Fast Response expect karta hai
-    res.status(200).send("EVENT_RECEIVED");
-
-    // Incoming events process karna (Console output)
-    if (body.entry && body.entry[0].changes) {
-      console.log("📩 WhatsApp Webhook Event Received:", JSON.stringify(body, null, 2));
-    }
-  } else {
-    res.sendStatus(404);
-  }
-});
-
-// ============================================================
-// 📊 STATS ENDPOINTS
-// ============================================================
-
-app.post("/api/track-visit", (req, res) => {
-  const { visitorId } = req.body;
-  if (visitorId) stats.onlineUsers.set(visitorId, Date.now());
-  cleanupOnlineUsers();
-  stats.totalVisitors += 1;
-  res.json({
-    success: true,
-    visitors: stats.totalVisitors,
-    registrations: stats.totalRegistrations,
-    online: stats.onlineUsers.size,
-  });
-});
-
-app.get("/api/stats", (req, res) => {
-  cleanupOnlineUsers();
-  res.json({
-    success: true,
-    visitors: stats.totalVisitors,
-    registrations: stats.totalRegistrations,
-    online: stats.onlineUsers.size,
-  });
-});
-
-app.post("/api/heartbeat", (req, res) => {
-  const { visitorId } = req.body;
-  if (visitorId) stats.onlineUsers.set(visitorId, Date.now());
-  cleanupOnlineUsers();
-  res.json({ success: true, online: stats.onlineUsers.size });
-});
-
-// ============================================================
-// 🚀 REGISTRATION API — FAST
-// ============================================================
-
-app.post("/api/leads", async (req, res) => {
-  const startTime = Date.now();
-
-  try {
-    const { name, phone, email, state, communityJoined } = req.body;
-
-    if (!name || !phone || !email || !state) {
-      return res.status(400).json({ success: false, message: "All fields required" });
-    }
-
-    const normalizedName = String(name).trim();
-    const normalizedEmail = String(email).trim().toLowerCase();
-    const normalizedState = String(state).trim();
-
-    let normalizedPhone = String(phone).replace(/\D/g, "");
-    if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) {
-      normalizedPhone = normalizedPhone.substring(2);
-    }
-    if (normalizedPhone.length !== 10) {
-      return res.status(400).json({ success: false, message: "Invalid phone" });
-    }
-
-    const lead = await Lead.create({
-      name: normalizedName,
-      phone: normalizedPhone,
-      email: normalizedEmail,
-      state: normalizedState,
-      communityJoined: communityJoined !== false,
-      communityJoinDate: communityJoined !== false ? new Date() : null,
-    });
-
-    stats.totalRegistrations += 1;
-
-    const timeTaken = Date.now() - startTime;
-    console.log(`✅ Lead saved in ${timeTaken}ms`);
-
-    return res.status(201).json({
-      success: true,
-      message: "Registration successful!",
-      leadId: lead._id,
-      zoomLink: WEBINAR_MEETING_LINK,
-      whatsappCommunityLink: WHATSAPP_COMMUNITY_LINK,
-      totalRegistrations: stats.totalRegistrations,
-    });
-
-  } catch (error) {
-    console.error("❌ Error:", error.message);
-    if (error.code === 11000) {
-      return res.status(409).json({ success: false, message: "Phone already registered" });
-    }
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// ============================================================
-// HEALTH
-// ============================================================
-
-app.get("/health", (req, res) => {
-  res.json({
-    success: true,
-    mongodb: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
-    stats: {
-      totalVisitors: stats.totalVisitors,
-      totalRegistrations: stats.totalRegistrations,
-      onlineNow: stats.onlineUsers.size,
-    },
-  });
-});
-
-// ============================================================
-// START
-// ============================================================
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  setInterval(cleanupOnlineUsers, 15000);
-});
-
-On Fri, Sep 25, 2026 at 5:59 PM Ravento Ai <raventoai55@gmail.com> wrote:
-require("dotenv").config();
-
-const dns = require("dns");
-
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
-console.log("🔎 DNS SERVERS:", dns.getServers());
-console.log("🔎 MONGO URI EXISTS:", !!process.env.MONGO_URI);
-const express = require("express");
-const path = require("path");
-const mongoose = require("mongoose");
-const cors = require("cors");
-
-const app = express();
-
-app.use(cors({ origin: "*" }));
-app.use(express.json({ limit: "1mb" }));
-app.use(express.urlencoded({ extended: true, limit: "1mb" }));
-
-app.use(express.static(path.join(__dirname, "public")));
-app.use(express.static(__dirname));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-const PORT = Number(process.env.PORT) || 5000;
-const MONGO_URI = process.env.MONGO_URI;
-
-// 🔑 Webhook Verify Token (Environment variable se ya direct fallback)
-const WEBHOOK_VERIFY_TOKEN = process.env.WEBHOOK_VERIFY_TOKEN || "MySecretToken12345";
-
-const WEBINAR_MEETING_LINK =
-  process.env.GOOGLE_MEET_LINK ||
-  "https://meet.google.com/uca-deoe-vnh?hs=1";
-
-const WHATSAPP_COMMUNITY_LINK =
-  "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
-
-// ============================================================
-// 📊 LIVE STATS
-// ============================================================
-
-const stats = {
-  totalVisitors: 0,
-  totalRegistrations: 0,
-  onlineUsers: new Map(),
-  startTime: Date.now(),
-};
-
-function cleanupOnlineUsers() {
-  const now = Date.now();
-  for (const [id, timestamp] of stats.onlineUsers.entries()) {
-    if (now - timestamp > 30000) stats.onlineUsers.delete(id);
-  }
-}
-
-// ============================================================
-// MONGODB — FAST CONNECT
-// ============================================================
-
-mongoose.set("bufferCommands", false);
-
-mongoose
-  .connect(MONGO_URI, {
-    serverSelectionTimeoutMS: 3000,
-    socketTimeoutMS: 10000,
-    maxPoolSize: 10,
-    minPoolSize: 2,
-    connectTimeoutMS: 5000,
-  })
-  .then(() => console.log("🟢 MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB error:", err.message));
-
-// ============================================================
-// LEAD SCHEMA
-// ============================================================
-
-const leadSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true, trim: true },
-    phone: { type: String, required: true, unique: true, trim: true },
-    email: { type: String, required: true, lowercase: true, trim: true },
-    state: { type: String, required: true, trim: true },
-    communityJoined: { type: Boolean, default: false },
-    communityJoinDate: { type: Date, default: null },
-    registrationDate: { type: Date, default: Date.now },
-  },
-  { timestamps: true }
-);
-
-const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
-
-// ============================================================
-// 📲 META WHATSAPP WEBHOOK ENDPOINTS
-// ============================================================
-
-// 1. GET Route: Meta Verification ke liye
-app.get("/webhook", (req, res) => {
-  const mode = req.query["hub.mode"];
-  const token = req.query["hub.verify_token"];
-  const challenge = req.query["hub.challenge"];
+  console.log("Token received:", token ? "YES" : "NO");
 
   if (mode === "subscribe" && token === WEBHOOK_VERIFY_TOKEN) {
-    console.log("🟢 WEBHOOK VERIFIED SUCCESSFULLY!");
+    console.log("🟢 WEBHOOK VERIFIED SUCCESSFULLY");
+
     return res.status(200).send(challenge);
-  } else {
-    console.error("❌ WEBHOOK VERIFICATION FAILED: Token Mismatch");
-    return res.sendStatus(403);
   }
+
+  console.error("❌ WEBHOOK VERIFICATION FAILED");
+
+  return res.sendStatus(403);
 });
 
-// 2. POST Route: WhatsApp Messages aur Status Updates (Delivered, Read) receive karne ke liye
-app.post("/webhook", (req, res) => {
-  const body = req.body;
+/* =========================================================
+   WHATSAPP WEBHOOK EVENTS
+========================================================= */
 
-  if (body.object === "whatsapp_business_account") {
-    // Meta hamesha HTTP 200 Fast Response expect karta hai
-    res.status(200).send("EVENT_RECEIVED");
-
-    // Incoming events process karna (Console output)
-    if (body.entry && body.entry[0].changes) {
-      console.log("📩 WhatsApp Webhook Event Received:", JSON.stringify(body, null, 2));
-    }
-  } else {
-    res.sendStatus(404);
-  }
-});
-
-// ============================================================
-// 📊 STATS ENDPOINTS
-// ============================================================
-
-app.post("/api/track-visit", (req, res) => {
-  const { visitorId } = req.body;
-  if (visitorId) stats.onlineUsers.set(visitorId, Date.now());
-  cleanupOnlineUsers();
-  stats.totalVisitors += 1;
-  res.json({
-    success: true,
-    visitors: stats.totalVisitors,
-    registrations: stats.totalRegistrations,
-    online: stats.onlineUsers.size,
-  });
-});
-
-app.get("/api/stats", (req, res) => {
-  cleanupOnlineUsers();
-  res.json({
-    success: true,
-    visitors: stats.totalVisitors,
-    registrations: stats.totalRegistrations,
-    online: stats.onlineUsers.size,
-  });
-});
-
-app.post("/api/heartbeat", (req, res) => {
-  const { visitorId } = req.body;
-  if (visitorId) stats.onlineUsers.set(visitorId, Date.now());
-  cleanupOnlineUsers();
-  res.json({ success: true, online: stats.onlineUsers.size });
-});
-
-// ============================================================
-// 🚀 REGISTRATION API — FAST
-// ============================================================
-
-app.post("/api/leads", async (req, res) => {
-  const startTime = Date.now();
+app.post("/webhook", async (req, res) => {
+  // Meta expects quick 200 response
+  res.sendStatus(200);
 
   try {
-    const { name, phone, email, state, communityJoined } = req.body;
+    const body = req.body;
 
-    if (!name || !phone || !email || !state) {
-      return res.status(400).json({ success: false, message: "All fields required" });
+    console.log("");
+    console.log("========== WHATSAPP WEBHOOK ==========");
+    console.log(JSON.stringify(body, null, 2));
+
+    if (body?.object !== "whatsapp_business_account") {
+      return;
     }
 
-    const normalizedName = String(name).trim();
-    const normalizedEmail = String(email).trim().toLowerCase();
-    const normalizedState = String(state).trim();
+    const changes = body?.entry?.flatMap((entry) => entry?.changes || []) || [];
 
-    let normalizedPhone = String(phone).replace(/\D/g, "");
-    if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) {
-      normalizedPhone = normalizedPhone.substring(2);
+    for (const change of changes) {
+      const value = change?.value;
+
+      /* =====================================
+         INCOMING WHATSAPP MESSAGES
+      ===================================== */
+
+      for (const message of value?.messages || []) {
+        const phone = message?.from || null;
+
+        let text = null;
+
+        if (message?.type === "text") {
+          text = message?.text?.body || null;
+        }
+
+        await WhatsAppMessage.create({
+          phone,
+
+          direction: "incoming",
+
+          messageId: message?.id || null,
+
+          messageType: message?.type || null,
+
+          text,
+
+          raw: message,
+        });
+
+        console.log(
+          `📩 WhatsApp message from ${phone}: ${text || message?.type}`,
+        );
+      }
+
+      /* =====================================
+         MESSAGE STATUS
+      ===================================== */
+
+      for (const status of value?.statuses || []) {
+        await WhatsAppMessage.create({
+          phone: status?.recipient_id || "unknown",
+
+          direction: "status",
+
+          messageId: status?.id || null,
+
+          status: status?.status || null,
+
+          raw: status,
+        });
+
+        console.log(`📬 WhatsApp status: ${status?.status} | ${status?.id}`);
+      }
     }
-    if (normalizedPhone.length !== 10) {
-      return res.status(400).json({ success: false, message: "Invalid phone" });
-    }
-
-    const lead = await Lead.create({
-      name: normalizedName,
-      phone: normalizedPhone,
-      email: normalizedEmail,
-      state: normalizedState,
-      communityJoined: communityJoined !== false,
-      communityJoinDate: communityJoined !== false ? new Date() : null,
-    });
-
-    stats.totalRegistrations += 1;
-
-    const timeTaken = Date.now() - startTime;
-    console.log(`✅ Lead saved in ${timeTaken}ms`);
-
-    return res.status(201).json({
-      success: true,
-      message: "Registration successful!",
-      leadId: lead._id,
-      zoomLink: WEBINAR_MEETING_LINK,
-      whatsappCommunityLink: WHATSAPP_COMMUNITY_LINK,
-      totalRegistrations: stats.totalRegistrations,
-    });
-
   } catch (error) {
-    console.error("❌ Error:", error.message);
-    if (error.code === 11000) {
-      return res.status(409).json({ success: false, message: "Phone already registered" });
-    }
-    return res.status(500).json({ success: false, message: "Server error" });
+    console.error("❌ Webhook processing error:", error.message);
   }
 });
 
-// ============================================================
-// HEALTH
-// ============================================================
+/* =========================================================
+   HEALTH CHECK
+========================================================= */
 
 app.get("/health", (req, res) => {
   res.json({
     success: true,
-    mongodb: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
+
+    mongodb:
+      mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
+
+    whatsapp: {
+      configured: Boolean(WHATSAPP_ACCESS_TOKEN && WHATSAPP_PHONE_NUMBER_ID),
+
+      phoneNumberIdConfigured: Boolean(WHATSAPP_PHONE_NUMBER_ID),
+
+      accessTokenConfigured: Boolean(WHATSAPP_ACCESS_TOKEN),
+
+      templateName: WHATSAPP_TEMPLATE_NAME,
+
+      graphApiVersion: GRAPH_API_VERSION,
+    },
+
+    webhook: {
+      configured: Boolean(WEBHOOK_VERIFY_TOKEN),
+    },
+
     stats: {
       totalVisitors: stats.totalVisitors,
+
       totalRegistrations: stats.totalRegistrations,
+
       onlineNow: stats.onlineUsers.size,
     },
   });
 });
 
-// ============================================================
-// START
-// ============================================================
+/* =========================================================
+   BASIC STATS
+========================================================= */
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  setInterval(cleanupOnlineUsers, 15000);
+app.get("/api/stats", (req, res) => {
+  res.json({
+    success: true,
+
+    totalVisitors: stats.totalVisitors,
+
+    totalRegistrations: stats.totalRegistrations,
+
+    onlineNow: stats.onlineUsers.size,
+  });
 });
 
-On Fri, Sep 25, 2026 at 5:55 PM jais gautam <gautamjais574@gmail.com> wrote:
+/* =========================================================
+   404
+========================================================= */
 
-require("dotenv").config();
-
-
-const dns = require("dns");
-
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
-console.log("🔎 DNS SERVERS:", dns.getServers());
-console.log("🔎 MONGO URI EXISTS:", !!process.env.MONGO_URI);
-const express = require("express");
-const path = require("path");
-const mongoose = require("mongoose");
-const cors = require("cors");
-
-const app = express();
-
-app.use(cors({ origin: "*" }));
-app.use(express.json({ limit: "1mb" }));
-app.use(express.urlencoded({ extended: true, limit: "1mb" }));
-
-app.use(express.static(path.join(__dirname, "public")));
-app.use(express.static(__dirname));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found.",
+  });
 });
 
-const PORT = Number(process.env.PORT) || 5000;
-const MONGO_URI = process.env.MONGO_URI;
+/* =========================================================
+   START SERVER
+========================================================= */
 
-const WEBINAR_MEETING_LINK =
-  process.env.GOOGLE_MEET_LINK ||
-  "https://meet.google.com/uca-deoe-vnh?hs=1";
+async function startServer() {
+  await connectMongoDB();
 
-const WHATSAPP_COMMUNITY_LINK =
-  "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
+  app.listen(PORT, () => {
+    console.log("");
+    console.log("==============================================");
+    console.log("🚀 SERVER STARTED");
+    console.log("==============================================");
 
-// ============================================================
-// 📊 LIVE STATS
-// ============================================================
+    console.log(`Local: http://localhost:${PORT}`);
 
-const stats = {
-  totalVisitors: 0,
-  totalRegistrations: 0,
-  onlineUsers: new Map(),
-  startTime: Date.now(),
-};
+    console.log(`Webhook: http://localhost:${PORT}/webhook`);
 
-function cleanupOnlineUsers() {
-  const now = Date.now();
-  for (const [id, timestamp] of stats.onlineUsers.entries()) {
-    if (now - timestamp > 30000) stats.onlineUsers.delete(id);
-  }
+    console.log(`Health: http://localhost:${PORT}/health`);
+
+    console.log("");
+    console.log("🔐 WEBHOOK VERIFY TOKEN:");
+
+    console.log(WEBHOOK_VERIFY_TOKEN);
+
+    console.log("");
+
+    console.log(
+      "📱 WhatsApp configured:",
+      Boolean(WHATSAPP_ACCESS_TOKEN && WHATSAPP_PHONE_NUMBER_ID),
+    );
+
+    console.log("📋 Template:", WHATSAPP_TEMPLATE_NAME);
+
+    console.log("🌐 Graph API:", GRAPH_API_VERSION);
+
+    console.log("==============================================");
+    console.log("");
+  });
 }
 
-// ============================================================
-// MONGODB — FAST CONNECT
-// ============================================================
-
-mongoose.set("bufferCommands", false);
-
-mongoose
-  .connect(MONGO_URI, {
-    serverSelectionTimeoutMS: 3000,
-    socketTimeoutMS: 10000,
-    maxPoolSize: 10,
-    minPoolSize: 2,
-    connectTimeoutMS: 5000,
-  })
-  .then(() => console.log("🟢 MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB error:", err.message));
-
-// ============================================================
-// LEAD SCHEMA
-// ============================================================
-
-const leadSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true, trim: true },
-    phone: { type: String, required: true, unique: true, trim: true },
-    email: { type: String, required: true, lowercase: true, trim: true },
-    state: { type: String, required: true, trim: true },
-    communityJoined: { type: Boolean, default: false },
-    communityJoinDate: { type: Date, default: null },
-    registrationDate: { type: Date, default: Date.now },
-  },
-  { timestamps: true }
-);
-
-const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
-
-// ============================================================
-// 📊 STATS ENDPOINTS
-// ============================================================
-
-app.post("/api/track-visit", (req, res) => {
-  const { visitorId } = req.body;
-  if (visitorId) stats.onlineUsers.set(visitorId, Date.now());
-  cleanupOnlineUsers();
-  stats.totalVisitors += 1;
-  res.json({
-    success: true,
-    visitors: stats.totalVisitors,
-    registrations: stats.totalRegistrations,
-    online: stats.onlineUsers.size,
-  });
-});
-
-app.get("/api/stats", (req, res) => {
-  cleanupOnlineUsers();
-  res.json({
-    success: true,
-    visitors: stats.totalVisitors,
-    registrations: stats.totalRegistrations,
-    online: stats.onlineUsers.size,
-  });
-});
-
-app.post("/api/heartbeat", (req, res) => {
-  const { visitorId } = req.body;
-  if (visitorId) stats.onlineUsers.set(visitorId, Date.now());
-  cleanupOnlineUsers();
-  res.json({ success: true, online: stats.onlineUsers.size });
-});
-
-// ============================================================
-// 🚀 REGISTRATION API — FAST
-// ============================================================
-
-app.post("/api/leads", async (req, res) => {
-  const startTime = Date.now();
-
-  try {
-    const { name, phone, email, state, communityJoined } = req.body;
-
-    if (!name || !phone || !email || !state) {
-      return res.status(400).json({ success: false, message: "All fields required" });
-    }
-
-    const normalizedName = String(name).trim();
-    const normalizedEmail = String(email).trim().toLowerCase();
-    const normalizedState = String(state).trim();
-
-    let normalizedPhone = String(phone).replace(/\D/g, "");
-    if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) {
-      normalizedPhone = normalizedPhone.substring(2);
-    }
-    if (normalizedPhone.length !== 10) {
-      return res.status(400).json({ success: false, message: "Invalid phone" });
-    }
-
-    const lead = await Lead.create({
-      name: normalizedName,
-      phone: normalizedPhone,
-      email: normalizedEmail,
-      state: normalizedState,
-      communityJoined: communityJoined !== false,
-      communityJoinDate: communityJoined !== false ? new Date() : null,
-    });
-
-    stats.totalRegistrations += 1;
-
-    const timeTaken = Date.now() - startTime;
-    console.log(`✅ Lead saved in ${timeTaken}ms`);
-
-    return res.status(201).json({
-      success: true,
-      message: "Registration successful!",
-      leadId: lead._id,
-      zoomLink: WEBINAR_MEETING_LINK,
-      whatsappCommunityLink: WHATSAPP_COMMUNITY_LINK,
-      totalRegistrations: stats.totalRegistrations,
-    });
-
-  } catch (error) {
-    console.error("❌ Error:", error.message);
-    if (error.code === 11000) {
-      return res.status(409).json({ success: false, message: "Phone already registered" });
-    }
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// ============================================================
-// HEALTH
-// ============================================================
-
-app.get("/health", (req, res) => {
-  res.json({
-    success: true,
-    mongodb: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
-    stats: {
-      totalVisitors: stats.totalVisitors,
-      totalRegistrations: stats.totalRegistrations,
-      onlineNow: stats.onlineUsers.size,
-    },
-  });
-});
-
-// ============================================================
-// START
-// ============================================================
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  setInterval(cleanupOnlineUsers, 15000);
-});
+startServer();
