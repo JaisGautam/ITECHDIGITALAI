@@ -10918,104 +10918,864 @@
 
 // startServer();
 
+// require("dotenv").config();
+
+// const fs = require("fs");
+// const path = require("path");
+// const crypto = require("crypto");
+// const dns = require("dns");
+
+// // MongoDB Atlas DNS issue workaround
+// dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
+// const express = require("express");
+// const mongoose = require("mongoose");
+// const cors = require("cors");
+
+// const app = express();
+
+// /* =========================================================
+//    BASIC APP CONFIG
+// ========================================================= */
+
+// app.use(cors({ origin: "*" }));
+
+// app.use(express.json({ limit: "1mb" }));
+// app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+
+// app.use(express.static(path.join(__dirname, "public")));
+// app.use(express.static(__dirname));
+
+// app.get("/", (req, res) => {
+//   res.sendFile(path.join(__dirname, "index.html"));
+// });
+
+// /* =========================================================
+//    ENV CONFIG
+// ========================================================= */
+
+// const PORT = Number(process.env.PORT) || 5000;
+
+// const MONGO_URI = process.env.MONGO_URI;
+
+// const GOOGLE_MEET_LINK =
+//   process.env.GOOGLE_MEET_LINK || "https://meet.google.com/uca-deoe-vnh?hs=1";
+
+// const WHATSAPP_COMMUNITY_LINK =
+//   process.env.WHATSAPP_COMMUNITY_LINK ||
+//   "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
+
+// /* =========================================================
+//    WEBHOOK VERIFY TOKEN
+//    Automatically generate and save in .env if missing
+// ========================================================= */
+
+// function getOrCreateWebhookToken() {
+//   const envPath = path.join(__dirname, ".env");
+
+//   let token = process.env.WEBHOOK_VERIFY_TOKEN;
+
+//   if (token && token.trim()) {
+//     return token.trim();
+//   }
+
+//   token = crypto.randomBytes(32).toString("hex");
+
+//   let envContent = "";
+
+//   if (fs.existsSync(envPath)) {
+//     envContent = fs.readFileSync(envPath, "utf8");
+//   }
+
+//   if (envContent.length > 0 && !envContent.endsWith("\n")) {
+//     envContent += "\n";
+//   }
+
+//   envContent += `WEBHOOK_VERIFY_TOKEN=${token}\n`;
+
+//   fs.writeFileSync(envPath, envContent, "utf8");
+
+//   process.env.WEBHOOK_VERIFY_TOKEN = token;
+
+//   console.log("");
+//   console.log("==============================================");
+//   console.log("🔐 NEW WEBHOOK VERIFY TOKEN GENERATED");
+//   console.log("==============================================");
+//   console.log(token);
+//   console.log("==============================================");
+//   console.log("Saved automatically inside .env");
+//   console.log("Use this SAME token in Meta Webhook settings.");
+//   console.log("==============================================");
+//   console.log("");
+
+//   return token;
+// }
+
+// const WEBHOOK_VERIFY_TOKEN = getOrCreateWebhookToken();
+
+// /* =========================================================
+//    WHATSAPP CLOUD API CONFIG
+// ========================================================= */
+
+// const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN || "";
+
+// const WHATSAPP_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || "";
+
+// const WHATSAPP_TEMPLATE_NAME =
+//   process.env.WHATSAPP_TEMPLATE_NAME || "seminar_reminder";
+
+// const WHATSAPP_TEMPLATE_LANGUAGE =
+//   process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en_US";
+
+// /*
+//    Keep this configurable because Meta can change
+//    supported Graph API versions.
+// */
+// const GRAPH_API_VERSION = process.env.GRAPH_API_VERSION || "v23.0";
+
+// /* =========================================================
+//    MONGODB
+// ========================================================= */
+
+// if (!MONGO_URI) {
+//   console.error("❌ MONGO_URI missing in .env");
+// }
+
+// /* =========================================================
+//    LEAD SCHEMA
+// ========================================================= */
+
+// const leadSchema = new mongoose.Schema(
+//   {
+//     name: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//     },
+
+//     phone: {
+//       type: String,
+//       required: true,
+//       unique: true,
+//       trim: true,
+//       index: true,
+//     },
+
+//     email: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//       lowercase: true,
+//     },
+
+//     state: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//     },
+
+//     communityJoined: {
+//       type: Boolean,
+//       default: false,
+//     },
+
+//     communityJoinDate: {
+//       type: Date,
+//       default: null,
+//     },
+
+//     registrationDate: {
+//       type: Date,
+//       default: Date.now,
+//     },
+
+//     source: {
+//       type: String,
+//       default: "website",
+//     },
+
+//     campaign: {
+//       type: String,
+//       default: null,
+//     },
+//   },
+//   {
+//     timestamps: true,
+//   },
+// );
+
+// // ✅ SAFETY: Model overwrite error se bachne ke liye
+// const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
+
+// /* =========================================================
+//    WHATSAPP MESSAGE SCHEMA
+// ========================================================= */
+
+// const whatsappMessageSchema = new mongoose.Schema(
+//   {
+//     phone: {
+//       type: String,
+//       required: true,
+//       index: true,
+//     },
+
+//     direction: {
+//       type: String,
+//       enum: ["outgoing", "incoming", "status"],
+//       required: true,
+//     },
+
+//     messageId: {
+//       type: String,
+//       index: true,
+//       default: null,
+//     },
+
+//     messageType: {
+//       type: String,
+//       default: null,
+//     },
+
+//     status: {
+//       type: String,
+//       default: null,
+//     },
+
+//     text: {
+//       type: String,
+//       default: null,
+//     },
+
+//     raw: {
+//       type: mongoose.Schema.Types.Mixed,
+//       default: null,
+//     },
+//   },
+//   {
+//     timestamps: true,
+//   },
+// );
+
+// // ✅ SAFETY: Model overwrite error se bachne ke liye
+// const WhatsAppMessage =
+//   mongoose.models.WhatsAppMessage ||
+//   mongoose.model("WhatsAppMessage", whatsappMessageSchema);
+
+// /* =========================================================
+//    STATS
+//    ✅ FIX: Map use kiya (pehle Set tha) + startTime add kiya
+// ========================================================= */
+
+// const stats = {
+//   totalVisitors: 0,
+//   totalRegistrations: 0,
+//   onlineUsers: new Map(),
+//   startTime: Date.now(),
+// };
+
+// /* =========================================================
+//    CLEANUP ONLINE USERS
+//    ✅ FIX: Ye function wapas add kiya
+// ========================================================= */
+
+// function cleanupOnlineUsers() {
+//   const now = Date.now();
+//   for (const [id, timestamp] of stats.onlineUsers.entries()) {
+//     if (now - timestamp > 30000) stats.onlineUsers.delete(id);
+//   }
+// }
+
+// /* =========================================================
+//    MONGODB CONNECTION
+// ========================================================= */
+
+// mongoose.set("bufferCommands", false);
+
+// async function connectMongoDB() {
+//   if (!MONGO_URI) {
+//     console.error("❌ MONGO_URI is missing.");
+//     return;
+//   }
+
+//   try {
+//     await mongoose.connect(MONGO_URI, {
+//       serverSelectionTimeoutMS: 5000,
+//       socketTimeoutMS: 10000,
+//       maxPoolSize: 10,
+//       minPoolSize: 2,
+//       connectTimeoutMS: 5000,
+//     });
+
+//     console.log("🟢 MONGODB CONNECTED");
+//   } catch (error) {
+//     console.error("❌ MONGODB CONNECTION ERROR:");
+//     console.error(error.message);
+//   }
+// }
+
+// /* =========================================================
+//    PHONE NORMALIZATION
+// ========================================================= */
+
+// function normalizeIndianPhone(phone) {
+//   let value = String(phone || "").replace(/\D/g, "");
+
+//   if (value.startsWith("00")) {
+//     value = value.substring(2);
+//   }
+
+//   // Already +91XXXXXXXXXX
+//   if (value.startsWith("91") && value.length === 12) {
+//     return value;
+//   }
+
+//   // 10 digit Indian number
+//   if (value.length === 10) {
+//     return `91${value}`;
+//   }
+
+//   throw new Error("Invalid Indian phone number. Use 10 digit Indian number.");
+// }
+
+// /* =========================================================
+//    WHATSAPP TEMPLATE SENDER
+// ========================================================= */
+
+// async function sendWhatsAppTemplate({
+//   phone,
+//   name,
+//   meetingLink = GOOGLE_MEET_LINK,
+//   communityLink = WHATSAPP_COMMUNITY_LINK,
+//   companyName = "RAVANTOAI",
+// }) {
+//   if (!WHATSAPP_ACCESS_TOKEN) {
+//     throw new Error("WHATSAPP_ACCESS_TOKEN is missing in .env");
+//   }
+
+//   if (!WHATSAPP_PHONE_NUMBER_ID) {
+//     throw new Error("WHATSAPP_PHONE_NUMBER_ID is missing in .env");
+//   }
+
+//   const recipient = normalizeIndianPhone(phone);
+
+//   const url =
+//     `https://graph.facebook.com/${GRAPH_API_VERSION}/` +
+//     `${WHATSAPP_PHONE_NUMBER_ID}/messages`;
+
+//   const payload = {
+//     messaging_product: "whatsapp",
+
+//     recipient_type: "individual",
+
+//     to: recipient,
+
+//     type: "template",
+
+//     template: {
+//       name: WHATSAPP_TEMPLATE_NAME,
+
+//       language: {
+//         code: WHATSAPP_TEMPLATE_LANGUAGE,
+//       },
+
+//       components: [
+//         {
+//           type: "body",
+
+//           parameters: [
+//             {
+//               type: "text",
+//               text: String(name || "there"),
+//             },
+
+//             {
+//               type: "text",
+//               text: String(meetingLink),
+//             },
+
+//             {
+//               type: "text",
+//               text: String(communityLink),
+//             },
+
+//             {
+//               type: "text",
+//               text: String(companyName),
+//             },
+//           ],
+//         },
+//       ],
+//     },
+//   };
+
+//   const response = await fetch(url, {
+//     method: "POST",
+
+//     headers: {
+//       Authorization: `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+//       "Content-Type": "application/json",
+//     },
+
+//     body: JSON.stringify(payload),
+//   });
+
+//   const data = await response.json();
+
+//   if (!response.ok) {
+//     const message =
+//       data?.error?.message || `WhatsApp API returned HTTP ${response.status}`;
+
+//     const error = new Error(message);
+
+//     error.status = response.status;
+//     error.meta = data;
+
+//     throw error;
+//   }
+
+//   return {
+//     recipient,
+
+//     messageId: data?.messages?.[0]?.id || null,
+
+//     response: data,
+//   };
+// }
+
+// /* =========================================================
+//    📊 STATS ENDPOINTS (Old endpoints — wapas add kiye)
+// ========================================================= */
+
+// /* ---------- TRACK VISIT ---------- */
+// app.post("/api/track-visit", (req, res) => {
+//   const { visitorId } = req.body;
+
+//   if (visitorId) stats.onlineUsers.set(visitorId, Date.now());
+
+//   cleanupOnlineUsers();
+
+//   stats.totalVisitors += 1;
+
+//   res.json({
+//     success: true,
+//     visitors: stats.totalVisitors,
+//     registrations: stats.totalRegistrations,
+//     online: stats.onlineUsers.size,
+//   });
+// });
+
+// /* ---------- HEARTBEAT ---------- */
+// app.post("/api/heartbeat", (req, res) => {
+//   const { visitorId } = req.body;
+
+//   if (visitorId) stats.onlineUsers.set(visitorId, Date.now());
+
+//   cleanupOnlineUsers();
+
+//   res.json({
+//     success: true,
+//     online: stats.onlineUsers.size,
+//   });
+// });
+
+// /* ---------- STATS ---------- */
+// // ✅ FIX: Response format purana kar diya (visitors, registrations, online)
+// app.get("/api/stats", (req, res) => {
+//   cleanupOnlineUsers();
+
+//   res.json({
+//     success: true,
+//     visitors: stats.totalVisitors,
+//     registrations: stats.totalRegistrations,
+//     online: stats.onlineUsers.size,
+//   });
+// });
+
+// /* =========================================================
+//    🚀 WEBSITE LEAD API
+//    ✅ FIX: Response format purana kar diya (zoomLink, leadId, totalRegistrations)
+// ========================================================= */
+
+// app.post("/api/leads", async (req, res) => {
+//   try {
+//     const { name, phone, email, state, communityJoined, source, campaign } =
+//       req.body;
+
+//     if (!name || !phone || !email || !state) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Name, phone, email and state are required.",
+//       });
+//     }
+
+//     const normalizedPhone = String(phone).replace(/\D/g, "").slice(-10);
+
+//     if (normalizedPhone.length !== 10) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid Indian phone number.",
+//       });
+//     }
+
+//     const existingLead = await Lead.findOne({
+//       phone: normalizedPhone,
+//     });
+
+//     if (existingLead) {
+//       return res.status(409).json({
+//         success: false,
+//         message: "Lead already exists.",
+//         lead: existingLead,
+//       });
+//     }
+
+//     const lead = await Lead.create({
+//       name,
+//       phone: normalizedPhone,
+//       email,
+//       state,
+
+//       communityJoined: communityJoined === true || communityJoined === "true",
+
+//       communityJoinDate:
+//         communityJoined === true || communityJoined === "true"
+//           ? new Date()
+//           : null,
+
+//       source: source || "website",
+
+//       campaign: campaign || null,
+//     });
+
+//     stats.totalRegistrations++;
+
+//     // ✅ FIX: Response format purana kar diya
+//     return res.status(201).json({
+//       success: true,
+//       message: "Registration successful!",
+//       leadId: lead._id,
+//       zoomLink: GOOGLE_MEET_LINK,
+//       whatsappCommunityLink: WHATSAPP_COMMUNITY_LINK,
+//       totalRegistrations: stats.totalRegistrations,
+//     });
+//   } catch (error) {
+//     console.error("❌ Lead API error:", error);
+
+//     if (error.code === 11000) {
+//       return res.status(409).json({
+//         success: false,
+//         message: "Phone number already registered.",
+//       });
+//     }
+
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error.",
+//     });
+//   }
+// });
+
+// /* =========================================================
+//    SEND ONE WHATSAPP TEMPLATE
+// ========================================================= */
+
+// app.post("/api/whatsapp/send-template", async (req, res) => {
+//   try {
+//     const { phone, name, meetingLink, communityLink, companyName } = req.body;
+
+//     if (!phone) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Phone is required.",
+//       });
+//     }
+
+//     const result = await sendWhatsAppTemplate({
+//       phone,
+//       name,
+//       meetingLink,
+//       communityLink,
+//       companyName,
+//     });
+
+//     await WhatsAppMessage.create({
+//       phone: result.recipient,
+
+//       direction: "outgoing",
+
+//       messageId: result.messageId,
+
+//       messageType: "template",
+
+//       status: "accepted",
+
+//       raw: result.response,
+//     });
+
+//     return res.json({
+//       success: true,
+
+//       message: "WhatsApp template sent.",
+
+//       messageId: result.messageId,
+
+//       phone: result.recipient,
+//     });
+//   } catch (error) {
+//     console.error("❌ WhatsApp send error:", error.meta || error.message);
+
+//     return res.status(error.status || 500).json({
+//       success: false,
+
+//       message: error.message,
+
+//       meta: error.meta || null,
+//     });
+//   }
+// });
+
+// /* =========================================================
+//    WHATSAPP WEBHOOK VERIFICATION
+// ========================================================= */
+
+// app.get("/webhook", (req, res) => {
+//   const mode = req.query["hub.mode"];
+
+//   const token = req.query["hub.verify_token"];
+
+//   const challenge = req.query["hub.challenge"];
+
+//   console.log("");
+//   console.log("========== WEBHOOK VERIFICATION ==========");
+
+//   console.log("Mode:", mode);
+
+//   console.log("Token received:", token ? "YES" : "NO");
+
+//   if (mode === "subscribe" && token === WEBHOOK_VERIFY_TOKEN) {
+//     console.log("🟢 WEBHOOK VERIFIED SUCCESSFULLY");
+
+//     return res.status(200).send(challenge);
+//   }
+
+//   console.error("❌ WEBHOOK VERIFICATION FAILED");
+
+//   return res.sendStatus(403);
+// });
+
+// /* =========================================================
+//    WHATSAPP WEBHOOK EVENTS
+// ========================================================= */
+
+// app.post("/webhook", async (req, res) => {
+//   // Meta expects quick 200 response
+//   res.sendStatus(200);
+
+//   try {
+//     const body = req.body;
+
+//     console.log("");
+//     console.log("========== WHATSAPP WEBHOOK ==========");
+//     console.log(JSON.stringify(body, null, 2));
+
+//     if (body?.object !== "whatsapp_business_account") {
+//       return;
+//     }
+
+//     const changes = body?.entry?.flatMap((entry) => entry?.changes || []) || [];
+
+//     for (const change of changes) {
+//       const value = change?.value;
+
+//       /* =====================================
+//          INCOMING WHATSAPP MESSAGES
+//       ===================================== */
+
+//       for (const message of value?.messages || []) {
+//         const phone = message?.from || null;
+
+//         let text = null;
+
+//         if (message?.type === "text") {
+//           text = message?.text?.body || null;
+//         }
+
+//         await WhatsAppMessage.create({
+//           phone,
+
+//           direction: "incoming",
+
+//           messageId: message?.id || null,
+
+//           messageType: message?.type || null,
+
+//           text,
+
+//           raw: message,
+//         });
+
+//         console.log(
+//           `📩 WhatsApp message from ${phone}: ${text || message?.type}`,
+//         );
+//       }
+
+//       /* =====================================
+//          MESSAGE STATUS
+//       ===================================== */
+
+//       for (const status of value?.statuses || []) {
+//         await WhatsAppMessage.create({
+//           phone: status?.recipient_id || "unknown",
+
+//           direction: "status",
+
+//           messageId: status?.id || null,
+
+//           status: status?.status || null,
+
+//           raw: status,
+//         });
+
+//         console.log(`📬 WhatsApp status: ${status?.status} | ${status?.id}`);
+//       }
+//     }
+//   } catch (error) {
+//     console.error("❌ Webhook processing error:", error.message);
+//   }
+// });
+
+// /* =========================================================
+//    HEALTH CHECK
+// ========================================================= */
+
+// app.get("/health", (req, res) => {
+//   res.json({
+//     success: true,
+
+//     mongodb:
+//       mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
+
+//     whatsapp: {
+//       configured: Boolean(WHATSAPP_ACCESS_TOKEN && WHATSAPP_PHONE_NUMBER_ID),
+
+//       phoneNumberIdConfigured: Boolean(WHATSAPP_PHONE_NUMBER_ID),
+
+//       accessTokenConfigured: Boolean(WHATSAPP_ACCESS_TOKEN),
+
+//       templateName: WHATSAPP_TEMPLATE_NAME,
+
+//       graphApiVersion: GRAPH_API_VERSION,
+//     },
+
+//     webhook: {
+//       configured: Boolean(WEBHOOK_VERIFY_TOKEN),
+//     },
+
+//     stats: {
+//       totalVisitors: stats.totalVisitors,
+
+//       totalRegistrations: stats.totalRegistrations,
+
+//       onlineNow: stats.onlineUsers.size,
+//     },
+//   });
+// });
+
+// /* =========================================================
+//    404
+// ========================================================= */
+
+// app.use((req, res) => {
+//   res.status(404).json({
+//     success: false,
+//     message: "Route not found.",
+//   });
+// });
+
+// /* =========================================================
+//    START SERVER
+// ========================================================= */
+
+// async function startServer() {
+//   await connectMongoDB();
+
+//   app.listen(PORT, () => {
+//     console.log("");
+//     console.log("==============================================");
+//     console.log("🚀 SERVER STARTED");
+//     console.log("==============================================");
+
+//     console.log(`Local: http://localhost:${PORT}`);
+
+//     console.log(`Webhook: http://localhost:${PORT}/webhook`);
+
+//     console.log(`Health: http://localhost:${PORT}/health`);
+
+//     console.log("");
+//     console.log("🔐 WEBHOOK VERIFY TOKEN:");
+
+//     console.log(WEBHOOK_VERIFY_TOKEN);
+
+//     console.log("");
+
+//     console.log(
+//       "📱 WhatsApp configured:",
+//       Boolean(WHATSAPP_ACCESS_TOKEN && WHATSAPP_PHONE_NUMBER_ID),
+//     );
+
+//     console.log("📋 Template:", WHATSAPP_TEMPLATE_NAME);
+
+//     console.log("🌐 Graph API:", GRAPH_API_VERSION);
+
+//     console.log("==============================================");
+//     console.log("");
+
+//     // ✅ FIX: Cleanup interval wapas add kiya
+//     setInterval(cleanupOnlineUsers, 15000);
+//   });
+// }
+
+// startServer();
+
 require("dotenv").config();
-
-const fs = require("fs");
-const path = require("path");
-const crypto = require("crypto");
-const dns = require("dns");
-
-// MongoDB Atlas DNS issue workaround
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
+const crypto = require("crypto");
+const cron = require("node-cron");
+const dns = require("dns");
+
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const app = express();
 
-/* =========================================================
-   BASIC APP CONFIG
-========================================================= */
+app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
 
-app.use(cors({ origin: "*" }));
+// Meta webhook signature verification ke liye raw body preserve karo.
+app.use(
+  express.json({
+    limit: "1mb",
+    verify: (req, res, buf) => {
+      req.rawBody = Buffer.from(buf);
+    },
+  }),
+);
 
-app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
-
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(__dirname));
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-/* =========================================================
-   ENV CONFIG
-========================================================= */
-
 const PORT = Number(process.env.PORT) || 5000;
-
 const MONGO_URI = process.env.MONGO_URI;
 
 const GOOGLE_MEET_LINK =
-  process.env.GOOGLE_MEET_LINK || "https://meet.google.com/uca-deoe-vnh?hs=1";
+  process.env.GOOGLE_MEET_LINK || "https://meet.google.com/rqf-yuyk-jge";
 
 const WHATSAPP_COMMUNITY_LINK =
   process.env.WHATSAPP_COMMUNITY_LINK ||
   "https://whatsapp.com/channel/0029VbDbyYdChq6ORFUB1q2E";
-
-/* =========================================================
-   WEBHOOK VERIFY TOKEN
-   Automatically generate and save in .env if missing
-========================================================= */
-
-function getOrCreateWebhookToken() {
-  const envPath = path.join(__dirname, ".env");
-
-  let token = process.env.WEBHOOK_VERIFY_TOKEN;
-
-  if (token && token.trim()) {
-    return token.trim();
-  }
-
-  token = crypto.randomBytes(32).toString("hex");
-
-  let envContent = "";
-
-  if (fs.existsSync(envPath)) {
-    envContent = fs.readFileSync(envPath, "utf8");
-  }
-
-  if (envContent.length > 0 && !envContent.endsWith("\n")) {
-    envContent += "\n";
-  }
-
-  envContent += `WEBHOOK_VERIFY_TOKEN=${token}\n`;
-
-  fs.writeFileSync(envPath, envContent, "utf8");
-
-  process.env.WEBHOOK_VERIFY_TOKEN = token;
-
-  console.log("");
-  console.log("==============================================");
-  console.log("🔐 NEW WEBHOOK VERIFY TOKEN GENERATED");
-  console.log("==============================================");
-  console.log(token);
-  console.log("==============================================");
-  console.log("Saved automatically inside .env");
-  console.log("Use this SAME token in Meta Webhook settings.");
-  console.log("==============================================");
-  console.log("");
-
-  return token;
-}
-
-const WEBHOOK_VERIFY_TOKEN = getOrCreateWebhookToken();
-
-/* =========================================================
-   WHATSAPP CLOUD API CONFIG
-========================================================= */
 
 const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN || "";
 
@@ -11027,144 +11787,19 @@ const WHATSAPP_TEMPLATE_NAME =
 const WHATSAPP_TEMPLATE_LANGUAGE =
   process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en_US";
 
-/*
-   Keep this configurable because Meta can change
-   supported Graph API versions.
-*/
 const GRAPH_API_VERSION = process.env.GRAPH_API_VERSION || "v23.0";
 
-/* =========================================================
-   MONGODB
-========================================================= */
+const META_LEADS_VERIFY_TOKEN = process.env.META_LEADS_VERIFY_TOKEN || "";
 
-if (!MONGO_URI) {
-  console.error("❌ MONGO_URI missing in .env");
-}
+const META_LEAD_ACCESS_TOKEN = process.env.META_LEAD_ACCESS_TOKEN || "";
 
-/* =========================================================
-   LEAD SCHEMA
-========================================================= */
+const META_APP_SECRET = process.env.META_APP_SECRET || "";
 
-const leadSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+const ADMIN_AUTOMATION_KEY = process.env.ADMIN_AUTOMATION_KEY || "";
 
-    phone: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      index: true,
-    },
+const FOLLOWUP_ENABLED = process.env.FOLLOWUP_ENABLED !== "false";
 
-    email: {
-      type: String,
-      required: true,
-      trim: true,
-      lowercase: true,
-    },
-
-    state: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    communityJoined: {
-      type: Boolean,
-      default: false,
-    },
-
-    communityJoinDate: {
-      type: Date,
-      default: null,
-    },
-
-    registrationDate: {
-      type: Date,
-      default: Date.now,
-    },
-
-    source: {
-      type: String,
-      default: "website",
-    },
-
-    campaign: {
-      type: String,
-      default: null,
-    },
-  },
-  {
-    timestamps: true,
-  },
-);
-
-// ✅ SAFETY: Model overwrite error se bachne ke liye
-const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
-
-/* =========================================================
-   WHATSAPP MESSAGE SCHEMA
-========================================================= */
-
-const whatsappMessageSchema = new mongoose.Schema(
-  {
-    phone: {
-      type: String,
-      required: true,
-      index: true,
-    },
-
-    direction: {
-      type: String,
-      enum: ["outgoing", "incoming", "status"],
-      required: true,
-    },
-
-    messageId: {
-      type: String,
-      index: true,
-      default: null,
-    },
-
-    messageType: {
-      type: String,
-      default: null,
-    },
-
-    status: {
-      type: String,
-      default: null,
-    },
-
-    text: {
-      type: String,
-      default: null,
-    },
-
-    raw: {
-      type: mongoose.Schema.Types.Mixed,
-      default: null,
-    },
-  },
-  {
-    timestamps: true,
-  },
-);
-
-// ✅ SAFETY: Model overwrite error se bachne ke liye
-const WhatsAppMessage =
-  mongoose.models.WhatsAppMessage ||
-  mongoose.model("WhatsAppMessage", whatsappMessageSchema);
-
-/* =========================================================
-   STATS
-   ✅ FIX: Map use kiya (pehle Set tha) + startTime add kiya
-========================================================= */
+const FOLLOWUP_CRON = process.env.FOLLOWUP_CRON || "*/15 * * * *";
 
 const stats = {
   totalVisitors: 0,
@@ -11173,73 +11808,185 @@ const stats = {
   startTime: Date.now(),
 };
 
-/* =========================================================
-   CLEANUP ONLINE USERS
-   ✅ FIX: Ye function wapas add kiya
-========================================================= */
+// --------------------------------------------------
+// DATABASE MODELS
+// --------------------------------------------------
 
-function cleanupOnlineUsers() {
-  const now = Date.now();
-  for (const [id, timestamp] of stats.onlineUsers.entries()) {
-    if (now - timestamp > 30000) stats.onlineUsers.delete(id);
-  }
-}
+const leadSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    phone: { type: String, required: true, trim: true },
+    email: { type: String, default: "", trim: true, lowercase: true },
+    state: { type: String, default: "", trim: true },
 
-/* =========================================================
-   MONGODB CONNECTION
-========================================================= */
+    communityJoined: { type: Boolean, default: false },
+    communityJoinDate: { type: Date, default: null },
 
-mongoose.set("bufferCommands", false);
+    source: { type: String, default: "website", index: true },
+    campaign: { type: String, default: null },
 
-async function connectMongoDB() {
-  if (!MONGO_URI) {
-    console.error("❌ MONGO_URI is missing.");
-    return;
-  }
+    whatsappOptIn: { type: Boolean, default: false },
+    consentCapturedAt: { type: Date, default: null },
+    optedOutAt: { type: Date, default: null },
+    lastIncomingMessageAt: { type: Date, default: null },
 
-  try {
-    await mongoose.connect(MONGO_URI, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 10000,
-      maxPoolSize: 10,
-      minPoolSize: 2,
-      connectTimeoutMS: 5000,
-    });
+    metaLeadId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
 
-    console.log("🟢 MONGODB CONNECTED");
-  } catch (error) {
-    console.error("❌ MONGODB CONNECTION ERROR:");
-    console.error(error.message);
-  }
-}
+    initialMessageStatus: {
+      type: String,
+      enum: [
+        "pending_approval",
+        "sending",
+        "accepted",
+        "failed",
+        "not_eligible",
+      ],
+      default: "pending_approval",
+      index: true,
+    },
 
-/* =========================================================
-   PHONE NORMALIZATION
-========================================================= */
+    initialMessageId: { type: String, default: null },
+    initialApprovedAt: { type: Date, default: null },
+
+    followUp1DueAt: { type: Date, default: null },
+    followUp1Status: { type: String, default: "waiting" },
+    followUp1MessageId: { type: String, default: null },
+
+    followUp2DueAt: { type: Date, default: null },
+    followUp2Status: { type: String, default: "waiting" },
+    followUp2MessageId: { type: String, default: null },
+
+    followUp3DueAt: { type: Date, default: null },
+    followUp3Status: { type: String, default: "waiting" },
+    followUp3MessageId: { type: String, default: null },
+  },
+  { timestamps: true },
+);
+
+leadSchema.index({ phone: 1 }, { unique: true });
+leadSchema.index({ followUp1Status: 1, followUp1DueAt: 1 });
+leadSchema.index({ followUp2Status: 1, followUp2DueAt: 1 });
+leadSchema.index({ followUp3Status: 1, followUp3DueAt: 1 });
+
+const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
+
+const whatsappMessageSchema = new mongoose.Schema(
+  {
+    phone: { type: String, required: true, index: true },
+    direction: {
+      type: String,
+      enum: ["outgoing", "incoming", "status"],
+      required: true,
+    },
+    messageId: { type: String, default: null, index: true },
+    messageType: { type: String, default: null },
+    status: { type: String, default: null },
+    text: { type: String, default: null },
+    raw: { type: mongoose.Schema.Types.Mixed, default: null },
+  },
+  { timestamps: true },
+);
+
+whatsappMessageSchema.index(
+  { messageId: 1, status: 1 },
+  { unique: true, sparse: true },
+);
+
+const WhatsAppMessage =
+  mongoose.models.WhatsAppMessage ||
+  mongoose.model("WhatsAppMessage", whatsappMessageSchema);
+
+// --------------------------------------------------
+// GENERAL HELPERS
+// --------------------------------------------------
 
 function normalizeIndianPhone(phone) {
   let value = String(phone || "").replace(/\D/g, "");
 
-  if (value.startsWith("00")) {
-    value = value.substring(2);
+  if (value.startsWith("00")) value = value.slice(2);
+  if (value.length === 10) value = "91" + value;
+
+  if (!/^91[6-9]\d{9}$/.test(value)) {
+    throw new Error("Invalid Indian mobile number.");
   }
 
-  // Already +91XXXXXXXXXX
-  if (value.startsWith("91") && value.length === 12) {
-    return value;
-  }
-
-  // 10 digit Indian number
-  if (value.length === 10) {
-    return `91${value}`;
-  }
-
-  throw new Error("Invalid Indian phone number. Use 10 digit Indian number.");
+  return value;
 }
 
-/* =========================================================
-   WHATSAPP TEMPLATE SENDER
-========================================================= */
+function cleanupOnlineUsers() {
+  const now = Date.now();
+
+  for (const [id, timestamp] of stats.onlineUsers.entries()) {
+    if (now - timestamp > 30000) {
+      stats.onlineUsers.delete(id);
+    }
+  }
+}
+
+function requireAdmin(req, res, next) {
+  if (!ADMIN_AUTOMATION_KEY) {
+    return res.status(503).json({
+      success: false,
+      message: "ADMIN_AUTOMATION_KEY is not configured.",
+    });
+  }
+
+  const supplied = req.get("x-admin-automation-key") || "";
+
+  const expectedBuffer = Buffer.from(ADMIN_AUTOMATION_KEY);
+  const suppliedBuffer = Buffer.from(supplied);
+
+  if (
+    suppliedBuffer.length !== expectedBuffer.length ||
+    !crypto.timingSafeEqual(suppliedBuffer, expectedBuffer)
+  ) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized.",
+    });
+  }
+
+  next();
+}
+
+function verifyMetaSignature(req) {
+  if (!META_APP_SECRET || !req.rawBody) return false;
+
+  const supplied = req.get("x-hub-signature-256") || "";
+
+  const expected =
+    "sha256=" +
+    crypto
+      .createHmac("sha256", META_APP_SECRET)
+      .update(req.rawBody)
+      .digest("hex");
+
+  const a = Buffer.from(supplied);
+  const b = Buffer.from(expected);
+
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+async function connectMongoDB() {
+  if (!MONGO_URI) {
+    throw new Error("MONGO_URI is missing.");
+  }
+
+  await mongoose.connect(MONGO_URI, {
+    serverSelectionTimeoutMS: 10000,
+    maxPoolSize: 10,
+  });
+
+  console.log("MongoDB connected.");
+}
+
+// --------------------------------------------------
+// WHATSAPP CLOUD API
+// --------------------------------------------------
 
 async function sendWhatsAppTemplate({
   phone,
@@ -11248,12 +11995,8 @@ async function sendWhatsAppTemplate({
   communityLink = WHATSAPP_COMMUNITY_LINK,
   companyName = "RAVANTOAI",
 }) {
-  if (!WHATSAPP_ACCESS_TOKEN) {
-    throw new Error("WHATSAPP_ACCESS_TOKEN is missing in .env");
-  }
-
-  if (!WHATSAPP_PHONE_NUMBER_ID) {
-    throw new Error("WHATSAPP_PHONE_NUMBER_ID is missing in .env");
+  if (!WHATSAPP_ACCESS_TOKEN || !WHATSAPP_PHONE_NUMBER_ID) {
+    throw new Error("WhatsApp Cloud API configuration is missing.");
   }
 
   const recipient = normalizeIndianPhone(phone);
@@ -11264,44 +12007,20 @@ async function sendWhatsAppTemplate({
 
   const payload = {
     messaging_product: "whatsapp",
-
     recipient_type: "individual",
-
     to: recipient,
-
     type: "template",
-
     template: {
       name: WHATSAPP_TEMPLATE_NAME,
-
-      language: {
-        code: WHATSAPP_TEMPLATE_LANGUAGE,
-      },
-
+      language: { code: WHATSAPP_TEMPLATE_LANGUAGE },
       components: [
         {
           type: "body",
-
           parameters: [
-            {
-              type: "text",
-              text: String(name || "there"),
-            },
-
-            {
-              type: "text",
-              text: String(meetingLink),
-            },
-
-            {
-              type: "text",
-              text: String(communityLink),
-            },
-
-            {
-              type: "text",
-              text: String(companyName),
-            },
+            { type: "text", text: String(name || "there") },
+            { type: "text", text: String(meetingLink) },
+            { type: "text", text: String(communityLink) },
+            { type: "text", text: String(companyName) },
           ],
         },
       ],
@@ -11310,22 +12029,20 @@ async function sendWhatsAppTemplate({
 
   const response = await fetch(url, {
     method: "POST",
-
     headers: {
       Authorization: `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
       "Content-Type": "application/json",
     },
-
     body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(20000),
   });
 
   const data = await response.json();
 
   if (!response.ok) {
-    const message =
-      data?.error?.message || `WhatsApp API returned HTTP ${response.status}`;
-
-    const error = new Error(message);
+    const error = new Error(
+      data?.error?.message || `WhatsApp API error ${response.status}`,
+    );
 
     error.status = response.status;
     error.meta = data;
@@ -11335,26 +12052,44 @@ async function sendWhatsAppTemplate({
 
   return {
     recipient,
-
     messageId: data?.messages?.[0]?.id || null,
-
     response: data,
   };
 }
 
-/* =========================================================
-   📊 STATS ENDPOINTS (Old endpoints — wapas add kiye)
-========================================================= */
+async function sendAndLogTemplate(lead) {
+  const result = await sendWhatsAppTemplate({
+    phone: lead.phone,
+    name: lead.name,
+  });
 
-/* ---------- TRACK VISIT ---------- */
+  await WhatsAppMessage.create({
+    phone: result.recipient,
+    direction: "outgoing",
+    messageId: result.messageId,
+    messageType: "template",
+    status: "accepted",
+    raw: result.response,
+  });
+
+  return result;
+}
+
+// --------------------------------------------------
+// WEBSITE LEADS
+// --------------------------------------------------
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
 app.post("/api/track-visit", (req, res) => {
   const { visitorId } = req.body;
 
   if (visitorId) stats.onlineUsers.set(visitorId, Date.now());
 
   cleanupOnlineUsers();
-
-  stats.totalVisitors += 1;
+  stats.totalVisitors++;
 
   res.json({
     success: true,
@@ -11364,7 +12099,6 @@ app.post("/api/track-visit", (req, res) => {
   });
 });
 
-/* ---------- HEARTBEAT ---------- */
 app.post("/api/heartbeat", (req, res) => {
   const { visitorId } = req.body;
 
@@ -11372,14 +12106,9 @@ app.post("/api/heartbeat", (req, res) => {
 
   cleanupOnlineUsers();
 
-  res.json({
-    success: true,
-    online: stats.onlineUsers.size,
-  });
+  res.json({ success: true, online: stats.onlineUsers.size });
 });
 
-/* ---------- STATS ---------- */
-// ✅ FIX: Response format purana kar diya (visitors, registrations, online)
 app.get("/api/stats", (req, res) => {
   cleanupOnlineUsers();
 
@@ -11391,15 +12120,18 @@ app.get("/api/stats", (req, res) => {
   });
 });
 
-/* =========================================================
-   🚀 WEBSITE LEAD API
-   ✅ FIX: Response format purana kar diya (zoomLink, leadId, totalRegistrations)
-========================================================= */
-
 app.post("/api/leads", async (req, res) => {
   try {
-    const { name, phone, email, state, communityJoined, source, campaign } =
-      req.body;
+    const {
+      name,
+      phone,
+      email,
+      state,
+      communityJoined,
+      source,
+      campaign,
+      whatsappOptIn,
+    } = req.body;
 
     if (!name || !phone || !email || !state) {
       return res.status(400).json({
@@ -11408,48 +12140,38 @@ app.post("/api/leads", async (req, res) => {
       });
     }
 
-    const normalizedPhone = String(phone).replace(/\D/g, "").slice(-10);
+    const normalizedPhone = normalizeIndianPhone(phone);
 
-    if (normalizedPhone.length !== 10) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid Indian phone number.",
-      });
-    }
+    const existing = await Lead.findOne({ phone: normalizedPhone });
 
-    const existingLead = await Lead.findOne({
-      phone: normalizedPhone,
-    });
-
-    if (existingLead) {
+    if (existing) {
       return res.status(409).json({
         success: false,
         message: "Lead already exists.",
-        lead: existingLead,
+        leadId: existing._id,
       });
     }
 
+    const optedIn = whatsappOptIn === true || whatsappOptIn === "true";
+
+    const joined = communityJoined === true || communityJoined === "true";
+
     const lead = await Lead.create({
-      name,
+      name: String(name).trim(),
       phone: normalizedPhone,
-      email,
-      state,
-
-      communityJoined: communityJoined === true || communityJoined === "true",
-
-      communityJoinDate:
-        communityJoined === true || communityJoined === "true"
-          ? new Date()
-          : null,
-
+      email: String(email).trim().toLowerCase(),
+      state: String(state).trim(),
+      communityJoined: joined,
+      communityJoinDate: joined ? new Date() : null,
       source: source || "website",
-
       campaign: campaign || null,
+      whatsappOptIn: optedIn,
+      consentCapturedAt: optedIn ? new Date() : null,
+      initialMessageStatus: optedIn ? "pending_approval" : "not_eligible",
     });
 
     stats.totalRegistrations++;
 
-    // ✅ FIX: Response format purana kar diya
     return res.status(201).json({
       success: true,
       message: "Registration successful!",
@@ -11459,27 +12181,557 @@ app.post("/api/leads", async (req, res) => {
       totalRegistrations: stats.totalRegistrations,
     });
   } catch (error) {
-    console.error("❌ Lead API error:", error);
+    console.error("Website lead error:", error.message);
 
     if (error.code === 11000) {
       return res.status(409).json({
         success: false,
-        message: "Phone number already registered.",
+        message: "Phone number or lead ID already exists.",
       });
     }
 
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Server error.",
     });
   }
 });
 
-/* =========================================================
-   SEND ONE WHATSAPP TEMPLATE
-========================================================= */
+// --------------------------------------------------
+// MANUAL INITIAL MESSAGE APPROVAL
+// --------------------------------------------------
 
-app.post("/api/whatsapp/send-template", async (req, res) => {
+app.get("/api/admin/leads/pending", requireAdmin, async (req, res) => {
+  try {
+    const leads = await Lead.find({
+      initialMessageStatus: "pending_approval",
+      whatsappOptIn: true,
+      optedOutAt: null,
+    })
+      .sort({ createdAt: 1 })
+      .limit(200)
+      .select("name phone email state source campaign createdAt");
+
+    res.json({ success: true, leads });
+  } catch (error) {
+    console.error("Pending leads error:", error.message);
+    res.status(500).json({ success: false, message: "Server error." });
+  }
+});
+
+app.post(
+  "/api/admin/leads/:id/approve-initial",
+  requireAdmin,
+  async (req, res) => {
+    let lead;
+
+    try {
+      lead = await Lead.findOneAndUpdate(
+        {
+          _id: req.params.id,
+          initialMessageStatus: "pending_approval",
+          whatsappOptIn: true,
+          optedOutAt: null,
+        },
+        { $set: { initialMessageStatus: "sending" } },
+        { new: true },
+      );
+
+      if (!lead) {
+        return res.status(409).json({
+          success: false,
+          message: "Lead is unavailable, ineligible or already processed.",
+        });
+      }
+
+      const result = await sendAndLogTemplate(lead);
+
+      const now = new Date();
+
+      await Lead.updateOne(
+        { _id: lead._id, initialMessageStatus: "sending" },
+        {
+          $set: {
+            initialMessageStatus: "accepted",
+            initialMessageId: result.messageId,
+            initialApprovedAt: now,
+            followUp1DueAt: new Date(now.getTime() + 86400000),
+            followUp2DueAt: new Date(now.getTime() + 3 * 86400000),
+            followUp3DueAt: new Date(now.getTime() + 7 * 86400000),
+          },
+        },
+      );
+
+      res.json({
+        success: true,
+        message: "Initial template accepted by WhatsApp API.",
+        messageId: result.messageId,
+      });
+    } catch (error) {
+      console.error("Initial send error:", error.meta || error.message);
+
+      if (lead) {
+        await Lead.updateOne(
+          { _id: lead._id, initialMessageStatus: "sending" },
+          { $set: { initialMessageStatus: "failed" } },
+        );
+      }
+
+      res.status(error.status || 500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  },
+);
+
+// Admin can deliberately retry a failed initial message.
+app.post(
+  "/api/admin/leads/:id/retry-initial",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const lead = await Lead.findOneAndUpdate(
+        {
+          _id: req.params.id,
+          initialMessageStatus: "failed",
+          whatsappOptIn: true,
+          optedOutAt: null,
+        },
+        { $set: { initialMessageStatus: "sending" } },
+        { new: true },
+      );
+
+      if (!lead) {
+        return res.status(409).json({
+          success: false,
+          message: "Lead is not eligible for retry.",
+        });
+      }
+
+      const result = await sendAndLogTemplate(lead);
+      const now = new Date();
+
+      await Lead.updateOne(
+        { _id: lead._id },
+        {
+          $set: {
+            initialMessageStatus: "accepted",
+            initialMessageId: result.messageId,
+            initialApprovedAt: now,
+            followUp1DueAt: new Date(now.getTime() + 86400000),
+            followUp2DueAt: new Date(now.getTime() + 3 * 86400000),
+            followUp3DueAt: new Date(now.getTime() + 7 * 86400000),
+          },
+        },
+      );
+
+      res.json({ success: true, messageId: result.messageId });
+    } catch (error) {
+      res.status(error.status || 500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  },
+);
+
+// --------------------------------------------------
+// META LEAD ADS WEBHOOK
+// --------------------------------------------------
+
+app.get("/meta-leads-webhook", (req, res) => {
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+
+  if (
+    mode === "subscribe" &&
+    token === META_LEADS_VERIFY_TOKEN &&
+    META_LEADS_VERIFY_TOKEN
+  ) {
+    return res.status(200).send(challenge);
+  }
+
+  res.sendStatus(403);
+});
+
+async function fetchMetaLead(leadId) {
+  if (!META_LEAD_ACCESS_TOKEN) {
+    throw new Error("META_LEAD_ACCESS_TOKEN is missing.");
+  }
+
+  const url = new URL(
+    `https://graph.facebook.com/${GRAPH_API_VERSION}/${encodeURIComponent(leadId)}`,
+  );
+
+  url.searchParams.set(
+    "fields",
+    "id,created_time,field_data,form_id,campaign_id",
+  );
+
+  url.searchParams.set("access_token", META_LEAD_ACCESS_TOKEN);
+
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(20000),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.error?.message || "Meta lead fetch failed.");
+  }
+
+  return data;
+}
+
+function metaFieldsToObject(fieldData = []) {
+  const result = {};
+
+  for (const field of fieldData) {
+    result[String(field.name || "").toLowerCase()] = field.values?.[0] || "";
+  }
+
+  return result;
+}
+
+function readMetaConsent(fields) {
+  const keys = [
+    "whatsapp_opt_in",
+    "whatsapp_consent",
+    "marketing_consent",
+    "consent_to_whatsapp",
+  ];
+
+  for (const key of keys) {
+    if (Object.prototype.hasOwnProperty.call(fields, key)) {
+      const value = String(fields[key]).trim().toLowerCase();
+
+      return ["yes", "true", "1", "agree", "i agree"].includes(value);
+    }
+  }
+
+  // Consent field missing: default to no consent.
+  return false;
+}
+
+async function processMetaLeadEvent(change) {
+  const value = change?.value || {};
+  const leadId = value.leadgen_id;
+
+  if (!leadId) return;
+
+  const alreadyExists = await Lead.findOne({ metaLeadId: leadId });
+  if (alreadyExists) return;
+
+  const metaLead = await fetchMetaLead(leadId);
+  const fields = metaFieldsToObject(metaLead.field_data);
+
+  const name =
+    fields.full_name ||
+    [fields.first_name, fields.last_name].filter(Boolean).join(" ") ||
+    fields.name;
+
+  const rawPhone = fields.phone_number || fields.phone || fields.mobile_number;
+
+  if (!name || !rawPhone) {
+    console.warn("Meta lead missing name or phone:", leadId);
+    return;
+  }
+
+  const phone = normalizeIndianPhone(rawPhone);
+  const optedIn = readMetaConsent(fields);
+
+  const existingPhone = await Lead.findOne({ phone });
+
+  if (existingPhone) {
+    if (!existingPhone.metaLeadId) {
+      existingPhone.metaLeadId = leadId;
+      existingPhone.source = "meta_lead_ads";
+      existingPhone.campaign = metaLead.campaign_id || existingPhone.campaign;
+      existingPhone.whatsappOptIn = existingPhone.whatsappOptIn || optedIn;
+
+      if (optedIn && !existingPhone.consentCapturedAt) {
+        existingPhone.consentCapturedAt = new Date();
+      }
+
+      if (
+        existingPhone.whatsappOptIn &&
+        existingPhone.initialMessageStatus === "not_eligible"
+      ) {
+        existingPhone.initialMessageStatus = "pending_approval";
+      }
+
+      await existingPhone.save();
+    }
+
+    return;
+  }
+
+  await Lead.create({
+    name: String(name).trim(),
+    phone,
+    email: fields.email || "",
+    state: fields.state || fields.region || "",
+    source: "meta_lead_ads",
+    campaign: metaLead.campaign_id || null,
+    metaLeadId: leadId,
+    whatsappOptIn: optedIn,
+    consentCapturedAt: optedIn ? new Date() : null,
+    initialMessageStatus: optedIn ? "pending_approval" : "not_eligible",
+  });
+
+  stats.totalRegistrations++;
+}
+
+app.post("/meta-leads-webhook", async (req, res) => {
+  if (!verifyMetaSignature(req)) {
+    return res.sendStatus(401);
+  }
+
+  // Acknowledge quickly. Failed events must be recoverable from Meta
+  // webhook delivery/retry logs or through a separate reconciliation job.
+  res.sendStatus(200);
+
+  try {
+    if (req.body?.object !== "page") return;
+
+    for (const entry of req.body.entry || []) {
+      for (const change of entry.changes || []) {
+        if (change.field === "leadgen") {
+          try {
+            await processMetaLeadEvent(change);
+          } catch (error) {
+            console.error("Meta lead processing failed:", error.message);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Meta webhook error:", error.message);
+  }
+});
+
+// --------------------------------------------------
+// FOLLOW-UP WORKER
+// --------------------------------------------------
+
+async function processFollowup(statusField, dueField, messageIdField) {
+  const now = new Date();
+
+  const lead = await Lead.findOneAndUpdate(
+    {
+      [statusField]: "waiting",
+      [dueField]: { $lte: now },
+      initialMessageStatus: "accepted",
+      whatsappOptIn: true,
+      optedOutAt: null,
+      lastIncomingMessageAt: null,
+    },
+    { $set: { [statusField]: "sending" } },
+    { new: true, sort: { [dueField]: 1 } },
+  );
+
+  if (!lead) return false;
+
+  try {
+    const result = await sendAndLogTemplate(lead);
+
+    await Lead.updateOne(
+      { _id: lead._id, [statusField]: "sending" },
+      {
+        $set: {
+          [statusField]: "sent",
+          [messageIdField]: result.messageId,
+        },
+      },
+    );
+  } catch (error) {
+    console.error(
+      "Follow-up failed:",
+      lead._id.toString(),
+      error.meta || error.message,
+    );
+
+    // One delayed retry; do not silently mark as sent.
+    await Lead.updateOne(
+      { _id: lead._id, [statusField]: "sending" },
+      {
+        $set: {
+          [statusField]: "waiting",
+          [dueField]: new Date(Date.now() + 30 * 60000),
+        },
+      },
+    );
+  }
+
+  return true;
+}
+
+let schedulerRunning = false;
+
+async function runFollowupScheduler() {
+  if (!FOLLOWUP_ENABLED || schedulerRunning) return;
+
+  schedulerRunning = true;
+
+  try {
+    // Bound work per run to avoid flooding the API.
+    for (let i = 0; i < 50; i++) {
+      let processed = await processFollowup(
+        "followUp1Status",
+        "followUp1DueAt",
+        "followUp1MessageId",
+      );
+
+      if (!processed) {
+        processed = await processFollowup(
+          "followUp2Status",
+          "followUp2DueAt",
+          "followUp2MessageId",
+        );
+      }
+
+      if (!processed) {
+        processed = await processFollowup(
+          "followUp3Status",
+          "followUp3DueAt",
+          "followUp3MessageId",
+        );
+      }
+
+      if (!processed) break;
+    }
+  } catch (error) {
+    console.error("Follow-up scheduler error:", error.message);
+  } finally {
+    schedulerRunning = false;
+  }
+}
+
+cron.schedule(FOLLOWUP_CRON, runFollowupScheduler, {
+  timezone: "Asia/Kolkata",
+});
+
+// --------------------------------------------------
+// WHATSAPP WEBHOOK
+// --------------------------------------------------
+
+const WEBHOOK_VERIFY_TOKEN = process.env.WEBHOOK_VERIFY_TOKEN || "";
+
+app.get("/webhook", (req, res) => {
+  if (
+    req.query["hub.mode"] === "subscribe" &&
+    req.query["hub.verify_token"] === WEBHOOK_VERIFY_TOKEN &&
+    WEBHOOK_VERIFY_TOKEN
+  ) {
+    return res.status(200).send(req.query["hub.challenge"]);
+  }
+
+  res.sendStatus(403);
+});
+
+app.post("/webhook", async (req, res) => {
+  if (!verifyMetaSignature(req)) {
+    return res.sendStatus(401);
+  }
+
+  res.sendStatus(200);
+
+  try {
+    if (req.body?.object !== "whatsapp_business_account") return;
+
+    for (const entry of req.body.entry || []) {
+      for (const change of entry.changes || []) {
+        const value = change.value || {};
+
+        for (const message of value.messages || []) {
+          const phone = message.from || "";
+          let text = null;
+
+          if (message.type === "text") {
+            text = message.text?.body || null;
+          }
+
+          await WhatsAppMessage.updateOne(
+            { messageId: message.id, direction: "incoming" },
+            {
+              $setOnInsert: {
+                phone,
+                direction: "incoming",
+                messageId: message.id || null,
+                messageType: message.type || null,
+                text,
+                raw: message,
+              },
+            },
+            { upsert: true },
+          );
+
+          const normalizedPhone = /^\d+$/.test(phone) ? phone : null;
+
+          if (normalizedPhone) {
+            const incomingText = String(text || "")
+              .trim()
+              .toLowerCase();
+
+            const optOut =
+              /^(stop|unsubscribe|cancel|remove|opt out|stop all)$/i.test(
+                incomingText,
+              );
+
+            const update = {
+              lastIncomingMessageAt: new Date(),
+              followUp1Status: "stopped",
+              followUp2Status: "stopped",
+              followUp3Status: "stopped",
+            };
+
+            if (optOut) {
+              update.whatsappOptIn = false;
+              update.optedOutAt = new Date();
+            }
+
+            await Lead.updateOne({ phone: normalizedPhone }, { $set: update });
+          }
+        }
+
+        for (const status of value.statuses || []) {
+          await WhatsAppMessage.updateOne(
+            { messageId: status.id, direction: "status" },
+            {
+              $setOnInsert: {
+                phone: status.recipient_id || "unknown",
+                direction: "status",
+                messageId: status.id || null,
+                status: status.status || null,
+                raw: status,
+              },
+            },
+            { upsert: true },
+          );
+
+          const messageStatus = status.status;
+
+          if (status.id && messageStatus) {
+            await WhatsAppMessage.updateOne(
+              { messageId: status.id, direction: "outgoing" },
+              { $set: { status: messageStatus } },
+            );
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error("WhatsApp webhook error:", error.message);
+  }
+});
+
+// --------------------------------------------------
+// MANUAL SINGLE TEMPLATE ENDPOINT
+// --------------------------------------------------
+
+app.post("/api/whatsapp/send-template", requireAdmin, async (req, res) => {
   try {
     const { phone, name, meetingLink, communityLink, companyName } = req.body;
 
@@ -11500,190 +12752,63 @@ app.post("/api/whatsapp/send-template", async (req, res) => {
 
     await WhatsAppMessage.create({
       phone: result.recipient,
-
       direction: "outgoing",
-
       messageId: result.messageId,
-
       messageType: "template",
-
       status: "accepted",
-
       raw: result.response,
     });
 
-    return res.json({
+    res.json({
       success: true,
-
-      message: "WhatsApp template sent.",
-
+      message: "WhatsApp template accepted by API.",
       messageId: result.messageId,
-
       phone: result.recipient,
     });
   } catch (error) {
-    console.error("❌ WhatsApp send error:", error.meta || error.message);
-
-    return res.status(error.status || 500).json({
+    res.status(error.status || 500).json({
       success: false,
-
       message: error.message,
-
-      meta: error.meta || null,
     });
   }
 });
 
-/* =========================================================
-   WHATSAPP WEBHOOK VERIFICATION
-========================================================= */
-
-app.get("/webhook", (req, res) => {
-  const mode = req.query["hub.mode"];
-
-  const token = req.query["hub.verify_token"];
-
-  const challenge = req.query["hub.challenge"];
-
-  console.log("");
-  console.log("========== WEBHOOK VERIFICATION ==========");
-
-  console.log("Mode:", mode);
-
-  console.log("Token received:", token ? "YES" : "NO");
-
-  if (mode === "subscribe" && token === WEBHOOK_VERIFY_TOKEN) {
-    console.log("🟢 WEBHOOK VERIFIED SUCCESSFULLY");
-
-    return res.status(200).send(challenge);
-  }
-
-  console.error("❌ WEBHOOK VERIFICATION FAILED");
-
-  return res.sendStatus(403);
-});
-
-/* =========================================================
-   WHATSAPP WEBHOOK EVENTS
-========================================================= */
-
-app.post("/webhook", async (req, res) => {
-  // Meta expects quick 200 response
-  res.sendStatus(200);
-
-  try {
-    const body = req.body;
-
-    console.log("");
-    console.log("========== WHATSAPP WEBHOOK ==========");
-    console.log(JSON.stringify(body, null, 2));
-
-    if (body?.object !== "whatsapp_business_account") {
-      return;
-    }
-
-    const changes = body?.entry?.flatMap((entry) => entry?.changes || []) || [];
-
-    for (const change of changes) {
-      const value = change?.value;
-
-      /* =====================================
-         INCOMING WHATSAPP MESSAGES
-      ===================================== */
-
-      for (const message of value?.messages || []) {
-        const phone = message?.from || null;
-
-        let text = null;
-
-        if (message?.type === "text") {
-          text = message?.text?.body || null;
-        }
-
-        await WhatsAppMessage.create({
-          phone,
-
-          direction: "incoming",
-
-          messageId: message?.id || null,
-
-          messageType: message?.type || null,
-
-          text,
-
-          raw: message,
-        });
-
-        console.log(
-          `📩 WhatsApp message from ${phone}: ${text || message?.type}`,
-        );
-      }
-
-      /* =====================================
-         MESSAGE STATUS
-      ===================================== */
-
-      for (const status of value?.statuses || []) {
-        await WhatsAppMessage.create({
-          phone: status?.recipient_id || "unknown",
-
-          direction: "status",
-
-          messageId: status?.id || null,
-
-          status: status?.status || null,
-
-          raw: status,
-        });
-
-        console.log(`📬 WhatsApp status: ${status?.status} | ${status?.id}`);
-      }
-    }
-  } catch (error) {
-    console.error("❌ Webhook processing error:", error.message);
-  }
-});
-
-/* =========================================================
-   HEALTH CHECK
-========================================================= */
+// --------------------------------------------------
+// HEALTH CHECK
+// --------------------------------------------------
 
 app.get("/health", (req, res) => {
+  cleanupOnlineUsers();
+
   res.json({
     success: true,
-
     mongodb:
       mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
-
     whatsapp: {
       configured: Boolean(WHATSAPP_ACCESS_TOKEN && WHATSAPP_PHONE_NUMBER_ID),
-
-      phoneNumberIdConfigured: Boolean(WHATSAPP_PHONE_NUMBER_ID),
-
-      accessTokenConfigured: Boolean(WHATSAPP_ACCESS_TOKEN),
-
       templateName: WHATSAPP_TEMPLATE_NAME,
-
       graphApiVersion: GRAPH_API_VERSION,
     },
-
-    webhook: {
-      configured: Boolean(WEBHOOK_VERIFY_TOKEN),
+    metaLeadWebhook: {
+      configured: Boolean(
+        META_LEADS_VERIFY_TOKEN && META_LEAD_ACCESS_TOKEN && META_APP_SECRET,
+      ),
     },
-
+    scheduler: {
+      enabled: FOLLOWUP_ENABLED,
+      cron: FOLLOWUP_CRON,
+    },
     stats: {
       totalVisitors: stats.totalVisitors,
-
       totalRegistrations: stats.totalRegistrations,
-
       onlineNow: stats.onlineUsers.size,
     },
   });
 });
 
-/* =========================================================
-   404
-========================================================= */
+// --------------------------------------------------
+// 404 AND ERROR HANDLING
+// --------------------------------------------------
 
 app.use((req, res) => {
   res.status(404).json({
@@ -11692,47 +12817,18 @@ app.use((req, res) => {
   });
 });
 
-/* =========================================================
-   START SERVER
-========================================================= */
-
 async function startServer() {
   await connectMongoDB();
 
   app.listen(PORT, () => {
-    console.log("");
-    console.log("==============================================");
-    console.log("🚀 SERVER STARTED");
-    console.log("==============================================");
-
-    console.log(`Local: http://localhost:${PORT}`);
-
-    console.log(`Webhook: http://localhost:${PORT}/webhook`);
-
-    console.log(`Health: http://localhost:${PORT}/health`);
-
-    console.log("");
-    console.log("🔐 WEBHOOK VERIFY TOKEN:");
-
-    console.log(WEBHOOK_VERIFY_TOKEN);
-
-    console.log("");
-
-    console.log(
-      "📱 WhatsApp configured:",
-      Boolean(WHATSAPP_ACCESS_TOKEN && WHATSAPP_PHONE_NUMBER_ID),
-    );
-
-    console.log("📋 Template:", WHATSAPP_TEMPLATE_NAME);
-
-    console.log("🌐 Graph API:", GRAPH_API_VERSION);
-
-    console.log("==============================================");
-    console.log("");
-
-    // ✅ FIX: Cleanup interval wapas add kiya
-    setInterval(cleanupOnlineUsers, 15000);
+    console.log("RAVANTOAI automation server started.");
+    console.log("Port:", PORT);
+    console.log("WhatsApp template:", WHATSAPP_TEMPLATE_NAME);
+    console.log("Follow-ups enabled:", FOLLOWUP_ENABLED);
   });
 }
 
-startServer();
+startServer().catch((error) => {
+  console.error("Server startup failed:", error.message);
+  process.exit(1);
+});
